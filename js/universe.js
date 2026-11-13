@@ -150,51 +150,51 @@ function fStrings(){
 }
 const LY=9.461e12;
 const SCENES=[
-  {name:"Look up",make:fSky,mode:0,km:2.14,dist:()=>3,trail:true,spin:h=>h*h*2.6,b:"to turn the sky",coord:"Your site · look north for Polaris",beats:[
+  {name:"Look up",light:["Visible starlight", 550, "Your eyes catch photons that left these stars years to centuries ago."],make:fSky,mode:0,km:2.14,dist:()=>3,trail:true,spin:h=>h*h*2.6,b:"to turn the sky",coord:"Your site · look north for Polaris",beats:[
     "Twenty minutes after the last light goes out, your eyes adjust and the Milky Way appears.",
     "Find the Big Dipper and follow its two pointer stars, Merak and Dubhe. They lead you to Polaris, the pole star.",
     "Keep scrolling and the Earth turns. Every star circles the pole, drawing the trails a long-exposure photo would catch."]},
-  {name:"The Moon",make:fMoon,mode:5,km:384400,dist:h=>lerp(3.5,2.1,ease(h)),spin:h=>h*1.3,b:"to rotate the Moon",coord:"384,400 km away · 3,474 km wide",beats:[
+  {name:"The Moon",light:["Reflected sunlight", 560, "Sunlight bounces off the Moon’s surface and reaches you 1.3 seconds later."],make:fMoon,mode:5,km:384400,dist:h=>lerp(3.5,2.1,ease(h)),spin:h=>h*1.3,b:"to rotate the Moon",coord:"384,400 km away · 3,474 km wide",beats:[
     "Our first stop. The Moon is 384,400 km away, and its light reaches you in 1.3 seconds.",
     "The dark patches are maria, plains of old lava. Early astronomers thought they were seas.",
     "The best views are along the terminator, where low sunlight throws long shadows from crater walls."]},
-  {name:"Jupiter",make:fJupiter,mode:5,km:7.2e8,dist:h=>lerp(3.8,3,ease(h)),spin:h=>h*3,b:"to watch the moons orbit",coord:"142,984 km wide · 4 Galilean moons",beats:[
+  {name:"Jupiter",light:["Reflected sunlight", 580, "Sunlight reflected from its cloud tops, which show bands of colour."],make:fJupiter,mode:5,km:7.2e8,dist:h=>lerp(3.8,3,ease(h)),spin:h=>h*3,b:"to watch the moons orbit",coord:"142,984 km wide · 4 Galilean moons",beats:[
     "Jupiter is so large that about 1,300 Earths would fit inside it.",
     "The Great Red Spot is a storm wider than Earth. People have watched it for at least 190 years.",
     "Galileo found its four largest moons in 1610. Io, Europa, Ganymede and Callisto change places every night."]},
-  {name:"Saturn",make:fPlanet,mode:1,km:1.3e9,dist:h=>lerp(3.4,1.85,ease(h)),spin:h=>h*1.6,b:"to zoom in",coord:"1.3 billion km · magnitude 0.7",beats:[
+  {name:"Saturn",light:["Reflected sunlight", 590, "Sunlight reflected from its clouds and from the ice of its rings."],make:fPlanet,mode:1,km:1.3e9,dist:h=>lerp(3.4,1.85,ease(h)),spin:h=>h*1.6,b:"to zoom in",coord:"1.3 billion km · magnitude 0.7",beats:[
     "In the 24-inch telescope, Saturn's rings look close enough to touch.",
     "The rings span about 280,000 km, yet most of them are less than a kilometre thick. They are made of water ice.",
     "Saturn is so light for its size that it would float in water, if you could find an ocean big enough."]},
-  {name:"The Solar System",make:fSolar,mode:6,km:6e9,dist:h=>lerp(3.7,3,ease(h)),spin:h=>h*2,b:"to look down on the orbits",coord:"Sun to Neptune · 4.5 billion km",beats:[
+  {name:"The Solar System",light:["Sunlight", 500, "The Sun’s light is brightest around 500 nm, in the blue-green, and it lights every planet you see."],make:fSolar,mode:6,km:6e9,dist:h=>lerp(3.7,3,ease(h)),spin:h=>h*2,b:"to look down on the orbits",coord:"Sun to Neptune · 4.5 billion km",beats:[
     "Pull back far enough and the planets turn into points of light on nearly flat orbits.",
     "Between Mars and Jupiter lies the asteroid belt. Past Neptune is the icy Kuiper belt.",
     "Sunlight needs about four hours to reach Neptune. Next, we leave the Sun behind."]},
-  {name:"Orion Nebula",make:fNebula,mode:2,km:1344*LY,dist:h=>lerp(3,2.3,ease(h)),spin:h=>h*1.4,b:"to light new stars",coord:"M42 · RA 05h 35m · Dec −05° 23′",beats:[
+  {name:"Orion Nebula",light:["Hydrogen-alpha, 656 nm", 656, "Glowing hydrogen gives the nebula its red light at 656.3 nm; oxygen adds a green glow at 500.7 nm."],make:fNebula,mode:2,km:1344*LY,dist:h=>lerp(3,2.3,ease(h)),spin:h=>h*1.4,b:"to light new stars",coord:"M42 · RA 05h 35m · Dec −05° 23′",beats:[
     "1,344 light-years away, a cloud of gas is collapsing into new stars.",
     "The four stars of the Trapezium at its heart are less than a million years old.",
     "On a winter night you can see it without a telescope, as a fuzzy star in Orion's sword."]},
-  {name:"The Crab Nebula",make:fCrab,mode:7,km:6500*LY,dist:h=>lerp(2.4,3.1,h),spin:()=>0,b:"to watch it explode",coord:"M1 · RA 05h 34m · Dec +22° 01′",beats:[
+  {name:"The Crab Nebula",light:["Synchrotron light, radio to gamma rays", "broad", "Electrons spiralling in strong magnetic fields shine across almost the whole spectrum."],make:fCrab,mode:7,km:6500*LY,dist:h=>lerp(2.4,3.1,h),spin:()=>0,b:"to watch it explode",coord:"M1 · RA 05h 34m · Dec +22° 01′",beats:[
     "In 1054, astronomers in China recorded a new star bright enough to see in daylight for 23 days.",
     "It was a supernova: a massive star exploding at the end of its life, 6,500 light-years away.",
     "The debris still expands at about 1,500 km per second. At its centre a neutron star spins 30 times a second."]},
-  {name:"Sagittarius A*",make:fBlackHole,mode:8,km:26000*LY,dist:h=>lerp(3.3,2,ease(h)),spin:h=>h*3,b:"to fall closer",coord:"RA 17h 45m · Dec −29° 00′ · 4 million suns",beats:[
+  {name:"Sagittarius A*",light:["Radio waves, 1.3 mm", "radio", "Dust hides the galactic centre in visible light. The Event Horizon Telescope imaged it at a wavelength of 1.3 mm."],make:fBlackHole,mode:8,km:26000*LY,dist:h=>lerp(3.3,2,ease(h)),spin:h=>h*3,b:"to fall closer",coord:"RA 17h 45m · Dec −29° 00′ · 4 million suns",beats:[
     "At the centre of our galaxy sits a black hole about 4 million times the mass of the Sun.",
     "Gas spiralling in heats up and glows. Gravity bends that light around the dark shadow.",
     "In 2022 the Event Horizon Telescope published the first image of it, made with radio dishes on several continents."]},
-  {name:"The Milky Way",make:()=>fGalaxy(),mode:3,km:2e5*LY,dist:h=>lerp(3.1,3.7,ease(h)),spin:h=>h*3.2,b:"to spin a galactic year",coord:"Seen from 200,000 light-years out",beats:[
+  {name:"The Milky Way",light:["Visible light and the 21 cm hydrogen line", "radio", "Radio waves 21 cm long from cold hydrogen gas map the spiral arms that dust hides from our eyes."],make:()=>fGalaxy(),mode:3,km:2e5*LY,dist:h=>lerp(3.1,3.7,ease(h)),spin:h=>h*3.2,b:"to spin a galactic year",coord:"Seen from 200,000 light-years out",beats:[
     "From far outside, this is roughly what our home galaxy would look like.",
     "It is about 100,000 light-years across and holds 100 to 400 billion stars.",
     "The Sun sits in a minor arm and needs 230 million years to go around once."]},
-  {name:"Andromeda",make:()=>fGalaxy({wind:3.2,bulge:.26,ring:true,sats:true}),mode:9,km:2.5e6*LY,dist:h=>lerp(3.6,2.4,ease(h)),spin:h=>h,b:"to fly closer",coord:"M31 · RA 00h 43m · Dec +41° 16′",beats:[
+  {name:"Andromeda",light:["Visible light", 550, "The light reaching your eye tonight left Andromeda about 2.5 million years ago."],make:()=>fGalaxy({wind:3.2,bulge:.26,ring:true,sats:true}),mode:9,km:2.5e6*LY,dist:h=>lerp(3.6,2.4,ease(h)),spin:h=>h,b:"to fly closer",coord:"M31 · RA 00h 43m · Dec +41° 16′",beats:[
     "The Andromeda Galaxy is one of the most distant things you can see with your own eyes.",
     "It holds about a trillion stars, more than the Milky Way.",
     "It is falling toward us at about 110 km per second. In roughly 4.5 billion years the two galaxies will merge."]},
-  {name:"The cosmic web",make:fWeb,mode:4,km:1e9*LY,dist:()=>3.7,spin:()=>0,b:"to turn around",coord:"Filaments hundreds of millions of light-years long",beats:[
+  {name:"The cosmic web",light:["Redshifted galaxy light", "red", "Expanding space stretches light to longer, redder wavelengths on its way to us. That stretch tells us the distance."],make:fWeb,mode:4,km:1e9*LY,dist:()=>3.7,spin:()=>0,b:"to turn around",coord:"Filaments hundreds of millions of light-years long",beats:[
     "Galaxies gather along filaments hundreds of millions of light-years long, with vast empty voids between them.",
     "This cosmic web is the largest structure we know of.",
     "From here the journey turns around and zooms in, past atoms and nuclei, to the smallest scale physics can describe."]},
-  {name:"The smallest scale",make:fStrings,mode:10,km:1.6e-38,dist:h=>lerp(3.7,2.6,ease(h)),final:true,spin:h=>h*1.4,b:"to pluck the strings",coord:"Planck length · 1.6 × 10⁻³⁵ m",beats:[
+  {name:"The smallest scale",light:["Beyond light", "none", "No light could probe this scale: it would take energies about 10¹⁹ times a proton’s mass-energy."],make:fStrings,mode:10,km:1.6e-38,dist:h=>lerp(3.7,2.6,ease(h)),final:true,spin:h=>h*1.4,b:"to pluck the strings",coord:"Planck length · 1.6 × 10⁻³⁵ m",beats:[
     "String theory proposes that at about 10⁻³⁵ m, the Planck length, everything is made of tiny vibrating strings.",
     "Each way a string can vibrate would show up as a different particle, the way one guitar string plays many notes.",
     "The theory needs extra dimensions curled up too small to see, often drawn as Calabi–Yau shapes. No experiment has tested it yet."]}

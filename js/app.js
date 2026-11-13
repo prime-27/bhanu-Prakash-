@@ -8,7 +8,7 @@ const scrollToId = id => document.getElementById(id)?.scrollIntoView({ behavior:
 
 /* ---------- content (source of truth: website brief) ---------- */
 const CONTENT = {
-  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["projects","Projects"],["notes","Notes"]],
+  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["light","Light"],["projects","Projects"],["notes","Notes"]],
   hero: {
     eyebrow: "Astronomy · Education · Technology",
     title: "Exploring the Universe. Building What’s Next.",
@@ -213,7 +213,7 @@ function FieldNotes({ i }) {
   const sc = SCENES[i];
   return html`<aside className="notes" aria-label=${"Now passing: " + sc.name}>
     <div className="notes-h"><span className="label">Now passing · ${ROMAN[i]}</span><h3>${sc.name}</h3><span className="coordline">${sc.coord} · ${fmtKm(sc.km)}</span></div>
-    <ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol></aside>`;
+    <div className="notes-body"><ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol><${SeenBy} sc=${sc}/></div></aside>`;
 }
 function Interlude({ i, p }) {
   const sc = SCENES[i];
@@ -223,6 +223,8 @@ function Interlude({ i, p }) {
       <h2 id=${"ch" + i}>${sc.name}</h2>
       <p className="coordline">${sc.coord}</p>
       <ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol>
+      <${SeenBy} sc=${sc}/>
+      ${sc.final && html`<${StringLab}/>`}
       ${sc.final ? html`<button className="link back" type="button" onClick=${() => scrollToP(0)}>↑ Travel back to Earth</button>` : html`<span className="hint">Keep scrolling ${sc.b} ↓</span>`}
     </div></div></section>`;
 }
@@ -315,7 +317,7 @@ function Projects() {
   const counts = useMemo(() => Object.fromEntries(Object.keys(TAGS).map(k => [k, k === "all" ? CONTENT.projects.length : CONTENT.projects.filter(p => p.c.includes(k)).length])), []);
   const shown = CONTENT.projects.filter(p => filter === "all" || p.c.includes(filter));
   const p = dlg.data;
-  return html`<${Section} id="projects" p=${[6.6, 7.6]} chapter=${7} label="Projects" title="Selected work"
+  return html`<${Section} id="projects" p=${[7.0, 7.6]} chapter=${7} label="Projects" title="Selected work"
     lede="Case studies will be added here with role, audience, process, outcomes and photographs. The cards below are templates until each project is confirmed.">
     <div className="filters" role="group" aria-label="Filter projects">
       ${Object.entries(TAGS).map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${filter === k} onClick=${e => { setFilter(k); burstAt(e.currentTarget, { n: 16, speed: 3 }); }}>${n} <span className="count">${counts[k]}</span></button>`)}
@@ -818,9 +820,168 @@ function SkyNotes() {
   <//>`;
 }
 
+/* ---------- Light: the wave each stop is seen by ---------- */
+function nmColor(nm) {
+  let r = 0, g = 0, b = 0;
+  if (nm < 440) { r = (440 - nm) / 60; b = 1; } else if (nm < 490) { g = (nm - 440) / 50; b = 1; } else if (nm < 510) { g = 1; b = (510 - nm) / 20; }
+  else if (nm < 580) { r = (nm - 510) / 70; g = 1; } else if (nm < 645) { r = 1; g = (645 - nm) / 65; } else r = 1;
+  const f = nm < 420 ? .3 + .7 * (nm - 380) / 40 : nm > 700 ? .3 + .7 * (780 - nm) / 80 : 1;
+  return `rgb(${[r, g, b].map(c => Math.round(255 * Math.pow(Math.max(0, c) * f, .8))).join(",")})`;
+}
+function LightWave({ wave }) {
+  const W = 132, H = 20, pts = [];
+  const kind = typeof wave === "number" ? "nm" : wave;
+  for (let x = 0; x <= W; x += 1.5) {
+    let y = 0;
+    if (kind === "nm") y = Math.sin(x / (wave / 70) * 2) * 6;
+    else if (kind === "radio") y = Math.sin(x / 22) * 6;
+    else if (kind === "broad") y = Math.sin(Math.pow(x / W, 2.2) * 60) * 6;
+    else if (kind === "red") y = Math.sin(x / (720 / 70) * 2 * (1 - x / W * .25)) * 6;
+    pts.push(`${x.toFixed(1)},${(H / 2 - y).toFixed(1)}`);
+  }
+  const col = kind === "nm" ? nmColor(wave) : kind === "red" ? "#ff6b4a" : kind === "none" ? "var(--dim)" : "var(--ice)";
+  return html`<svg className="lightwave" width=${W} height=${H} viewBox=${`0 0 ${W} ${H}`} aria-hidden="true">
+    ${kind === "none" ? html`<line x1="0" y1=${H / 2} x2=${W} y2=${H / 2} stroke=${col} strokeDasharray="2 5"/>` : html`<polyline points=${pts.join(" ")} fill="none" stroke=${col} strokeWidth="1.6" strokeLinecap="round"/>`}</svg>`;
+}
+function SeenBy({ sc }) {
+  if (!sc.light) return null;
+  return html`<div className="seenby"><${LightWave} wave=${sc.light[1]}/><div><span className="label">Seen by · ${sc.light[0]}</span><p>${sc.light[2]}</p></div></div>`;
+}
+
+/* ---------- Light: wave or particle? An interactive double-slit experiment ---------- */
+function startDoubleSlit(canvas, state) {
+  const ctx = canvas.getContext("2d"), hits = [], flying = [], bins = new Float32Array(90);
+  let W = 1, H = 1, raf = 0, t = 0, visible = false, last = 0, acc = 0;
+  const resize = () => { const d = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * d; canvas.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+  const geo = () => ({ sx: W * .08, bx: W * .42, scr: W * .9, cy: H / 2, d: H * .16, a: H * .028 });
+  // intensity on the screen: two-slit interference times the single-slit envelope, or two separate humps when the path is measured
+  const I = (y, g) => { const L = g.scr - g.bx, lam = state.nm / 550 * H * .055, k = Math.PI / (lam * L);
+    const env = u => { const b = k * g.a * u; return b === 0 ? 1 : Math.pow(Math.sin(b) / b, 2); };
+    if (state.detect) { const s = g.d * 1.7; return .5 * (Math.exp(-Math.pow((y - g.d / 2) / s, 2)) + Math.exp(-Math.pow((y + g.d / 2) / s, 2))); }
+    return Math.pow(Math.cos(k * g.d * y), 2) * env(y); };
+  const sample = g => { for (let n = 0; n < 400; n++) { const y = (Math.random() * 2 - 1) * H * .46; if (Math.random() < I(y, g)) return y; } return 0; };
+  const fire = () => { const g = geo(), slit = Math.random() < .5 ? -1 : 1; flying.push({ x: g.sx, y: g.cy, slit, target: sample(g), stage: 0 }); };
+  state.clear = () => { hits.length = 0; bins.fill(0); state.onCount(0); };
+  function frame(now) {
+    raf = visible ? requestAnimationFrame(frame) : 0;
+    const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; t += dt;
+    if (state.on) { acc += dt * state.rate; while (acc > 1) { fire(); acc--; } }
+    const g = geo(), col = nmColor(state.nm);
+    ctx.clearRect(0, 0, W, H);
+    // waves spreading from the slits (only while no one watches which slit)
+    if (!state.detect && !reduced) { ctx.lineWidth = 1;
+      for (const s of [-1, 1]) for (let k = 0; k < 9; k++) { const r = ((t * 60 + k * 34) % 306);
+        ctx.beginPath(); ctx.arc(g.bx, g.cy + s * g.d / 2, r, -Math.PI / 2.4, Math.PI / 2.4);
+        ctx.strokeStyle = col.replace("rgb", "rgba").replace(")", `,${(.22 * (1 - r / 306)).toFixed(3)})`); ctx.stroke(); } }
+    // incoming plane waves
+    if (!reduced) for (let k = 0; k < 6; k++) { const x = g.sx + ((t * 60 + k * 34) % (g.bx - g.sx)); ctx.fillStyle = col.replace("rgb", "rgba").replace(")", ",.12)"); ctx.fillRect(x, g.cy - H * .3, 1, H * .6); }
+    // barrier with two slits
+    ctx.fillStyle = "rgba(190,200,235,.55)";
+    const s1 = g.cy - g.d / 2, s2 = g.cy + g.d / 2;
+    ctx.fillRect(g.bx - 2, 0, 4, s1 - g.a); ctx.fillRect(g.bx - 2, s1 + g.a, 4, s2 - s1 - 2 * g.a); ctx.fillRect(g.bx - 2, s2 + g.a, 4, H - s2 - g.a);
+    if (state.detect) { ctx.strokeStyle = "rgba(255,194,122,.9)"; ctx.lineWidth = 1.5; for (const y of [s1, s2]) { ctx.beginPath(); ctx.arc(g.bx + 10, y, 6, 0, 6.283); ctx.stroke(); } }
+    // source
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(g.sx, g.cy, 5, 0, 6.283); ctx.fill();
+    // photons in flight: always detected as single dots
+    for (let i = flying.length - 1; i >= 0; i--) { const p = flying[i], v = W * .9 * dt;
+      if (p.stage === 0) { p.x += v; if (p.x >= g.bx) { p.stage = 1; p.y = g.cy + (state.detect ? p.slit * g.d / 2 : 0); } }
+      else { p.x += v; const f = (p.x - g.bx) / (g.scr - g.bx); p.y = g.cy + (state.detect ? p.slit * g.d / 2 : 0) * (1 - f) + p.target * f;
+        if (p.x >= g.scr) { flying.splice(i, 1); hits.push([g.scr + Math.random() * W * .07, g.cy + p.target]); const b = Math.floor((p.target / (H * .46) * .5 + .5) * bins.length); if (b >= 0 && b < bins.length) bins[b]++; state.onCount(hits.length); if (hits.length > 6000) hits.shift(); continue; } }
+      ctx.fillStyle = "#fff"; ctx.fillRect(p.x - 1, p.y - 1, 2.4, 2.4); }
+    // the detection screen
+    ctx.fillStyle = "rgba(190,200,235,.08)"; ctx.fillRect(g.scr, 0, W * .07, H);
+    ctx.fillStyle = col; for (const h of hits) ctx.fillRect(h[0], h[1], 1.4, 1.4);
+    // histogram of arrivals
+    const mx = Math.max(1, ...bins); ctx.beginPath();
+    for (let i = 0; i < bins.length; i++) { const y = g.cy + ((i + .5) / bins.length * 2 - 1) * H * .46, x = g.scr - 6 - bins[i] / mx * W * .16; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = "rgba(255,194,122,.8)"; ctx.lineWidth = 1.2; ctx.stroke();
+  }
+  const io = new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && !raf) { last = 0; raf = requestAnimationFrame(frame); } });
+  io.observe(canvas); resize(); addEventListener("resize", resize);
+  return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+}
+function LightSection() {
+  const can = useRef(), st = useRef({ on: true, detect: false, nm: 532, rate: 70, onCount: () => {} });
+  const [on, setOn] = useState(true), [detect, setDetect] = useState(false), [nm, setNm] = useState(532), [count, setCount] = useState(0);
+  useEffect(() => { st.current.onCount = c => { if (c % 25 === 0 || c < 25) setCount(c); }; return startDoubleSlit(can.current, st.current); }, []);
+  useEffect(() => { Object.assign(st.current, { on, detect, nm }); }, [on, detect, nm]);
+  const reset = () => { st.current.clear?.(); setCount(0); };
+  return html`<${Section} id="light" p=${[6.6, 7.0]} label="Light · wave or particle?" title="Everything on this journey reaches us as light"
+    lede="Every stop on this site is known to us only through the light it sends. And light behaves in two ways at once: it spreads and interferes like a wave, yet it always arrives as single particles called photons.">
+    <div className="slit-wrap">
+      <canvas ref=${can} className="slit" role="img" aria-label=${`Double-slit experiment: ${count} photons detected. ${detect ? "Which-slit detectors on: two plain bands." : "No detectors: interference stripes."}`}></canvas>
+      <div className="slit-ui">
+        <div className="slit-stats"><b>${count.toLocaleString("en")}</b><span>photons detected</span></div>
+        <div className="slit-ctl" role="group" aria-label="Experiment controls">
+          <button type="button" aria-pressed=${on} onClick=${() => setOn(v => !v)}>${on ? "Pause photons" : "Fire photons"}</button>
+          <button type="button" aria-pressed=${detect} onClick=${() => { setDetect(v => !v); reset(); }}>${detect ? "Stop watching the slits" : "Watch which slit"}</button>
+          <button type="button" onClick=${reset}>Clear screen</button>
+        </div>
+        <label className="slit-nm" htmlFor="nm">Colour of light <b style=${{ color: nmColor(nm) }}>${nm} nm</b>
+          <input id="nm" type="range" min="400" max="680" step="2" value=${nm} onInput=${e => { setNm(+e.target.value); reset(); }}/></label>
+      </div>
+    </div>
+    <ol className="duality">
+      <li><span className="label">1801 · Wave</span><h3>Stripes</h3><p>Thomas Young sent light through two narrow slits. It spread out and overlapped like ripples on water, making bright and dark stripes where the waves add up or cancel. Longer, redder light makes wider stripes: try the slider.</p></li>
+      <li><span className="label">1905 · Particle</span><h3>Photons</h3><p>Einstein explained the photoelectric effect by treating light as packets of energy, photons, each carrying E = hf. It earned him the 1921 Nobel Prize. On a screen, light always lands as single dots.</p></li>
+      <li><span className="label">Both · Complementarity</span><h3>Watch, and the stripes vanish</h3><p>Fire photons one at a time and the dots still build up stripes, as if each one passed through both slits. Measure which slit each photon takes and the stripes disappear, leaving two plain bands. Press “Watch which slit” to see it.</p></li>
+    </ol>
+    <p className="duality-note">Telescopes use both sides of light: they collect photons one by one, and they split light into its wavelengths to read what stars and nebulae are made of. The particles behind this whole site do the same: they travel between chapters as waves, and settle into points when they arrive.</p>
+  <//>`;
+}
+
+/* ---------- String lab: one string, many notes ---------- */
+const MODES = [
+  { n: 1, open: "The lowest vibration of an open string is massless. In many string models, a state like this behaves as the photon, the particle of light.", closed: "One of the closed string’s lowest vibrations is massless and behaves like the graviton, the particle string theory proposes for gravity." },
+  { n: 2, open: "One step up the scale: more nodes, more energy. In string theory, more vibrational energy shows up as more mass.", closed: "A closed loop vibrates in waves running both ways around it, like a ring that rings." },
+  { n: 3, open: "Each higher harmonic would be a heavier particle, in steps set by the string’s tension.", closed: "Higher loop modes would also be heavier particles, far beyond anything a collider can make." },
+  { n: 4, open: "These heavy states are near the Planck scale, so no experiment has seen one.", closed: "That is the theory’s great difficulty: its predictions sit at energies we cannot reach." },
+  { n: 5, open: "In the theory, ordinary particles are the lightest notes; the rest are out of reach.", closed: "The same loop, a different note, a different particle." },
+  { n: 6, open: "Like a guitar string: the same string, playing higher and higher notes.", closed: "One kind of object, a whole spectrum of particles." }
+];
+function StringLab() {
+  const can = useRef(), [kind, setKind] = useState("open"), [n, setN] = useState(1), sref = useRef({ kind: "open", n: 1, kick: 1 });
+  useEffect(() => { Object.assign(sref.current, { kind, n, kick: 1.6 }); }, [kind, n]);
+  useEffect(() => {
+    const c = can.current, ctx = c.getContext("2d"); let raf = 0, t = 0, vis = false, W = 1, H = 1;
+    const resize = () => { const d = Math.min(devicePixelRatio || 1, 2), r = c.getBoundingClientRect(); W = r.width; H = r.height; c.width = W * d; c.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+    const frame = () => { raf = vis ? requestAnimationFrame(frame) : 0; t += reduced ? 0 : .016; const S = sref.current; S.kick += (1 - S.kick) * .03;
+      ctx.clearRect(0, 0, W, H); const cx = W / 2, cy = H / 2, w = S.n, A = Math.min(H * .28, 34) * S.kick, ph = Math.cos(t * (2 + w * 1.1));
+      ctx.lineCap = "round";
+      const draw = (pts, col, lw) => { ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke(); };
+      if (S.kind === "open") {
+        const x0 = W * .14, x1 = W * .86, pts = [];
+        for (let i = 0; i <= 120; i++) { const u = i / 120; pts.push([x0 + (x1 - x0) * u, cy + A * Math.sin(Math.PI * w * u) * ph]); }
+        ctx.fillStyle = "rgba(143,211,255,.12)"; ctx.fillRect(x0 - 10, cy - H * .38, 6, H * .76); ctx.fillRect(x1 + 4, cy - H * .38, 6, H * .76);
+        ctx.fillStyle = "rgba(143,211,255,.7)"; ctx.font = "11px 'IBM Plex Mono', monospace"; ctx.fillText("D-brane", x0 - 22, cy + H * .45); ctx.fillText("D-brane", x1 - 18, cy + H * .45);
+        draw(pts, "rgba(255,194,122,.12)", 7); draw(pts, "#ffc27a", 1.6);
+        [x0, x1].forEach(x => { ctx.fillStyle = "#f1eee6"; ctx.beginPath(); ctx.arc(x, cy, 3.5, 0, 6.283); ctx.fill(); });
+      } else {
+        const R = Math.min(H * .3, 70), pts = [];
+        for (let i = 0; i <= 160; i++) { const a = i / 160 * 6.283, r = R + A * .55 * (Math.sin(w * a - t * 2.2) * .5 + Math.sin(w * a + t * 2.2) * .5) * (w === 1 ? .6 : 1); pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r * .8]); }
+        draw(pts, "rgba(255,194,122,.12)", 7); draw(pts, "#ffc27a", 1.6);
+      }
+    };
+    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis && !raf) raf = requestAnimationFrame(frame); });
+    io.observe(c); resize(); addEventListener("resize", resize);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+  }, []);
+  const m = MODES[n - 1];
+  return html`<div className="stringlab">
+    <span className="label">String lab · one string, many notes</span>
+    <canvas ref=${can} className="lab" role="img" aria-label=${`${kind === "open" ? "Open" : "Closed"} string vibrating in mode ${n}`}></canvas>
+    <div className="lab-ctl">
+      <div role="group" aria-label="String type">${["open", "closed"].map(k => html`<button key=${k} type="button" aria-pressed=${kind === k} onClick=${() => setKind(k)}>${k === "open" ? "Open string" : "Closed string"}</button>`)}</div>
+      <div role="group" aria-label="Vibration mode">${MODES.map(x => html`<button key=${x.n} type="button" aria-pressed=${n === x.n} aria-label=${"Mode " + x.n} onClick=${() => setN(x.n)}>${x.n}</button>`)}</div>
+    </div>
+    <p className="lab-text">${kind === "open" ? m.open : m.closed}</p>
+    <p className="lab-small">Open strings have two ends, which in string theory rest on surfaces called D-branes. Closed strings are loops. Superstring theory needs 10 dimensions (M-theory, 11), with the extra ones curled up too small to see. It remains a hypothesis: no experiment has tested it.</p>
+  </div>`;
+}
+
 /* ---------- app ---------- */
 function App() {
-  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "projects", "gallery", "notes", "contact"]);
+  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "projects", "gallery", "notes", "contact"]);
   const [toast, setToast] = useState("");
   const [view, setView] = useState({ i: 0, beat: 0 });
   const refs = { stage: useRef(), canvas: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
@@ -849,6 +1010,7 @@ function App() {
       <${Development}/>
       <${Process}/>
       <${Interlude} i=${6} p=${[5.6, 6.6]}/>
+      <${LightSection}/>
       <${Projects}/>
       <${Interlude} i=${8} p=${[7.6, 8.6]}/>
       <${Gallery}/>
