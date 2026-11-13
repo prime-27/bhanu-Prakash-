@@ -145,6 +145,9 @@ function startStrings(canvas) {
       const amber = el.dataset.tone === "amber";
       ctx.beginPath(); for (let i = 0; i < NP; i++) { const X = g.x + g.w * i / (NP - 1), Y = g.y + o.y[i]; i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
       ctx.lineWidth = 1; ctx.strokeStyle = amber ? "rgba(255,194,122,.45)" : "rgba(190,200,235,.2)"; ctx.stroke();
+      { const tb = performance.now() / 1000; for (const sg of [-1, 1]) { ctx.beginPath();
+        for (let i = 0; i < NP; i++) { const u = i / (NP - 1), X = g.x + g.w * u, Y = g.y + o.y[i] * .75 + sg * 2.6 * Math.sin(Math.PI * u) * Math.sin(Math.PI * u * 7 + tb * .9 * sg); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+        ctx.lineWidth = .6; ctx.strokeStyle = amber ? "rgba(255,194,122,.22)" : "rgba(190,200,235,.12)"; ctx.stroke(); } }
       if (o.e > .05) { const k = Math.min(1, o.e / 3); ctx.globalCompositeOperation = "lighter";
         ctx.lineWidth = 5; ctx.strokeStyle = `rgba(255,194,122,${(.12 * k).toFixed(3)})`; ctx.stroke();
         ctx.lineWidth = 1.2; ctx.strokeStyle = `rgba(255,194,122,${(.75 * k).toFixed(3)})`; ctx.stroke(); ctx.globalCompositeOperation = "source-over"; }
@@ -433,7 +436,7 @@ const CAS_EDGES = [[0, 1], [1, 2], [2, 3], [3, 4]];
 const BG_STARS = (() => { let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; return [...Array(70)].map(() => [r() * 1000, r() * 700, .4 + r() * r() * 1.8, .2 + r() * .5]); })();
 function Expertise() {
   const [hot, setHot] = useState(null);
-  const dots = useRef([]), edgeEls = useRef([]), amp = useRef([0, 0, 0, 0]), hotRef = useRef(null);
+  const dots = useRef([]), edgeEls = useRef([]), edgeB = useRef([]), amp = useRef([0, 0, 0, 0]), hotRef = useRef(null);
   useEffect(() => { hotRef.current = hot; if (hot != null) CAS_EDGES.forEach(([a, b], i) => { if (a === hot || b === hot) amp.current[i] = 14; }); }, [hot]);
   useEffect(() => {
     if (reduced) return;
@@ -450,7 +453,11 @@ function Expertise() {
       CAS_EDGES.forEach(([a, b], i) => { const el = edgeEls.current[i]; if (!el) return; const A = CAS[a], B = CAS[b], m = amp.current[i] *= .965;
         const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L; let d = `M${A[0]} ${A[1]}`;
         for (let k = 1; k <= 24; k++) { const u = k / 24, w = m * Math.sin(Math.PI * u) * Math.cos(ph) + m * .35 * Math.sin(2 * Math.PI * u) * Math.sin(ph * 1.7); d += `L${(A[0] + dx * u + nx * w).toFixed(1)} ${(A[1] + dy * u + ny * w).toFixed(1)}`; }
-        el.setAttribute("d", d); });
+        el.setAttribute("d", d);
+        [-1, 1].forEach((sg, c) => { const e2 = edgeB.current[i * 2 + c]; if (!e2) return; let d2 = `M${A[0]} ${A[1]}`;
+          for (let k = 1; k <= 32; k++) { const u = k / 32, w = m * Math.sin(Math.PI * u) * Math.cos(ph) * .8 + sg * 6 * Math.sin(Math.PI * u) * Math.sin(Math.PI * u * 3 + ph * .12 * sg);
+            d2 += `L${(A[0] + dx * u + nx * w).toFixed(1)} ${(A[1] + dy * u + ny * w).toFixed(1)}`; }
+          e2.setAttribute("d", d2); }); });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);
@@ -468,6 +475,7 @@ function Expertise() {
         ${BG_STARS.map(([x, y, r, o], i) => html`<circle key=${"b" + i} cx=${x} cy=${y} r=${r} className="bg-star" opacity=${o}/>`)}
         ${CAS_EDGES.map(([a, b], i) => html`<path key=${i} ref=${el => (edgeEls.current[i] = el)} d=${`M${CAS[a][0]} ${CAS[a][1]}L${CAS[b][0]} ${CAS[b][1]}`}
           className=${"w" + (hot == null ? "" : (a === hot || b === hot ? " hot" : " cold"))}/>`)}
+        ${CAS_EDGES.map((e, i) => [0, 1].map(c => html`<path key=${"b" + i + c} ref=${el => (edgeB.current[i * 2 + c] = el)} className=${"wb" + (hot != null && (e[0] === hot || e[1] === hot) ? " hot" : "")} d=""/>`))}
         ${[...Array(14)].map((_, i) => html`<circle key=${"d" + i} r="2.4" className="edge-dot" ref=${el => (dots.current[i] = el)} cx="-10" cy="-10"/>`)}
         ${CAS.map(([x, y, r], i) => html`<g key=${"s" + i} className=${"cstar" + (hot === i ? " on" : "")}>
           <circle cx=${x} cy=${y} r=${r * 3.2} className="halo"/><circle cx=${x} cy=${y} r=${r} className="core"/>
@@ -1004,7 +1012,7 @@ function StringLab() {
 /* ---------- Starlight ribbons: light from the current object streaming to you.
    Each strand ripples at that object's wavelength (wave) and carries photons (particles). ---------- */
 function startRibbons(canvas) {
-  const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, t = 0, last = 0, op = 0;
+  const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, t = 0, last = 0, op = 0, opB = 0, lastSY = scrollY, vel = 0;
   const small = innerWidth < 760, NR = small ? 6 : 10, NS = small ? 4 : 6;
   const RB = [...Array(NR)].map((_, k) => ({ a: -.55 + k / (NR - 1) * 1.1, ph: Math.random() * 6.28, sp: .5 + Math.random() * .6, w: .6 + Math.random() * .8, photons: [...Array(3)].map(() => Math.random()) }));
   const resize = () => { const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * d; canvas.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
@@ -1013,12 +1021,29 @@ function startRibbons(canvas) {
   function frame(now) {
     raf = requestAnimationFrame(frame); const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt;
     const mode = document.body.dataset.mode, want = mode === "interlude" || mode === "hero" ? 1 : 0; op += (want - op) * Math.min(1, dt * 3);
-    ctx.clearRect(0, 0, W, H); if (op < .01) return;
+    ctx.clearRect(0, 0, W, H);
+    const wantB = mode === "interlude" ? 1 : mode === "hero" ? .8 : mode === "content" ? .4 : 0; opB += (wantB - opB) * Math.min(1, dt * 3);
+    const dyS = scrollY - lastSY; lastSY = scrollY; vel = vel * .9 + Math.abs(dyS) * .1;
+    if (op < .01 && opB < .01) return;
     const [c0, nm] = colorOf(), cv = c0.match(/\d+/g).map(Number), mixw = [241, 238, 230], col = `rgb(${cv.map((v, k) => Math.round(v * .45 + mixw[k] * .55)).join(",")})`;
     const rgba = a => col.replace("rgb", "rgba").replace(")", `,${a.toFixed(3)})`), hero = mode === "hero";
     const sx = hero ? W * .82 : W > 1020 ? W * .68 : W * .5, sy = hero ? H * .12 : H * .5;
     ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
-    for (const r of RB) {
+    if (opB > .01) {
+      const ch = +document.body.dataset.ch || 0, n = 1 + ch % 4, NB = small ? 5 : 7, bx = hero ? W * .5 : sx, by = hero ? H * .8 : sy, slope = hero ? -.08 : -.3, boost = 1 + Math.min(2, vel * .06);
+      for (let k = 0; k < NB; k++) {
+        const ph = k * 1.9, spd = .5 + k * .11, A = (hero ? 12 : small ? 18 : 28) * (.5 + .5 * Math.abs(Math.sin(k * 2.3))) * boost, pts = [];
+        for (let x = -W * .05; x <= W * 1.05; x += 6) { const u = x / W, env = .4 + .9 * Math.exp(-Math.pow((x - bx) / (W * .28), 2));
+          pts.push([x, by + (x - bx) * slope + A * env * Math.sin(6.283 * u * (n + k % 3) + ph + t * spd)]); }
+        const tint = k === 0;
+        ctx.beginPath(); pts.forEach((q, j) => j ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]));
+        ctx.strokeStyle = tint ? rgba(.08 * opB) : `rgba(241,238,230,${(.04 * opB).toFixed(3)})`; ctx.lineWidth = 5; ctx.stroke();
+        ctx.strokeStyle = tint ? rgba(.7 * opB) : `rgba(241,238,230,${(.3 * opB).toFixed(3)})`; ctx.lineWidth = .9; ctx.stroke();
+        const sh = Math.floor(t * 30 * spd + k * 11);
+        for (let j = 0; j < pts.length; j += 9) { const q = pts[(j + sh) % pts.length]; ctx.fillStyle = `rgba(241,238,230,${(.55 * opB).toFixed(3)})`; ctx.fillRect(q[0] - .9, q[1] - .9, 1.8, 1.8); }
+      }
+    }
+    if (op > .01) for (const r of RB) {
       const ex = hero ? W * (.08 + (r.a + .55) * .5) : -W * .15, ey = hero ? H * 1.08 : H * (.5 + r.a * 1.4);
       const cx = (sx + ex) / 2 + (hero ? -W * .1 : W * .05) * r.w, cy = (sy + ey) / 2 + r.a * H * .25;
       const L = Math.hypot(ex - sx, ey - sy), lam = nm ? clamp(nm / 550, .5, 2.6) * 70 : 0, amp = nm ? 5 * r.w : 0;
