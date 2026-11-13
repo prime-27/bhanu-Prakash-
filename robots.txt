@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://prime-27.github.io/bhanu-Prakash-/sitemap.xml
