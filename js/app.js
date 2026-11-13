@@ -370,7 +370,9 @@ function Contact({ onToast }) {
     const first = Object.keys(er)[0];
     if (first) { document.getElementById("f-" + first)?.focus(); return; }
     burstAt(e.currentTarget.querySelector("button[type=submit]"), { n: 90, speed: 6.5 });
-    onToast("Thanks, " + f.name.split(" ")[0] + ". This draft form doesn’t send messages yet. Connect it to an email or form service before launch.");
+    const subject = `${f.type}: enquiry from ${f.name}`, body = `${f.message}\n\nName: ${f.name}\nEmail: ${f.email}`;
+    window.location.href = `mailto:bhanuastro2427@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    onToast("Your email app should open with the message ready to send. If it doesn’t, email bhanuastro2427@gmail.com or message +91 75692 81287 on WhatsApp.");
     setF(empty); setTried(false);
   };
   const Field = (k, label, input, full) => html`<div className=${"field" + (full ? " full" : "")}>
@@ -385,8 +387,8 @@ function Contact({ onToast }) {
       <h2 id="contact-h">Let’s bring your idea to life</h2>
       <p className="lede" style=${{ marginBottom: "32px" }}>Planning a stargazing evening, a school astronomy session, or a digital project? Send a message with a few details.</p>
       <dl>
-        <div><dt>Email</dt><dd><${Ph}>Professional email to add<//></dd></div>
-        <div><dt>WhatsApp & social</dt><dd><${Ph}>Optional links to add<//></dd></div>
+        <div><dt>Email</dt><dd><a className="clink" href="mailto:bhanuastro2427@gmail.com">bhanuastro2427@gmail.com</a> <${CopyBtn} text="bhanuastro2427@gmail.com"/></dd></div>
+        <div><dt>Phone & WhatsApp</dt><dd><a className="clink" href="tel:+917569281287">+91 75692 81287</a> <${CopyBtn} text="+917569281287"/><br/><a className="link" href="https://wa.me/917569281287" target="_blank" rel="noopener">Message on WhatsApp ↗</a></dd></div>
         <div><dt>Service area</dt><dd>Hyderabad, India <${Ph}>Confirm travel coverage<//></dd></div>
       </dl>
       <button className="link back" type="button" onClick=${() => scrollToP(0)}>↑ Travel back to Earth</button>
@@ -398,8 +400,14 @@ function Contact({ onToast }) {
       ${Field("message", "Message", html`<textarea ...${a("message")} value=${f.message} onChange=${set("message")} placeholder="Date, audience size, venue or project idea"></textarea>`, true)}
       <div className="field full"><label className="consent" htmlFor="f-consent"><input ...${a("consent")} type="checkbox" checked=${f.consent} onChange=${set("consent")}/>
         <span>I agree that my details are used only to reply to this inquiry.</span></label>${errors.consent && html`<span className="err" id="e-consent">${errors.consent}</span>`}</div>
-      <div><button className="btn" type="submit">Send inquiry</button></div>
+      <div className="send-row"><button className="btn" type="submit">Send by email</button>
+        <button className="btn ghost" type="button" onClick=${() => { const t = `Hello Bhanu, I’m ${f.name || "…"}. ${f.type ? f.type + ": " : ""}${f.message}`; window.open(`https://wa.me/917569281287?text=${encodeURIComponent(t)}`, "_blank", "noopener"); }}>Send on WhatsApp</button></div>
     </form></div></div></section>`;
+}
+function CopyBtn({ text }) {
+  const [done, setDone] = useState(false);
+  const copy = async () => { try { await navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 1800); } catch (_) { const r = document.createRange(); const el = document.activeElement.previousElementSibling; if (el) { r.selectNodeContents(el); getSelection().removeAllRanges(); getSelection().addRange(r); } } };
+  return html`<button type="button" className="copy" onClick=${copy} aria-label=${"Copy " + text}>${done ? "Copied" : "Copy"}</button>`;
 }
 function Toast({ msg, onDone }) {
   useEffect(() => { if (!msg) return; const t = setTimeout(onDone, 7000); return () => clearTimeout(t); }, [msg]);

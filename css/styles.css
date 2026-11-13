@@ -592,3 +592,12 @@ footer{border-top:0}
 .cas .wb.hot{stroke:rgba(255,194,122,.55)}
 
 .filters button{background:rgba(10,14,29,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+
+.clink{color:var(--star);text-decoration:none;border-bottom:1px solid var(--line)}
+.clink:hover{border-color:var(--amber)}
+.copy{all:unset;cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:var(--radius-sm);padding:2px 7px;margin-left:6px}
+.copy:hover{color:var(--star)}
+.copy:focus-visible{outline:1.5px solid var(--amber)}
+.contact dd .link{display:inline-block;margin-top:8px}
+.send-row{display:flex;gap:10px;flex-wrap:wrap}
+.send-row{grid-column:1/-1}

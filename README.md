@@ -40,7 +40,7 @@ The site is a draft. Amber dashed tags on the page mark details still to confirm
 - Real projects, with links and your role in each
 - Programming languages and tools
 - Contact email, social links and service area
-- Connecting the contact form to an email or form service, such as Formspree or EmailJS (it does not send messages yet)
+- The contact form opens a ready-written email or WhatsApp message to Bhanu. For messages that arrive without the visitor’s email app, connect a form service such as Formspree
 
 ## Editing content
 
