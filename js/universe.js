@@ -11,13 +11,13 @@ let seed=20261113;
 const R=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 const gauss=()=>{let u=0;while(!u)u=R();return Math.sqrt(-2*Math.log(u))*Math.cos(TAU*R());};
 const starCol=b=>{const t=R();const c=t<.22?[.66,.78,1]:t<.62?[1,1,1]:t<.86?[1,.9,.72]:[1,.72,.52];return c.map(x=>x*b);};
-const mk=()=>({p:new Float32Array(N*4),c:new Float32Array(N*4)});
+const mk=()=>({p:new Float32Array(N*4),c:new Float32Array(N*4),bodies:[]});
 function set(f,i,x,y,z,k,r,g,b,s){const o=i*4;f.p[o]=x;f.p[o+1]=y;f.p[o+2]=z;f.p[o+3]=k;f.c[o]=r;f.c[o+1]=g;f.c[o+2]=b;f.c[o+3]=s;}
 const horizon=x=>-.95+.12*Math.sin(x*1.7)+.06*Math.sin(x*4.3+1);
 function bgStars(f,i,n){for(let j=0;j<n;j++){const m=Math.pow(R(),3),z=-1.2-R()*2.5,half=(4+(-z))/1.6;set(f,i++,(R()*2-1)*half*2,(R()*2-1)*half*1.15,z,1,...starCol(.18+m*.7),1+m*2.2);}return i;}
 
 /* ---------- formations ----------
-   kind: 0 animated · 1 static · 2 lit sphere · 3 rings · 4 young stars · 9 pulsar · 10 lensed light
+   kind: 0 animated · 1 static · 2 lit sphere · 3 rings · 4 young stars · 5 dark matter · 9 pulsar · 10 lensed light · 11 Hawking radiation
          8 + r/10 orbiting body (r = orbit radius, so clusters orbit rigidly) */
 function fSky(){
   const f=mk();let i=0;
@@ -54,7 +54,7 @@ function fMoon(){
 function fJupiter(){
   const f=mk();let i=bgStars(f,0,N*.06|0);
   [[1.05,.03,[.95,.85,.45]],[1.3,.026,[.85,.82,.78]],[1.62,.04,[.72,.7,.66]],[1.98,.036,[.55,.53,.5]]].forEach(([r,s,c],k)=>{
-    const a=k*1.9+.4;i=blob(f,i,N*.008|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.7),1.5);});
+    const a=k*1.9+.4;f.bodies.push([r,a,.07,.07]);i=blob(f,i,N*.008|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.7),1.5);});
   while(i<N){const n=onSphere(),lat=Math.asin(n[1]),a=n[3]<0?n[3]+TAU:n[3];
     const w=Math.sin(lat*11+Math.sin(a*2+lat*6)*.35+gauss()*.05);
     let c=w>0?[1,.92,.78]:[.8,.56,.38],b=.42+R()*.1;
@@ -77,7 +77,7 @@ function fSolar(){
   for(let j=0,n=N*.07|0;j<n;j++){const s=onSphere(),r=Math.abs(gauss())*.05,b=.45+R()*.4;set(f,i++,s[0]*r,s[1]*r,s[2]*r,0,b,b*.72,b*.35,2+R()*3);}
   const PL=[[.22,.012,[.7,.65,.6]],[.3,.018,[1,.85,.6]],[.4,.02,[.45,.65,1]],[.5,.015,[1,.5,.3]],[.86,.05,[1,.85,.65]],[1.1,.044,[1,.9,.65]],[1.34,.03,[.6,.9,1]],[1.56,.03,[.4,.55,1]]];
   PL.forEach(([r])=>{for(let j=0,n=N*.02|0;j<n;j++){const a=R()*TAU;set(f,i++,Math.cos(a)*r,0,Math.sin(a)*r,0,.045,.055,.1,1);}});
-  PL.forEach(([r,s,c])=>{const a=R()*TAU;i=blob(f,i,N*.007|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.75),1.4);});
+  PL.forEach(([r,s,c],k)=>{const a=R()*TAU;if(k===2||k>3)f.bodies.push([r,a,s*1.6,.07]);i=blob(f,i,N*.007|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.75),1.4);});
   for(let j=0,n=N*.07|0;j<n;j++){const r=.63+R()*.13,a=R()*TAU,b=.07+R()*.1;set(f,i++,Math.cos(a)*r,gauss()*.01,Math.sin(a)*r,8+r/10,b,b*.9,b*.8,1);}
   while(i<N){const r=1.72+R()*.38,a=R()*TAU,b=.05+R()*.08;set(f,i++,Math.cos(a)*r,gauss()*.03,Math.sin(a)*r,8+r/10,b*.8,b*.85,b,1);}
   return f;
@@ -103,10 +103,11 @@ function fCrab(){
   return f;
 }
 function fBlackHole(){
-  const f=mk();let i=bgStars(f,0,N*.07|0);
+  const f=mk();let i=bgStars(f,0,N*.12|0);
   for(let j=0,n=N*.62|0;j<n;j++){const r=.36+Math.pow(R(),1.6)*1.1,a=R()*TAU,t=(r-.36)/1.1,b=(.5-.38*t)*(.6+R()*.4);
     set(f,i++,Math.cos(a)*r,gauss()*.006*(1+t*3),Math.sin(a)*r,0,b,b*lerp(.95,.45,t),b*lerp(.85,.18,t),1.1+R()*.9);}
   for(let j=0,n=N*.05|0;j<n;j++){const a=R()*TAU,r=.29+Math.abs(gauss())*.012;set(f,i++,Math.cos(a)*r,Math.sin(a)*r,0,10,.5,.43,.3,1.2);}
+  for(let j=0,n=N*.025|0;j<n;j++){const b=.5+R()*.5;set(f,i++,R()*TAU,0,0,11,b*.75,b*.88,b,1.4+R()*1.1);}
   while(i<N){const a=R()*TAU,r=.36+Math.pow(R(),1.8)*.5,t=(r-.36)/.5,b=(.35-.25*t)*(.5+R()*.5);
     set(f,i++,Math.cos(a)*r*1.05,Math.sin(a)*r*.92,-.01,10,b,b*.75,b*.45,1.1);}
   return f;
@@ -114,6 +115,7 @@ function fBlackHole(){
 function fGalaxy(o={}){
   const wind=o.wind||2.3,f=mk();let i=bgStars(f,0,N*.05|0);
   if(o.sats){i=blob(f,i,N*.012|0,.42,.2,.3,.04,1,[.5,.42,.3],1.4);for(let j=0,n=N*.02|0;j<n;j++)set(f,i++,-.6+gauss()*.07,-.42+gauss()*.05,.3,1,.2,.18,.15,1.6);}
+  if(o.halo)for(let j=0,n=N*.14|0;j<n;j++){const s=onSphere(),r=.25+Math.pow(R(),.75)*2.1,b=.2+R()*.25;set(f,i++,s[0]*r,s[1]*r*.85,s[2]*r,5,b*.62,b*.48,b,1.6+R()*1.6);}
   for(let j=0,n=N*(o.bulge||.18)|0;j<n;j++){const b=.18+R()*.25;set(f,i++,gauss()*.15,gauss()*.08,gauss()*.15,0,b,b*.84,b*.6,1.1+R());}
   while(i<N){const r=.12+Math.pow(R(),.9)*1.35,scatter=R()<.22;
     const th=scatter?R()*TAU:(i%2)*Math.PI+Math.log(r/.12)*wind+gauss()*.3;
@@ -126,6 +128,7 @@ function fGalaxy(o={}){
 function fWeb(){
   const f=mk();let i=bgStars(f,0,N*.06|0);
   const nodes=[...Array(46)].map(()=>{const s=onSphere(),r=Math.cbrt(R())*1.7;return[s[0]*r*1.3,s[1]*r,s[2]*r];});
+  nodes.slice(0,6).forEach(n=>f.bodies.push([Math.hypot(n[0],n[2]),Math.atan2(n[2],n[0]),.16,.22]));
   const edges=[];nodes.forEach((n,a)=>{const d=nodes.map((m,b)=>[Math.hypot(n[0]-m[0],n[1]-m[1],n[2]-m[2]),b]).sort((p,q)=>p[0]-q[0]);edges.push([a,d[1][1]],[a,d[2][1]],[a,d[3][1]]);});
   for(let j=0,n=N*.22|0;j<n;j++){const p=nodes[j%nodes.length],b=.18+R()*.25;set(f,i++,p[0]+gauss()*.05,p[1]+gauss()*.05,p[2]+gauss()*.05,0,b,b*.8,b*.62,1.2+R()*1.5);}
   while(i<N){const [a,b]=edges[(R()*edges.length)|0],t=R(),w=.025*(1+Math.sin(t*Math.PI));const A=nodes[a],B=nodes[b],k=.16+R()*.24;
@@ -182,7 +185,7 @@ const SCENES=[
     "At the centre of our galaxy sits a black hole about 4 million times the mass of the Sun.",
     "Gas spiralling in heats up and glows. Gravity bends that light around the dark shadow.",
     "In 2022 the Event Horizon Telescope published the first image of it, made with radio dishes on several continents."]},
-  {name:"The Milky Way",light:["Visible light and the 21 cm hydrogen line", "radio", "Radio waves 21 cm long from cold hydrogen gas map the spiral arms that dust hides from our eyes."],make:()=>fGalaxy(),mode:3,km:2e5*LY,dist:h=>lerp(3.1,3.7,ease(h)),spin:h=>h*3.2,b:"to spin a galactic year",coord:"Seen from 200,000 light-years out",beats:[
+  {name:"The Milky Way",light:["Visible light and the 21 cm hydrogen line", "radio", "Radio waves 21 cm long from cold hydrogen gas map the spiral arms that dust hides from our eyes."],make:()=>fGalaxy({halo:true}),mode:3,km:2e5*LY,dist:h=>lerp(3.1,3.7,ease(h)),spin:h=>h*3.2,b:"to spin a galactic year",coord:"Seen from 200,000 light-years out",beats:[
     "From far outside, this is roughly what our home galaxy would look like.",
     "It is about 100,000 light-years across and holds 100 to 400 billion stars.",
     "The Sun sits in a minor arm and needs 230 million years to go around once."]},
@@ -199,6 +202,35 @@ const SCENES=[
     "Each way a string can vibrate would show up as a different particle, the way one guitar string plays many notes.",
     "The theory needs extra dimensions curled up too small to see, often drawn as Calabi–Yau shapes. No experiment has tested it yet."]}
 ];
+/* ---------- physics layers ----------
+   gr: the spacetime sheet under each stop (general relativity). y = height below the scene, size = half-width,
+       a = brightness, M/s = depth and width of the central dip, weave = loop-quantum-gravity weave.
+   Orbiting bodies (formation.bodies) add their own smaller dips. lens = Einstein radius for background stars. */
+const PHYS=[
+  {gr:{y:-1.2,size:3,a:0,M:0,s:.5}},
+  {gr:{y:-.95,size:3.2,a:.9,M:.42,s:.42},theory:[
+    ["General relativity","The faint grid under the Moon is spacetime. Einstein’s general relativity says mass curves it, and that curve is what we feel as gravity. The Moon makes a small dip; Earth’s deeper one keeps the Moon in orbit. The grid runs under every stop from here on.","Move your cursor or finger across the grid: it has mass too, and spacetime sinks under it."]]},
+  {gr:{y:-.9,size:3.2,a:.9,M:.62,s:.45}},
+  {gr:{y:-.78,size:3.2,a:.85,M:.55,s:.45}},
+  {gr:{y:-.1,size:2.6,a:1,M:.5,s:.14},theory:[
+    ["General relativity · orbits","The Sun makes the deepest dip in the grid, and each planet rolls around its slope in a small dip of its own. Einstein’s theory also explained what Newton’s could not: Mercury’s orbit slowly swings round, 43 arcseconds a century more than Newton predicts."]]},
+  {gr:{y:-.95,size:3.2,a:.6,M:.22,s:.7}},
+  {gr:{y:-.85,size:3.2,a:.8,M:.85,s:.06},theory:[
+    ["General relativity · neutron star","The pulsar packs about 1.4 Suns into a ball some 20 km wide, so its dip in the grid is narrow and steep. Clocks on its surface would run about a fifth slower than clocks far away."]]},
+  {gr:{y:-.45,size:3.4,a:1,M:1.5,s:.09},lens:.3,theory:[
+    ["Gravitational lensing","The background stars bend around the black hole. Light from a star behind it is split into two images, one on each side, and a star exactly in line would spread into a ring, called an Einstein ring."],
+    ["Hawking radiation","The faint sparks leaving the shadow’s edge show Hawking radiation. In 1974 Stephen Hawking showed that quantum effects make black holes glow very slightly. Sagittarius A* is far too cold for this to be seen: about 10⁻¹⁴ kelvin."]]},
+  {gr:{y:-.3,size:3.4,a:.8,M:.5,s:.3},theory:[
+    ["Dark matter","Stars far from the centre orbit about as fast as stars near it, so the galaxy must hold far more mass than we can see. An invisible halo of dark matter holds it together. Across the universe there is about five times more dark matter than ordinary matter, and nobody yet knows what it is.","Move your cursor or finger over the galaxy to reveal the halo."]]},
+  {gr:{y:-.35,size:3.4,a:.75,M:.5,s:.3},lens:.1,theory:[
+    ["Gravitational lensing","Whole galaxies bend light too. Here the effect is exaggerated so you can see it. Telescopes find real galaxy lenses as arcs and rings, and astronomers use them to weigh the dark matter inside."]]},
+  {gr:{y:-1.35,size:3.6,a:1,M:0,s:.5},theory:[
+    ["Dark energy","Space between the filaments keeps stretching, and in 1998 two teams found that the expansion is speeding up. The unknown cause is called dark energy, about 68% of the universe. Scroll on and watch the web, and the grid under it, spread faster and faster."]]},
+  {gr:{y:-1.1,size:3.2,a:1.7,M:0,s:.5,weave:1},theory:[
+    ["Loop quantum gravity","String theory’s main rival keeps Einstein’s spacetime but says it is not smooth. At the Planck scale it is woven from tiny loops, like cloth seen up close. The grid that followed you through the universe becomes that weave here. Like string theory, it has not been tested."],
+    ["Quantum uncertainty","At this scale everything is quantum. Each point of the shape is a fuzzy cloud of places it might be, until it is measured. It is the same rule that wipes out the stripes in the double-slit experiment.","Move your cursor or finger over the shape to measure it: the clouds snap to points."]]}
+];
+SCENES.forEach((sc,i)=>Object.assign(sc,PHYS[i]));
 const ROMAN=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
 const FORMS=[];
 const form=i=>FORMS[i]||(FORMS[i]=SCENES[i].make());
@@ -256,7 +288,7 @@ let gl=null;
 try{gl=cv.getContext("webgl",{antialias:false,alpha:false,preserveDrawingBuffer:true,powerPreference:"high-performance"});}catch(_){gl=null;}
 const VS=`precision highp float;
 attribute vec4 aPA,aCA,aPB,aCB,aR;
-uniform float uMix,uTime,uHoldA,uSpinA,uModeA,uModeB,uDist,uAspect,uPx,uMouseOn,uMotion,uShift;
+uniform float uMix,uTime,uHoldA,uSpinA,uModeA,uModeB,uDist,uAspect,uPx,uMouseOn,uMotion,uShift,uLensA,uLensB,uReveal;
 uniform vec2 uMouse;
 varying vec3 vC;
 varying float vB;
@@ -281,7 +313,7 @@ vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit){
     float r=length(q.xz);q.xz=rot((uTime*.04+spin)*.35/(r+.25))*q.xz;
     q.yz=rot(mix(.5,1.25,hold))*q.yz;q.xy=rot(.3)*q.xy;
   }
-  else if(mode<4.5){q.xz=rot(uTime*.05)*q.xz;q.yz=rot(.25+sin(uTime*.1)*.1)*q.yz;}
+  else if(mode<4.5){q*=.78+.62*hold*hold;q.xz=rot(uTime*.05)*q.xz;q.yz=rot(.25+sin(uTime*.1)*.1)*q.yz;}
   else if(mode<5.5){
     if(orb)q.xz=rot((uTime*.12+spin*2.5)/pow(orR,1.5))*q.xz;else q.xz=rot(spin+uTime*.05)*q.xz;
     q.yz=rot(.12)*q.yz;
@@ -298,6 +330,8 @@ vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit){
     else{q*=mix(.05,1.12,hold);float fl=1.-hold;lit=1.+fl*fl*2.2;}
   }
   else if(mode<8.5){
+    if(abs(k-11.)<.1){float f=fract(uTime*.06+aR.x*7.),r=aR.y<.35?.37-f*.08:.31+f*1.6;
+      q=vec3(cos(q.x)*r*1.05,sin(q.x)*r*.92,.02);lit=aR.y<.35?(1.-f)*.8:1.-f;return vec4(q,1.);}
     if(abs(k-10.)<.1)q.xy=rot(uTime*.04)*q.xy;
     else{float r=length(q.xz);q.xz=rot((uTime*.5+spin*5.)*.1/pow(max(r,.3),1.5))*q.xz;lit=1.+.7*q.x/max(r,.01);
       q.yz=rot(.17)*q.yz;q.xy=rot(-.12)*q.xy;if(q.z<0.&&length(q.xy)<.31)vis=0.;}
@@ -325,18 +359,31 @@ void main(){
   float vz=uDist-p.z;
   if(vz<.2){gl_Position=vec4(3.,3.,3.,1.);gl_PointSize=0.;vC=vec3(0.);return;}
   vec2 sp=p.xy*1.6/vz;sp.x/=uAspect;sp.x+=uShift;
-  float kind=t<.5?aPA.w:aPB.w;
-  if(abs(kind-1.)>.1){
+  float kind=t<.5?aPA.w:aPB.w,glow=1.;
+  vec2 dm=(sp-uMouse)*vec2(uAspect,1.);float near=exp(-dot(dm,dm)/.05)*uReveal;
+  /* quantum uncertainty: at the Planck scale each point is a cloud until the cursor measures it */
+  float fz=(uModeA>9.5&&abs(aPA.w)<.1?1.-t:0.)+(uModeB>9.5&&abs(aPB.w)<.1?t:0.);
+  if(fz>0.){float tq=uMotion>.5?floor(uTime*24.):0.;
+    vec3 h=fract(sin(vec3(dot(aR.xy,vec2(12.99,78.23)),dot(aR.zw,vec2(39.35,11.13)),dot(aR.xw,vec2(73.15,52.21)))+tq*vec3(.71,1.13,.37))*43758.55);
+    p+=(h-.5)*.36*fz*(1.-near);vz=uDist-p.z;sp=p.xy*1.6/vz;sp.x/=uAspect;sp.x+=uShift;glow=1.+near*fz*.8;}
+  /* dark matter: invisible until the cursor passes over it */
+  if(abs(kind-5.)<.1){glow=exp(-dot(dm,dm)/.14)*uReveal*2.2;}
+  /* gravitational lensing of the background stars (point-lens images and magnification) */
+  float lens=mix(uLensA,uLensB,t);
+  if(lens>0.&&abs(kind-1.)<.1&&p.z<-1.){vec2 c=vec2(uShift,0.),d=(sp-c)*vec2(uAspect,1.);float r=length(d)+1e-5,u=r/lens,s=sqrt(u*u+4.);
+    bool sec=aR.w<.35&&u<2.5;float th=sec?(u-s)*.5:(u+s)*.5,mu=(u*u+2.)/(2.*u*s)+(sec?-.5:.5);
+    sp=c+d/r*th*lens/vec2(uAspect,1.);glow=clamp(mu,0.,4.);}
+  if(abs(kind-1.)>.1&&abs(kind-5.)>.1&&fz<.5){
     vec2 dd=(sp-uMouse)*vec2(uAspect,1.);float dl=length(dd);
     sp+=dd/(dl+1e-4)/vec2(uAspect,1.)*.12*exp(-dl*dl/.03)*uMouseOn;
   }
   gl_Position=vec4(sp,0.,1.);
   float tw=1.+.28*sin(uTime*(1.5+aR.z*4.)+aR.x*60.)*uMotion;
-  float size=mix(aCA.w*sA,aCB.w*sB,t)*tw;
+  float size=mix(aCA.w*sA,aCB.w*sB,t)*tw*(glow>1.?sqrt(glow):1.);
   vB=smoothstep(2.4,5.2,size)*(1.-fly);
   gl_PointSize=clamp(size*uPx*3./vz*(1.+vB*3.),1.,150.);
   float vis=mix(A.w,B.w,t);
-  vC=mix(aCA.rgb*lA,aCB.rgb*lB,t)*vis*(1.+fly*.3);
+  vC=mix(aCA.rgb*lA,aCB.rgb*lB,t)*vis*(1.+fly*.3)*glow;
 }`;
 const FS=`precision mediump float;varying vec3 vC;varying float vB;
 void main(){vec2 q=gl_PointCoord-.5;float r=length(q),s=1.+vB*3.;
@@ -344,19 +391,61 @@ void main(){vec2 q=gl_PointCoord-.5;float r=length(q),s=1.+vB*3.;
   float halo=exp(-r*10.)*.45*vB;
   float spikes=(exp(-abs(q.x)*130.)*exp(-abs(q.y)*6.5)+exp(-abs(q.y)*130.)*exp(-abs(q.x)*6.5))*vB;
   gl_FragColor=vec4(vC*(core*1.3+halo)+mix(vC,vec3(1.),.5)*spikes*.9,1.);}`;
+/* Spacetime sheet: a grid of lines bent by every mass in the scene (general relativity),
+   woven into loops at the Planck scale (loop quantum gravity). Two sheets, for the scene we leave and the one we reach. */
+const GVS=`precision highp float;
+attribute vec3 aG;
+uniform vec4 uWA[6],uWB[6],uSA,uSB,uTA,uTB;
+uniform float uMix,uDist,uAspect,uShift,uMouseOn,uLines;
+uniform vec2 uMouse;
+varying float vA,vD;
+mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
+vec4 sheet(vec4 S,vec4 T,bool A){
+  vec2 p=aG.xy*S.y*T.z;float y=S.x,dip=0.;
+  for(int k=0;k<6;k++){vec4 w=A?uWA[k]:uWB[k];vec2 d=p-w.xy*T.z;dip+=w.z*w.w/sqrt(dot(d,d)+w.w*w.w+1e-4);}
+  y-=dip;
+  if(S.w>0.){float c=2.*S.y*T.z/(uLines-1.),fixd=aG.z<.5?aG.y:aG.x,idx=floor((fixd+1.)*(uLines-1.)*.5+.5);
+    float sg=mod(idx,2.)*2.-1.;y+=S.w*c*.4*cos(3.14159*(aG.z<.5?p.x:p.y)/c)*sg*(aG.z<.5?1.:-1.);}
+  vec3 q=vec3(p.x,y,p.y);q.xz=rot(T.w)*q.xz;q.yz=rot(T.x)*q.yz;q.xy=rot(T.y)*q.xy;
+  return vec4(q,dip);
+}
+void main(){
+  float m=smoothstep(0.,1.,uMix);
+  vec4 A=sheet(uSA,uTA,true),B=sheet(uSB,uTB,false);
+  vec3 q=mix(A.xyz,B.xyz,m);
+  float vz=uDist-q.z;vec2 sp=q.xy*1.6/max(vz,.05);sp.x/=uAspect;sp.x+=uShift;
+  vec2 dm=(sp-uMouse)*vec2(uAspect,1.);float pull=exp(-dot(dm,dm)/.03)*uMouseOn;
+  q.y-=.2*pull;vz=uDist-q.z;
+  sp=q.xy*1.6/max(vz,.05);sp.x/=uAspect;sp.x+=uShift;
+  gl_Position=vec4(sp,0.,1.);
+  float edge=1.-smoothstep(.35,1.,length(aG.xy));
+  vA=mix(uSA.z,uSB.z,m)*edge*smoothstep(.45,1.1,vz)*clamp(3.2/vz,0.,1.4);
+  vD=clamp(mix(A.w,B.w,m)*1.6+pull*.8,0.,1.);
+}`;
+const GFS=`precision mediump float;varying float vA,vD;uniform float uFade;
+void main(){vec3 c=mix(vec3(.3,.42,.85),vec3(1.,.72,.42),vD)*(.17+.14*vD);
+  gl_FragColor=vec4(c*vA*uFade+(vA>.004?2./255.:0.),1.);}`;
 const QVS=`attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
 const QFS=`precision mediump float;uniform vec4 uC;void main(){gl_FragColor=uC;}`;
 
-let prog,qprog,U={},QU={},bufP=[],bufC=[],bufR,quad,slot=0,W=1,H=1,dpr=1,A_LOC={};
+let prog,qprog,gprog,GU={},gridBuf,gridN=0,GL_LINES_N=49,U={},QU={},bufP=[],bufC=[],bufR,quad,slot=0,W=1,H=1,dpr=1,A_LOC={};
 function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
 function link(vs,fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p;}
 function upload(s,i){const F=form(i);gl.bindBuffer(gl.ARRAY_BUFFER,bufP[s]);gl.bufferData(gl.ARRAY_BUFFER,F.p,gl.DYNAMIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,bufC[s]);gl.bufferData(gl.ARRAY_BUFFER,F.c,gl.DYNAMIC_DRAW);}
 if(gl){
   try{
     prog=link(VS,FS);qprog=link(QVS,QFS);
-    ["uMix","uTime","uHoldA","uSpinA","uModeA","uModeB","uDist","uAspect","uPx","uMouseOn","uMotion","uMouse","uShift"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+    ["uMix","uTime","uHoldA","uSpinA","uModeA","uModeB","uDist","uAspect","uPx","uMouseOn","uMotion","uMouse","uShift","uLensA","uLensB","uReveal"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
     ["aPA","aCA","aPB","aCB","aR"].forEach(n=>A_LOC[n]=gl.getAttribLocation(prog,n));
     QU.uC=gl.getUniformLocation(qprog,"uC");QU.p=gl.getAttribLocation(qprog,"p");
+    gprog=link(GVS,GFS);
+    ["uWA","uWB","uSA","uSB","uTA","uTB","uMix","uDist","uAspect","uShift","uMouseOn","uLines","uMouse","uFade"].forEach(n=>GU[n]=gl.getUniformLocation(gprog,n));
+    GU.aG=gl.getAttribLocation(gprog,"aG");
+    { const L=GL_LINES_N,M=96,v=[];
+      for(let dir=0;dir<2;dir++)for(let l=0;l<L;l++){const f=-1+2*l/(L-1);
+        for(let k=0;k<M;k++){const a=-1+2*k/M,b=-1+2*(k+1)/M;
+          if(dir===0)v.push(a,f,0,b,f,0);else v.push(f,a,1,f,b,1);}}
+      gridN=v.length/3;gridBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(v),gl.STATIC_DRAW); }
     for(let s=0;s<2;s++){bufP[s]=gl.createBuffer();bufC[s]=gl.createBuffer();}
     upload(0,0);upload(1,1);pair=[0,1];
     const r=new Float32Array(N*4);for(let j=0;j<r.length;j++)r[j]=R();
@@ -378,6 +467,37 @@ function resize(){
 }
 new ResizeObserver(resize).observe(stage);
 
+/* where the sheet sits for scene i: mirrors the tilts in the shader's anim() so the dips stay under their bodies */
+const WA=new Float32Array(24),WB=new Float32Array(24);
+function sheetParams(i,hold,spin,t,W){
+  const sc=SCENES[i],g=sc.gr,m=sc.mode;let yz=0,xy=0,scale=1,yaw=0,orbit=null;
+  if(m===1){yz=.42;xy=-.28;}
+  else if(m===2)scale=1+hold*.22;
+  else if(m===3){yz=lerp(.5,1.25,hold);xy=.3;}
+  else if(m===4){scale=.78+.62*hold*hold;yaw=t*.05;yz=.25+Math.sin(t*.1)*.1;orbit=()=>0;}
+  else if(m===5){yz=.12;orbit=r=>(t*.12+spin*2.5)/Math.pow(r,1.5);}
+  else if(m===6){yz=lerp(.28,1.05,hold);orbit=r=>(t*.1+spin*3)*.3/Math.pow(r,1.5);}
+  else if(m===7)yaw=t*.03;
+  else if(m===8){yz=.17;xy=-.12;}
+  else if(m===9){yz=.3;xy=.6;}
+  else if(m===10)yz=.3;
+  W.fill(0);W[2]=g.M;W[3]=g.s;
+  if(orbit){let k=1;for(const [r,a,M,s] of form(i).bodies){if(k>5)break;const th=a+orbit(r);W[k*4]=Math.cos(th)*r;W[k*4+1]=Math.sin(th)*r;W[k*4+2]=M;W[k*4+3]=s;k++;}}
+  return{S:[g.y,g.size,g.a,g.weave||0],T:[yz,xy,scale,yaw]};
+}
+function drawGrid(fade,mixV,dist,hold,spin,i,j,t){
+  const A=sheetParams(i,ease(hold),spin,t,WA),B=sheetParams(j,0,0,t,WB);
+  if(A.S[2]===0&&B.S[2]===0)return;
+  gl.useProgram(gprog);
+  for(const l of Object.values(A_LOC))gl.disableVertexAttribArray(l);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.enableVertexAttribArray(GU.aG);gl.vertexAttribPointer(GU.aG,3,gl.FLOAT,false,0,0);
+  gl.uniform4fv(GU.uWA,WA);gl.uniform4fv(GU.uWB,WB);
+  gl.uniform4fv(GU.uSA,A.S);gl.uniform4fv(GU.uSB,B.S);gl.uniform4fv(GU.uTA,A.T);gl.uniform4fv(GU.uTB,B.T);
+  gl.uniform1f(GU.uMix,mixV);gl.uniform1f(GU.uDist,dist);gl.uniform1f(GU.uAspect,W/H);gl.uniform1f(GU.uShift,shiftV);
+  gl.uniform1f(GU.uMouseOn,reduced?mouseOn*.5:mouseOn);gl.uniform2f(GU.uMouse,ptr.mx,-ptr.my);gl.uniform1f(GU.uLines,GL_LINES_N);gl.uniform1f(GU.uFade,fade);
+  gl.drawArrays(gl.LINES,0,gridN);
+  gl.disableVertexAttribArray(GU.aG);
+}
 function bindAttr(name,buf){const l=A_LOC[name];gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,4,gl.FLOAT,false,0,0);}
 function drawGL(fade,mixV,dist,hold,spin,i,j){
   const t=reduced?0:time;
@@ -387,12 +507,15 @@ function drawGL(fade,mixV,dist,hold,spin,i,j){
   gl.blendEquation(gl.FUNC_ADD);gl.blendFunc(gl.ZERO,gl.ONE_MINUS_SRC_ALPHA);gl.uniform4f(QU.uC,0,0,0,fade);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);gl.blendFunc(gl.ONE,gl.ONE);gl.uniform4f(QU.uC,2/255,2/255,2/255,0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   gl.disableVertexAttribArray(QU.p);
-  gl.useProgram(prog);gl.blendEquation(gl.FUNC_ADD);gl.blendFunc(gl.ONE,gl.ONE);
+  gl.blendEquation(gl.FUNC_ADD);gl.blendFunc(gl.ONE,gl.ONE);
+  drawGrid(fade,mixV,dist,hold,spin,i,j,t);
+  gl.useProgram(prog);
   bindAttr("aPA",bufP[0]);bindAttr("aCA",bufC[0]);bindAttr("aPB",bufP[1]);bindAttr("aCB",bufC[1]);bindAttr("aR",bufR);
   gl.uniform1f(U.uMix,mixV);gl.uniform1f(U.uTime,t);gl.uniform1f(U.uHoldA,ease(hold));gl.uniform1f(U.uSpinA,spin);
   gl.uniform1f(U.uModeA,SCENES[i].mode);gl.uniform1f(U.uModeB,SCENES[j].mode);gl.uniform1f(U.uDist,dist);
   gl.uniform1f(U.uAspect,W/H);gl.uniform1f(U.uShift,shiftV);gl.uniform1f(U.uPx,H/760);gl.uniform1f(U.uMotion,reduced?0:1);
-  gl.uniform2f(U.uMouse,ptr.mx,-ptr.my);gl.uniform1f(U.uMouseOn,reduced?0:mouseOn);
+  gl.uniform2f(U.uMouse,ptr.mx,-ptr.my);gl.uniform1f(U.uMouseOn,reduced?0:mouseOn);gl.uniform1f(U.uReveal,mouseOn);
+  gl.uniform1f(U.uLensA,SCENES[i].lens||0);gl.uniform1f(U.uLensB,SCENES[j].lens||0);
   gl.drawArrays(gl.POINTS,0,N);
   if(bctx&&!reduced){bctx.globalCompositeOperation="copy";bctx.drawImage(cv,0,0,bloom.width,bloom.height);}
 }

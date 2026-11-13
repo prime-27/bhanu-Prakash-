@@ -213,7 +213,7 @@ function FieldNotes({ i }) {
   const sc = SCENES[i];
   return html`<aside className="notes" aria-label=${"Now passing: " + sc.name}>
     <div className="notes-h"><span className="label">Now passing · ${ROMAN[i]}</span><h3>${sc.name}</h3><span className="coordline">${sc.coord} · ${fmtKm(sc.km)}</span></div>
-    <div className="notes-body"><ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol><${SeenBy} sc=${sc}/></div></aside>`;
+    <div className="notes-body"><ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol><${SeenBy} sc=${sc}/><${Theory} sc=${sc}/></div></aside>`;
 }
 function Interlude({ i, p }) {
   const sc = SCENES[i];
@@ -224,6 +224,7 @@ function Interlude({ i, p }) {
       <p className="coordline">${sc.coord}</p>
       <ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol>
       <${SeenBy} sc=${sc}/>
+      <${Theory} sc=${sc}/>
       ${sc.final && html`<${StringLab}/>`}
       ${sc.final ? html`<button className="link back" type="button" onClick=${() => scrollToP(0)}>↑ Travel back to Earth</button>` : html`<span className="hint">Keep scrolling ${sc.b} ↓</span>`}
     </div></div></section>`;
@@ -270,7 +271,7 @@ function Hero({ cueRef }) {
       <div className="btns"><a className="btn" href="#projects">Explore My Work</a><a className="btn ghost" href="#contact">Get in Touch</a></div>
       <p className="trip">Scroll to travel from this hillside to the edge of the observable universe, then down to the smallest scale. Twelve stops, from 384,400 km out to a billion light-years and in to 10⁻³⁵ m.</p>
       <div className="hero-string" data-string="" data-tone="amber" ref=${hs} aria-hidden="true"></div>
-      <p className="trip strings-hint">String theory says everything is made of vibrating strings. So is this page: every line is a string you can pluck with your cursor or finger.</p>
+      <p className="trip strings-hint">String theory says everything is made of vibrating strings. So is this page: every line is a string you can pluck with your cursor or finger. Behind it all runs Einstein’s spacetime, a grid that bends under every mass you pass.</p>
     </div></div>
     <div className="cue" ref=${cueRef} aria-hidden="true">Scroll to leave Earth<i></i></div>
   </section>`;
@@ -464,7 +465,7 @@ function Contact({ onToast }) {
   const a = k => ({ id: "f-" + k, "aria-invalid": errors[k] ? "true" : undefined, "aria-describedby": errors[k] ? "e-" + k : undefined });
   return html`<section className="band" id="contact" aria-labelledby="contact-h" data-p0="9.6" data-p1="10.3" data-kind="content"><div className="inner">
     <div className="arrive"><span className="label">Chapter ${ROMAN[LASTI - 1]} · ${fmtKm(SCENES[LASTI - 1].km)} from Earth</span>
-      <p>You have reached the cosmic web, where galaxies gather along filaments hundreds of millions of light-years long. Every stop so far can be seen or photographed from Earth. Keep scrolling: the journey turns around and zooms in to the smallest scale.</p></div>
+      <p>You have reached the cosmic web, where galaxies gather along filaments hundreds of millions of light-years long. Every stop so far can be seen or photographed from Earth. Keep scrolling: the journey turns around and zooms in to the smallest scale.</p><${Theory} sc=${SCENES[LASTI - 1]}/></div>
     <div className="contact">
     <div>
       <span className="label">Contact</span>
@@ -969,6 +970,11 @@ function LightWave({ wave }) {
   const col = kind === "nm" ? nmColor(wave) : kind === "red" ? "#ff6b4a" : kind === "none" ? "var(--dim)" : "var(--ice)";
   return html`<svg className="lightwave" width=${W} height=${H} viewBox=${`0 0 ${W} ${H}`} aria-hidden="true">
     ${kind === "none" ? html`<line x1="0" y1=${H / 2} x2=${W} y2=${H / 2} stroke=${col} strokeDasharray="2 5"/>` : html`<polyline points=${pts.join(" ")} fill="none" stroke=${col} strokeWidth="1.6" strokeLinecap="round"/>`}</svg>`;
+}
+/* the physics each stop shows on top of the particles: general relativity, lensing, dark matter and more */
+function Theory({ sc }) {
+  if (!sc.theory) return null;
+  return html`<div className="theory">${sc.theory.map(([t, d, how]) => html`<div key=${t}><span className="label">Physics · ${t}</span><p>${d}</p>${how && html`<p className="how">${how}</p>`}</div>`)}</div>`;
 }
 function SeenBy({ sc }) {
   if (!sc.light) return null;

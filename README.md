@@ -15,6 +15,22 @@ Personal portfolio website for Bhanu Prakash. Scrolling the page is one journey:
 
 There is no build step. React 18 and htm load from public CDNs, so the folder can be hosted as it is.
 
+## Physics layers
+
+On top of the particles, the universe follows real physics. Each layer is explained on the page in a "Physics" note at its stop.
+
+| Theory | Where | What you see |
+| --- | --- | --- |
+| General relativity | Every stop from the Moon on | A spacetime grid that dips under each mass: the Sun and planets, a narrow steep well at the Crab pulsar, a deep funnel at Sagittarius A*. The cursor has mass too. |
+| Gravitational lensing | Sagittarius A*, Andromeda | Background stars bend around the lens, with a second image inside the ring (exaggerated for Andromeda) |
+| Hawking radiation | Sagittarius A* | Faint particles escaping the shadow's edge while their partners fall in |
+| Dark matter | The Milky Way | An invisible halo that the cursor reveals |
+| Dark energy | The cosmic web | The web and the grid under it expand faster and faster as you scroll |
+| Loop quantum gravity | The smallest scale | The spacetime grid becomes a woven lattice of loops |
+| Quantum uncertainty | The smallest scale | Each point is a fuzzy cloud until the cursor measures it |
+
+The numbers for each stop (grid depth, lens strength and the notes) are in the `PHYS` list in `js/universe.js`.
+
 ## Run it locally
 
 Any static file server works. From this folder:
