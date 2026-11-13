@@ -848,6 +848,9 @@ function Tonight() {
 
 /* ---------- Sky Notes (articles are static pages in /notes for search engines) ---------- */
 const NOTES = [
+  { slug: "sky-december-2026", title: "The night sky over Hyderabad: December 2026", tag: "Monthly sky · Dec 2026", mins: 3, d: "The Geminid meteor shower under dark skies, Saturn high in the evening, Jupiter and Mars rising in Leo, and Venus before dawn." },
+  { slug: "sky-january-2027", title: "The night sky over Hyderabad: January 2027", tag: "Monthly sky · Jan 2027", mins: 3, d: "The Quadrantid meteors, Orion and its nebula high in the evening, Jupiter and Mars near Regulus, Saturn sinking in the west." },
+  { slug: "sky-february-2027", title: "The night sky over Hyderabad: February 2027", tag: "Monthly sky · Feb 2027", mins: 3, d: "Jupiter and Mars reach opposition in Leo and are up all night, Saturn says goodbye in the evening twilight, and Venus rises before dawn." },
   { slug: "best-night-for-stargazing", title: "When is the best night to go stargazing?", tag: "Planning", mins: 4, d: "Why the New Moon week, a dark site and twenty minutes of patience matter more than a big telescope." },
   { slug: "find-cassiopeia-from-hyderabad", title: "How to find Cassiopeia from Hyderabad", tag: "Constellations", mins: 3, d: "The bright W in the northern sky: when to look, where to face, and the five stars that make it." },
   { slug: "see-the-orion-nebula", title: "See the Orion Nebula with your own eyes", tag: "Deep sky", mins: 3, d: "A star nursery 1,344 light-years away that you can spot from a dark site, no telescope needed." }

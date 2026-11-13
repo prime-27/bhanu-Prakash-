@@ -58,3 +58,9 @@ Articles are plain pages in `notes/`. To add one, copy an existing note, change 
 ### After changing CSS or JavaScript
 
 Browsers keep the site's files for about 10 minutes. When you change `css/styles.css`, `js/universe.js` or `js/app.js`, also change the `?v=` number after those file names in `index.html` (any new number works, such as today's date and time). Visitors then get the new files straight away.
+
+### Writing next month's Sky Note
+
+1. Copy the newest monthly note in `notes/` (for example `sky-february-2027.html`) and rename it, such as `sky-march-2027.html`.
+2. Change the title, description, the "Monthly sky" label and the text. Use the site's **Tonight's Sky** panel and **Sky calendar** to check planet times, New and Full Moons and meteor showers for Hyderabad.
+3. Add it to the top of the `NOTES` list in `js/app.js`, add its address to `sitemap.xml`, and bump the `?v=` numbers in `index.html`.
