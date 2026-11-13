@@ -559,8 +559,8 @@ function startProcess(canvas, section, onStage, ctl = { mode: "formed", paused: 
   canvas.addEventListener("pointerdown", down); addEventListener("pointermove", move); addEventListener("pointerup", up);
   const io = new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); } });
   io.observe(section); addEventListener("resize", resize); resize();
-  const F = () => Math.min(H * 1.05, W * .9);
-  function proj(x, y, z, camX) { const zc = 9 - z; if (zc < .3) return null; const k = F() / zc; return [W / 2 + (x - camX) * k, H * .56 - y * k, k]; }
+  const small = innerWidth < 700, F = () => Math.min(H * 1.05, W * (W < 700 ? 1.35 : .9));
+  function proj(x, y, z, camX) { const zc = 9 - z; if (zc < .3) return null; const k = F() / zc; return [W / 2 + (x - camX) * k, H * (W < 700 ? .5 : .56) - y * k, k]; }
   function frame(now) {
     raf = visible ? requestAnimationFrame(frame) : 0;
     const dt = clamp((now - last) / 1000, 0, .05); last = now; if (!reduced && !ctl.paused) t += dt;
@@ -575,12 +575,24 @@ function startProcess(canvas, section, onStage, ctl = { mode: "formed", paused: 
     // the Milky Way band the stages sit along
     for (const q of band) { if (Math.abs(q[0] - camX) > 16) continue; const p = proj(q[0], q[1], q[2], camX); if (!p) continue;
       const a = q[3] * (.75 + .25 * Math.sin(t * 1.3 + q[5])); ctx.fillStyle = `rgba(${PCOL[q[4]]},${a.toFixed(3)})`; const s = q[3] > .6 ? 1.8 : 1.1; ctx.fillRect(p[0], p[1], s, s); }
-    { const x0 = -3, x1 = SP * (N - 1) + 3, Lx = x1 - x0, nh = 1 + f, A = reduced ? 0 : .16, pts = [];
-      for (let x = Math.max(x0, camX - 15); x <= Math.min(x1, camX + 15); x += .06) { const u = (x - x0) / Lx;
-        const y = A * Math.sin(Math.PI * u * Math.round(nh * 2)) * Math.cos(t * (2 + nh)) + A * .4 * Math.sin(Math.PI * u * (Math.round(nh * 2) + 1)) * Math.sin(t * (3 + nh));
-        const p = proj(x, y - .02, 0, camX); if (p) pts.push(p); }
-      if (pts.length > 1) { ctx.beginPath(); pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-        ctx.strokeStyle = "rgba(255,194,122,.08)"; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = "rgba(255,214,160,.6)"; ctx.lineWidth = 1.1; ctx.stroke(); } }
+    /* a braid of vibrating strings: each strand plays a different mode, so they weave and cross */
+    { const NSTR = small ? 6 : 8, span = SP * (N - 1) + 6;
+      for (let k = 0; k < NSTR; k++) {
+        const n = 1 + (k % 4) + Math.floor(f * .6), ph = k * 1.7, A = (reduced ? .12 : .4) * (.5 + .5 * Math.abs(Math.sin(k * 2.3))), sp = .55 + k * .12, pts = [];
+        for (let x = camX - 16; x <= camX + 16; x += .07) {
+          const u = (x + 3) / span, tilt = (x - camX) * -.11;
+          const y = tilt + A * Math.sin(Math.PI * u * n * 2 + ph + t * sp) + .06 * Math.sin(x * 1.3 + k);
+          const z = A * .9 * Math.cos(Math.PI * u * n * 2 + ph * 1.3 + t * sp * .8);
+          const p = proj(x, y, z, camX); if (p) pts.push(p); }
+        if (pts.length < 2) continue;
+        const amber = k === 0;
+        ctx.beginPath(); pts.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+        ctx.strokeStyle = amber ? "rgba(255,194,122,.08)" : "rgba(241,238,230,.045)"; ctx.lineWidth = 5; ctx.stroke();
+        ctx.strokeStyle = amber ? "rgba(255,214,160,.7)" : "rgba(241,238,230,.34)"; ctx.lineWidth = .9; ctx.stroke();
+        const shift = Math.floor(t * 40 * sp + k * 13);
+        for (let j = 0; j < pts.length; j += 11) { const q = pts[(j + shift) % pts.length];
+          ctx.fillStyle = amber ? "rgba(255,214,160,.8)" : "rgba(241,238,230,.6)"; ctx.fillRect(q[0] - .9, q[1] - .9, 1.8, 1.8); }
+      } }
     objs.forEach((o, i) => {
       const w = Math.max(0, 1 - Math.abs(f - i)), sc = .8 + .5 * w, br = .25 + .75 * w, cx = i * SP;
       if (Math.abs(cx - camX) > 17) return;
