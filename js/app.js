@@ -486,19 +486,25 @@ function Expertise() {
 
 /* ---------- Process: a star's life in six stages, along the Milky Way ---------- */
 const STAGES = [
-  { n: "Understand", obj: "Molecular cloud", d: "Who is the audience, where is the venue, and what should people leave knowing? Like a cloud of gas before a star forms, every session and project starts as questions." },
-  { n: "Plan", obj: "Celestial sphere", d: "Pick what the sky will offer that night, check the Moon phase and the weather, or chart a site’s pages and features." },
-  { n: "Prepare", obj: "Protoplanetary disk", d: "Set up and align the telescopes, prepare demonstrations and materials, or build and test the first working version." },
-  { n: "Deliver", obj: "A star ignites", d: "First light: run the stargazing session, school program or workshop, or launch the website or application." },
-  { n: "Reflect", obj: "Reflection nebula", d: "Like dust lit by nearby stars, gather questions and feedback, and see what worked and what the sky or the users taught us." },
-  { n: "Grow", obj: "Spiral galaxy", d: "Turn one evening into a program, one workshop into a series, one launch into a product that keeps growing." }
+  { n: "Understand", obj: "Stellar nebula", s: "Nebula", d: "Stars are born in cold clouds of gas and dust. Every session and project starts the same way, as questions: who is the audience, where is the venue, and what should people leave knowing?" },
+  { n: "Plan", obj: "Protostar", s: "Protostar", d: "Gravity pulls the cloud into a hot, dense core that feeds from a spinning disk and fires jets from its poles. Plan what the sky will offer that night, check the Moon and the weather, or map out a site’s pages and features." },
+  { n: "Prepare", obj: "Young star and disk", s: "Young star", d: "The young star clears its surroundings while planets begin to form in the disk around it. Set up and align the telescopes, prepare demonstrations, or build and test the first working version." },
+  { n: "Deliver", obj: "Main-sequence star", s: "Main sequence", d: "Hydrogen fuses into helium in the core and the star shines steadily, for about 10 billion years in the Sun’s case. Run the stargazing session, school program or workshop, or launch the website or app." },
+  { n: "Reflect", obj: "Red giant", s: "Red giant", d: "When the hydrogen in its core runs out, the star swells into a red giant many times its size. Gather questions and feedback, and see what worked and what the sky or the users taught us." },
+  { n: "Grow", obj: "Planetary nebula and white dwarf", s: "White dwarf", d: "A Sun-like star sheds its outer layers as a glowing shell around a white dwarf, returning carbon and nitrogen to space for new stars and planets. Turn one evening into a program and one launch into a product that keeps growing." }
 ];
 function Spark({ k, size = 24 }) {
-  const c = 12, r = 2 + k * 1.2, L = 4 + k * 1.3;
-  return html`<svg className=${"spark" + (k >= 5 ? " guide" : "")} width=${size} height=${size} viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx=${c} cy=${c} r="11" className="spark-ring"/>
-    <path d=${`M${c} ${c - L}Q${c} ${c} ${c + L} ${c}Q${c} ${c} ${c} ${c + L}Q${c} ${c} ${c - L} ${c}Q${c} ${c} ${c} ${c - L}Z`} className="spark-ray"/>
-    <circle cx=${c} cy=${c} r=${r * .45} className="spark-core"/></svg>`;
+  const dots = (n, r, seed) => [...Array(n)].map((_, i) => { const a = i * 2.39996 + seed, rr = r * Math.sqrt((i + .5) / n); return html`<circle key=${i} cx=${12 + Math.cos(a) * rr} cy=${12 + Math.sin(a) * rr * .8} r=${.55 + (i % 3) * .25} className="si-dot"/>`; });
+  const art = [
+    html`<g>${dots(22, 8.2, 1)}<circle cx="12" cy="12" r="1.4" className="si-core dim"/></g>`,
+    html`<g><path d="M12 2.5V8M12 16v5.5" className="si-jet"/><ellipse cx="12" cy="12" rx="7.5" ry="2" className="si-disk"/><circle cx="12" cy="12" r="2.4" className="si-core warm"/></g>`,
+    html`<g><ellipse cx="12" cy="12" rx="9" ry="2.6" className="si-disk"/><ellipse cx="12" cy="12" rx="5.6" ry="1.6" className="si-gap"/><circle cx="12" cy="12" r="2.6" className="si-core"/><circle cx="19.2" cy="12.9" r=".9" className="si-dot"/></g>`,
+    html`<g><path d="M12 3.5V7M12 17v3.5M3.5 12H7M17 12h3.5M6 6l2.3 2.3M15.7 15.7L18 18M18 6l-2.3 2.3M8.3 15.7L6 18" className="si-ray"/><circle cx="12" cy="12" r="4" className="si-core sun"/></g>`,
+    html`<g><circle cx="12" cy="12" r="8.6" className="si-core red"/><circle cx="9.5" cy="10" r="1.6" className="si-spot"/><circle cx="14.5" cy="14" r="1.2" className="si-spot"/></g>`,
+    html`<g><ellipse cx="12" cy="12" rx="8.4" ry="7" className="si-ring"/><ellipse cx="12" cy="12" rx="5.6" ry="4.6" className="si-ring2"/><circle cx="12" cy="12" r="1.3" className="si-core wd"/></g>`
+  ];
+  return html`<svg className=${"stage-icon" + (k >= 5 ? " guide" : "")} width=${size} height=${size} viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="11.3" className="si-bg"/>${art[k] || art[0]}</svg>`;
 }
 function buildProcessObjects() {
   const R = Math.random, G = () => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * R()); }, O = [];
@@ -508,14 +514,14 @@ function buildProcessObjects() {
       pts.push([Math.cos(a + tw) * r + G() * .08, G() * .18 * (1 - r / 2), Math.sin(a + tw) * r * .7 + G() * .08, .2 + R() * .5, i % 9 ? 0 : 2]); }
     for (let i = 0; i < 160; i++) pts.push([G() * .12, G() * .1, G() * .12, .7 + R() * .3, 0]);
     O.push({ segs: [], pts, pitch: .75, spin: .08 }); }
-  // 1 Plan: the celestial sphere, with lines of right ascension and declination and a constellation charted on it
-  { const S = [], r = 1.25;
-    for (const d of [-60, -30, 0, 30, 60]) { const dr = d * Math.PI / 180; ring(S, r, 56, d ? .22 : .5, t => [Math.cos(t) * Math.cos(dr) * r, Math.sin(dr) * r, Math.sin(t) * Math.cos(dr) * r]); }
-    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 6; let pv = null; for (let i = 0; i <= 40; i++) { const t = i / 40 * Math.PI - Math.PI / 2, p = [Math.cos(t) * Math.cos(a) * r, Math.sin(t) * r, Math.cos(t) * Math.sin(a) * r]; if (pv) S.push([...pv, ...p, .18]); pv = p; } }
-    const sph = (ra, dec) => [Math.cos(dec) * Math.cos(ra) * r, Math.sin(dec) * r, Math.cos(dec) * Math.sin(ra) * r];
-    const cs = [[.2, .55], [.45, .4], [.68, .45], [.85, .2], [1.12, .33]].map(([a, d]) => sph(a, d));
-    for (let i = 0; i < 4; i++) S.push([...cs[i], ...cs[i + 1], .95]);
-    O.push({ segs: S, pts: cs.map((p, i) => [...p, i === 2 ? 2.2 : 1.6, i === 2 ? 1 : 0]), pitch: .35, spin: .12 }); }
+  // 1 Plan: a protostar, a hot core fed by a spinning disk, firing jets from its poles
+  { const pts = [];
+    for (let i = 0; i < 260; i++) pts.push([G() * .09, G() * .09, G() * .09, .7 + R() * .3, 1]);
+    for (let i = 0; i < 900; i++) { const r = .18 + Math.pow(R(), .7) * 1.1, a = R() * 6.283; pts.push([Math.cos(a) * r, G() * .03 * (1 + r), Math.sin(a) * r, .22 + R() * .4, r < .45 ? 1 : 0]); }
+    for (let i = 0; i < 520; i++) { const sg = i % 2 ? 1 : -1, h = Math.pow(R(), .8) * 1.7, w = .03 + h * .07; pts.push([G() * w, sg * (.12 + h), G() * w, .3 + (1 - h / 1.8) * .55, 2]); }
+    for (let i = 0; i < 420; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.2 + R() * .5; pts.push([sq * Math.cos(a) * r, u * r * .8, sq * Math.sin(a) * r, .08 + R() * .14, 0]); }
+    pts.push([0, 0, 0, 3, 1]);
+    O.push({ segs: [], pts, pitch: .3, spin: .3 }); }
   // 2 Prepare: a protoplanetary disk with gaps where planets are clearing their orbits
   { const pts = []; for (let i = 0; i < 1500; i++) { let r; do { r = .25 + Math.pow(R(), .8) * 1.45; } while ((r > .62 && r < .72) || (r > 1.08 && r < 1.16));
       const a = R() * 6.283; pts.push([Math.cos(a) * r, G() * .015 * (1 + r), Math.sin(a) * r, .25 + R() * .45, r < .5 ? 1 : 0]); }
@@ -529,20 +535,25 @@ function buildProcessObjects() {
       S.push([d[0] * .64, d[1] * .64, d[2] * .64, d[0] * L, d[1] * L, d[2] * L, .25 + R() * .35]); }
     pts.push([0, 0, 0, 4, 1]);
     O.push({ segs: S, pts, pitch: .2, spin: .1 }); }
-  // 4 Reflect: a young cluster lighting the dust around it, like the Pleiades
-  { const pts = [], stars = [[-.6, .35, .1], [-.2, .55, -.2], [.25, .4, .15], [.55, .1, -.1], [.05, .05, .3], [-.45, -.15, -.25], [.35, -.35, .05]];
-    stars.forEach(([x, y, z], i) => pts.push([x, y, z, i < 3 ? 2.6 : 1.9, 2]));
-    for (let i = 0; i < 1100; i++) { const s = stars[i % stars.length], r = Math.pow(R(), 1.5) * .55; const a = R() * 6.283;
-      pts.push([s[0] + Math.cos(a) * r + G() * .05, s[1] + G() * .16 + Math.sin(a) * r * .3, s[2] + Math.sin(a) * r * .5, .12 + R() * .3, 2]); }
-    O.push({ segs: [], pts, pitch: .1, spin: .06 }); }
-  // 5 Grow: a spiral galaxy, arms reaching outward
-  { const pts = []; for (let i = 0; i < 1600; i++) { const bulge = i < 280; if (bulge) { pts.push([G() * .16, G() * .08, G() * .16, .5 + R() * .5, 1]); continue; }
-      const r = .18 + Math.pow(R(), .85) * 1.55, a = (i % 2) * Math.PI + Math.log(r / .18) * 2.2 + G() * .28;
-      pts.push([Math.cos(a) * r, G() * .025, Math.sin(a) * r, .25 + R() * .5, R() < .07 ? 3 : (r > 1 ? 2 : 0)]); }
-    O.push({ segs: [], pts, pitch: .95, spin: .2 }); }
+  // 4 Reflect: a red giant, swollen and mottled by giant convection cells
+  { const pts = [], cells = [...Array(9)].map(() => { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u); return [sq * Math.cos(a), u, sq * Math.sin(a)]; });
+    for (let i = 0; i < 1500; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), n = [sq * Math.cos(a), u, sq * Math.sin(a)];
+      let b = .35 + R() * .3; for (const c of cells) if (Math.hypot(n[0] - c[0], n[1] - c[1], n[2] - c[2]) < .35) b += .25;
+      const r = 1.15 + G() * .02; pts.push([n[0] * r, n[1] * r, n[2] * r, Math.min(.95, b), 4]); }
+    for (let i = 0; i < 380; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.25 + Math.pow(R(), 2) * .6; pts.push([sq * Math.cos(a) * r, u * r, sq * Math.sin(a) * r, .08 + R() * .12, 4]); }
+    pts.push([0, 0, 0, 2.2, 1]);
+    O.push({ segs: [], pts, pitch: .15, spin: .05, shell: 1.15 }); }
+  // 5 Grow: a planetary nebula, a glowing shell of shed gas around a white dwarf
+  { const pts = [];
+    for (let i = 0; i < 2400; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1 + G() * .07, rim = Math.abs(u) < .55;
+      if (!rim && R() < .6) continue; pts.push([sq * Math.cos(a) * r * 1.15, u * r * .95, sq * Math.sin(a) * r, .45 + R() * .5, R() < .6 ? 3 : 4]); }
+    for (let i = 0; i < 520; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = Math.pow(R(), .5) * .78; pts.push([sq * Math.cos(a) * r, u * r * .9, sq * Math.sin(a) * r, .2 + R() * .3, 2]); }
+    for (let i = 0; i < 300; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.4 + R() * .45; pts.push([sq * Math.cos(a) * r, u * r, sq * Math.sin(a) * r, .06 + R() * .08, 3]); }
+    pts.push([0, 0, 0, 2.6, 0]);
+    O.push({ segs: [], pts, pitch: .25, spin: .07 }); }
   return O;
 }
-const PCOL = ["241,238,230", "255,194,122", "168,199,255", "242,71,127"];
+const PCOL = ["241,238,230", "255,194,122", "168,199,255", "242,71,127", "255,120,72"];
 function startProcess(canvas, section, onStage, ctl = { mode: "formed", paused: false }) {
   let ex = 0;
   const ctx = canvas.getContext("2d"), objs = buildProcessObjects(), SP = 7, N = STAGES.length;
@@ -627,10 +638,10 @@ function Process() {
   return html`<section className="process" id="process" ref=${sec} data-p0="5.2" data-p1="5.6" data-kind="process" aria-labelledby="proc-h">
     <div className="proc-stick">
       <canvas ref=${can} className="proc-canvas" aria-label=${"Interactive model: " + S.obj + ". Drag to rotate."}></canvas>
-      <div className="proc-head"><span className="label">Process · the life of a star, on one string</span><h2 id="proc-h">From the first question to a full sky</h2></div>
+      <div className="proc-head"><span className="label">Process · the life of a star</span><h2 id="proc-h">From the first question to a full sky</h2></div>
       <ol className="phases"><li className="phase-string" aria-hidden="true" data-string="" data-tone="amber" ref=${strRef}></li>${STAGES.map((s, i) => html`<li key=${i} className=${i === stage ? "on" : i < stage ? "past" : ""}>
         <button type="button" onClick=${() => go(i)} aria-current=${i === stage ? "step" : undefined} aria-label=${`Stage ${i + 1}: ${s.n}`}>
-          <span className="ph-l"><span className="ph-n">${String(i + 1).padStart(2, "0")}</span> ${s.n}</span><span className="mb"><${Spark} k=${i} size=${i === stage ? 56 : 30}/></span>
+          <span className="ph-l"><span className="ph-n">${String(i + 1).padStart(2, "0")}</span> ${s.n}<span className="ph-sub">${s.s}</span></span><span className="mb"><${Spark} k=${i} size=${i === stage ? 56 : 30}/></span>
         </button></li>`)}</ol>
       <div className="proc-foot">
         <div className="proc-now" aria-live="polite">

@@ -601,3 +601,24 @@ footer{border-top:0}
 .contact dd .link{display:inline-block;margin-top:8px}
 .send-row{display:flex;gap:10px;flex-wrap:wrap}
 .send-row{grid-column:1/-1}
+
+/* ---------- stellar-evolution stepper icons ---------- */
+.stage-icon .si-bg{fill:var(--void);stroke:rgba(241,238,230,.3);stroke-width:.8}
+.stage-icon .si-dot{fill:var(--star-2)}
+.stage-icon .si-core{fill:var(--star)}
+.stage-icon .si-core.dim{fill:rgba(241,238,230,.5)}
+.stage-icon .si-core.warm{fill:#ffd9a8}
+.stage-icon .si-core.sun{fill:#ffe6b8}
+.stage-icon .si-core.red{fill:#ff7848}
+.stage-icon .si-core.wd{fill:#fff}
+.stage-icon .si-spot{fill:#ffb08a;opacity:.7}
+.stage-icon .si-jet{stroke:var(--particle-cool);stroke-width:1.3;stroke-linecap:round}
+.stage-icon .si-disk{fill:none;stroke:var(--amber);stroke-width:1.2}
+.stage-icon .si-gap{fill:none;stroke:var(--void);stroke-width:1.4}
+.stage-icon .si-ray{stroke:#ffe6b8;stroke-width:1.1;stroke-linecap:round}
+.stage-icon .si-ring{fill:none;stroke:#f2477f;stroke-width:2.2;opacity:.85}
+.stage-icon .si-ring2{fill:none;stroke:var(--particle-cool);stroke-width:1.2;opacity:.75}
+.phases li:not(.on):not(.past) .stage-icon{opacity:.6}
+.phases .on .stage-icon{filter:drop-shadow(0 0 10px rgba(255,214,160,.5))}
+.ph-sub{display:block;font-size:11px;color:var(--dim);margin-top:2px;font-family:var(--mono);letter-spacing:.04em}
+.phases .on .ph-sub{color:var(--amber)}
