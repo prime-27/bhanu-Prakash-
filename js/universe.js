@@ -1,4 +1,4 @@
-/* Particle universe: WebGL engine and the twelve formations of the journey. */
+/* Particle universe: WebGL engine and the thirteen formations of the journey. */
 window.Universe=(()=>{
 "use strict";
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -18,6 +18,7 @@ function bgStars(f,i,n){for(let j=0;j<n;j++){const m=Math.pow(R(),3),z=-1.2-R()*
 
 /* ---------- formations ----------
    kind: 0 animated · 1 static · 2 lit sphere · 3 rings · 4 young stars · 5 dark matter · 9 pulsar · 10 lensed light · 11 Hawking radiation
+         13 Kepler wedge · 14 pulsar beam · 15 fusion flash · 16/17 entangled pair · 18/19 vacuum pair · 20 cosmic microwave background
          8 + r/10 orbiting body (r = orbit radius, so clusters orbit rigidly) */
 function fSky(){
   const f=mk();let i=0;
@@ -39,6 +40,10 @@ function fSky(){
   while(i<N){const m=Math.pow(R(),4),a=R()*TAU,r=5.4*Math.sqrt(R());set(f,i++,-.35+Math.cos(a)*r,1.5+Math.sin(a)*r,0,0,...starCol(.16+m*1.05),1+m*4.2);}
   return f;
 }
+/* Kepler orbits: eccentricity by orbit radius (Mercury and Mars stretched to show it), perihelion direction w */
+const ecc=r=>r<.25?.25:Math.abs(r-.5)<.02?.32:.07, peri=r=>r*11;
+function kep(a,e,M){let E=M;for(let k=0;k<6;k++)E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));return[a*(Math.cos(E)-e),a*Math.sqrt(1-e*e)*Math.sin(E)];}
+const rot2=([x,z],w)=>[Math.cos(w)*x-Math.sin(w)*z,Math.sin(w)*x+Math.cos(w)*z];
 const onSphere=()=>{const u=R()*2-1,a=R()*TAU,s=Math.sqrt(1-u*u);return[s*Math.cos(a),u,s*Math.sin(a),a];};
 function blob(f,i,n,cx,cy,cz,rad,kind,c,size){for(let j=0;j<n;j++){const s=onSphere(),r=rad*Math.cbrt(R());set(f,i++,cx+s[0]*r,cy+s[1]*r,cz+s[2]*r,kind,c[0],c[1],c[2],size);}return i;}
 function fMoon(){
@@ -76,8 +81,11 @@ function fSolar(){
   const f=mk();let i=bgStars(f,0,N*.06|0);
   for(let j=0,n=N*.07|0;j<n;j++){const s=onSphere(),r=Math.abs(gauss())*.05,b=.45+R()*.4;set(f,i++,s[0]*r,s[1]*r,s[2]*r,0,b,b*.72,b*.35,2+R()*3);}
   const PL=[[.22,.012,[.7,.65,.6]],[.3,.018,[1,.85,.6]],[.4,.02,[.45,.65,1]],[.5,.015,[1,.5,.3]],[.86,.05,[1,.85,.65]],[1.1,.044,[1,.9,.65]],[1.34,.03,[.6,.9,1]],[1.56,.03,[.4,.55,1]]];
-  PL.forEach(([r])=>{for(let j=0,n=N*.02|0;j<n;j++){const a=R()*TAU;set(f,i++,Math.cos(a)*r,0,Math.sin(a)*r,0,.045,.055,.1,1);}});
-  PL.forEach(([r,s,c],k)=>{const a=R()*TAU;if(k===2||k>3)f.bodies.push([r,a,s*1.6,.07]);i=blob(f,i,N*.007|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.75),1.4);});
+  for(let j=0,n=N*.004|0;j<n;j++){const s=onSphere(),r=Math.abs(gauss())*.02;set(f,i++,s[0]*r,s[1]*r,s[2]*r,15,1,.95,.75,1.6);}
+  PL.forEach(([r])=>{const e=ecc(r),w=peri(r);for(let j=0,n=N*.02|0;j<n;j++){const E=R()*TAU,[x,z]=rot2([r*(Math.cos(E)-e),r*Math.sqrt(1-e*e)*Math.sin(E)],w);set(f,i++,x,0,z,0,.045,.055,.1,1);}});
+  let marsA=0;
+  PL.forEach(([r,s,c],k)=>{const a=R()*TAU;if(k===3)marsA=a;if(k===2||k>3)f.bodies.push([r,a,s*1.6,.07]);i=blob(f,i,N*.007|0,Math.cos(a)*r,0,Math.sin(a)*r,s,8+r/10,c.map(v=>v*.75),1.4);});
+  for(let j=0,n=N*.025|0;j<n;j++){const b=.12+R()*.1;set(f,i++,R(),R(),marsA,13,b,b*.55,b*.3,1.4);}
   for(let j=0,n=N*.07|0;j<n;j++){const r=.63+R()*.13,a=R()*TAU,b=.07+R()*.1;set(f,i++,Math.cos(a)*r,gauss()*.01,Math.sin(a)*r,8+r/10,b,b*.9,b*.8,1);}
   while(i<N){const r=1.72+R()*.38,a=R()*TAU,b=.05+R()*.08;set(f,i++,Math.cos(a)*r,gauss()*.03,Math.sin(a)*r,8+r/10,b*.8,b*.85,b,1);}
   return f;
@@ -94,6 +102,7 @@ function fNebula(){
 function fCrab(){
   const f=mk();let i=bgStars(f,0,N*.06|0);
   for(let j=0,n=N*.004|0;j<n;j++)set(f,i++,gauss()*.008,gauss()*.008,gauss()*.008,9,.8,.85,1,2.5);
+  for(let j=0,n=N*.045|0;j<n;j++){const b=.7+R()*.5;set(f,i++,.03+Math.pow(R(),1.4)*1.5,R()<.5?-1:1,R()*TAU,14,b*.6,b*.8,b,1.5+R()*1.2);}
   for(let j=0,n=N*.28|0;j<n;j++){const b=.045+R()*.07;set(f,i++,gauss()*.28,gauss()*.2,gauss()*.2,0,b*.55,b*.7,b*1.2,2.5+R()*2.5);}
   while(i<N){const n=onSphere();
     const fil=Math.sin(n[0]*9+Math.sin(n[1]*7)*2)*Math.sin(n[1]*8+n[2]*6)*Math.sin(n[2]*10+n[0]*3);
@@ -143,12 +152,25 @@ function fStrings(){
     set(f,i++,c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r,-.5,12,b*.75,b*.85,b*1.2,1.2);}
   const n=5,pw=(z,e)=>{const r=Math.hypot(z[0],z[1]),t=Math.atan2(z[1],z[0]),m=Math.pow(r,e);return[m*Math.cos(t*e),m*Math.sin(t*e)];},
     rotc=(z,g)=>[z[0]*Math.cos(g)-z[1]*Math.sin(g),z[0]*Math.sin(g)+z[1]*Math.cos(g)],al=Math.PI/4;
+  for(let k=0;k<14;k++){const s=onSphere(),r=1.25+R()*.35;for(let j=0;j<40;j++){set(f,i++,s[0]*r,s[1]*r*.7,s[2]*r,16,.5,.5,.55,1.5);set(f,i++,-s[0]*r,-s[1]*r*.7,-s[2]*r,17,.5,.5,.55,1.5);}}
+  for(let j=0,n=N*.015|0;j<n;j++){const s=onSphere(),r=.3+Math.cbrt(R())*2;for(const k of[18,19])set(f,i++,s[0]*r*1.3,s[1]*r*.8,s[2]*r,k,.55,.6,.8,1.3);}
   const COL=[[1,.76,.48],[.66,.78,1],[.95,.93,.9]];
   while(i<N){const k1=(R()*n)|0,k2=(R()*n)|0,a=(R()*2-1)*1.05,b=R()*Math.PI/2;
     const ch=[Math.cosh(a)*Math.cos(b),Math.sinh(a)*Math.sin(b)],sh=[Math.sinh(a)*Math.cos(b),Math.cosh(a)*Math.sin(b)];
     const z1=rotc(pw(ch,2/n),TAU*k1/n),z2=rotc(pw([sh[1],-sh[0]],2/n),TAU*k2/n);
     const c=COL[(k1+k2)%3],v=.2+R()*.22;
     set(f,i++,z1[0]*.95,z2[0]*.95,(Math.cos(al)*z1[1]+Math.sin(al)*z2[1])*.95,0,c[0]*v,c[1]*v,c[2]*v,1.05+R()*.5);}
+  return f;
+}
+function fBang(){
+  const f=mk();let i=0;
+  const cl=[...Array(90)].map(()=>{const s=onSphere(),r=Math.cbrt(R())*1.5;return[s[0]*r,s[1]*r,s[2]*r];});
+  for(let j=0,n=N*.68|0;j<n;j++){const c=cl[j%cl.length],k=R()<.3,b=.2+R()*.35,col=R()<.5?[1,.85,.65]:[.7,.8,1];
+    set(f,i++,c[0]+gauss()*(k?.15:.05),c[1]+gauss()*(k?.15:.05),c[2]+gauss()*(k?.15:.05),0,col[0]*b,col[1]*b,col[2]*b,1+R()*1.4);}
+  /* the afterglow: a speckled sphere of hot and cold spots, like the Planck satellite's map */
+  while(i<N){const s=onSphere(),v=Math.sin(s[0]*9+Math.sin(s[1]*7)*2)*Math.sin(s[1]*11+s[2]*5)*Math.sin(s[2]*8-s[0]*4)+Math.sin(s[0]*23+s[2]*19)*.35;
+    const t=clamp(.5+v*.6,0,1),col=t<.5?[lerp(.1,.8,t*2),lerp(.25,.85,t*2),1]:[1,lerp(.85,.35,t*2-1),lerp(.7,.1,t*2-1)],b=.34+R()*.1;
+    set(f,i++,s[0]*2.1,s[1]*2.1,s[2]*2.1,20,col[0]*b,col[1]*b,col[2]*b,1.8+R()*1.2);}
   return f;
 }
 const LY=9.461e12;
@@ -197,10 +219,14 @@ const SCENES=[
     "Galaxies gather along filaments hundreds of millions of light-years long, with vast empty voids between them.",
     "This cosmic web is the largest structure we know of.",
     "From here the journey turns around and zooms in, past atoms and nuclei, to the smallest scale physics can describe."]},
-  {name:"The smallest scale",light:["Beyond light", "none", "No light could probe this scale: it would take energies about 10¹⁹ times a proton’s mass-energy."],make:fStrings,mode:10,km:1.6e-38,dist:h=>lerp(3.7,2.6,ease(h)),final:true,spin:h=>h*1.4,b:"to pluck the strings",coord:"Planck length · 1.6 × 10⁻³⁵ m",beats:[
+  {name:"The smallest scale",light:["Beyond light", "none", "No light could probe this scale: it would take energies about 10¹⁹ times a proton’s mass-energy."],make:fStrings,mode:10,km:1.6e-38,dist:h=>lerp(3.7,2.6,ease(h)),lab:true,spin:h=>h*1.4,b:"to go back to the beginning of time",coord:"Planck length · 1.6 × 10⁻³⁵ m",beats:[
     "String theory proposes that at about 10⁻³⁵ m, the Planck length, everything is made of tiny vibrating strings.",
     "Each way a string can vibrate would show up as a different particle, the way one guitar string plays many notes.",
-    "The theory needs extra dimensions curled up too small to see, often drawn as Calabi–Yau shapes. No experiment has tested it yet."]}
+    "The theory needs extra dimensions curled up too small to see, often drawn as Calabi–Yau shapes. No experiment has tested it yet."]},
+  {name:"The Big Bang",light:["Microwaves, about 1 mm", "radio", "The Big Bang’s afterglow left as visible light. Expanding space has stretched it into microwaves, now at 2.7 degrees above absolute zero."],make:fBang,mode:11,km:13.8e9*LY,dist:()=>3.6,final:true,bang:true,spin:()=>0,b:"",coord:"13.8 billion years ago · the oldest light, at 2.7 K",beats:[
+    "Everything in the universe, every galaxy on this journey, was once packed into a space far smaller than an atom.",
+    "13.8 billion years ago it began to expand, and it has been expanding ever since. The Big Bang was not an explosion in space: it was space itself stretching.",
+    "The faint speckled glow is the cosmic microwave background, the oldest light there is. Its tiny hot and cold spots grew into the galaxies."]}
 ];
 /* ---------- physics layers ----------
    gr: the spacetime sheet under each stop (general relativity). y = height below the scene, size = half-width,
@@ -209,29 +235,44 @@ const SCENES=[
 const PHYS=[
   {gr:{y:-1.2,size:3,a:0,M:0,s:.5}},
   {gr:{y:-.95,size:3.2,a:.9,M:.42,s:.42},theory:[
+    ["Special relativity","Scroll fast and you travel near the speed of light. Stars crowd toward the direction you are heading and turn bluer, and when you scroll back they spread out and redden. This is relativistic aberration and the Doppler effect."],
     ["General relativity","The faint grid under the Moon is spacetime. Einstein’s general relativity says mass curves it, and that curve is what we feel as gravity. The Moon makes a small dip; Earth’s deeper one keeps the Moon in orbit. The grid runs under every stop from here on.","Move your cursor or finger across the grid: it has mass too, and spacetime sinks under it."]]},
   {gr:{y:-.9,size:3.2,a:.9,M:.62,s:.45}},
   {gr:{y:-.78,size:3.2,a:.85,M:.55,s:.45}},
   {gr:{y:-.1,size:2.6,a:1,M:.5,s:.14},theory:[
-    ["General relativity · orbits","The Sun makes the deepest dip in the grid, and each planet rolls around its slope in a small dip of its own. Einstein’s theory also explained what Newton’s could not: Mercury’s orbit slowly swings round, 43 arcseconds a century more than Newton predicts."]]},
+    ["General relativity · orbits","The Sun makes the deepest dip in the grid, and each planet rolls around its slope in a small dip of its own. Einstein’s theory also explained what Newton’s could not: Mercury’s orbit slowly swings round, 43 arcseconds a century more than Newton predicts."],
+    ["Kepler’s laws","Planets move on ellipses with the Sun at one focus, and speed up as they swing close to it. The glowing wedge behind Mars always sweeps the same area in the same time, Kepler’s second law. The orbits of Mercury and Mars are stretched here so you can see it."],
+    ["Nuclear fusion","The flashes in the Sun’s core stand for fusion. At 15 million °C, hydrogen nuclei fuse into helium, and each second about 4 million tonnes of mass turn into the energy that makes the Sun shine, by E = mc²."]]},
   {gr:{y:-.95,size:3.2,a:.6,M:.22,s:.7}},
   {gr:{y:-.85,size:3.2,a:.8,M:.85,s:.06},theory:[
-    ["General relativity · neutron star","The pulsar packs about 1.4 Suns into a ball some 20 km wide, so its dip in the grid is narrow and steep. Clocks on its surface would run about a fifth slower than clocks far away."]]},
-  {gr:{y:-.45,size:3.4,a:1,M:1.5,s:.09},lens:.3,theory:[
+    ["General relativity · neutron star","The pulsar packs about 1.4 Suns into a ball some 20 km wide, so its dip in the grid is narrow and steep."],
+    ["Pulsar beams","The neutron star sweeps two radio beams around about 30 times a second, like a lighthouse. Each time one points at Earth we see a flash. Here it is slowed down 20 times."],
+    ["Time dilation","Strong gravity slows time. A clock on the pulsar’s surface ticks about a quarter slower than one far away."]],clock:[.77,"On the pulsar’s surface"]},
+  {gr:{y:-.45,size:3.4,a:1,M:1.5,s:.09,fd:1},lens:.3,theory:[
     ["Gravitational lensing","The background stars bend around the black hole. Light from a star behind it is split into two images, one on each side, and a star exactly in line would spread into a ring, called an Einstein ring."],
-    ["Hawking radiation","The faint sparks leaving the shadow’s edge show Hawking radiation. In 1974 Stephen Hawking showed that quantum effects make black holes glow very slightly. Sagittarius A* is far too cold for this to be seen: about 10⁻¹⁴ kelvin."]]},
+    ["Hawking radiation","The faint sparks leaving the shadow’s edge show Hawking radiation. In 1974 Stephen Hawking showed that quantum effects make black holes glow very slightly. Sagittarius A* is far too cold for this to be seen: about 10⁻¹⁴ kelvin."],
+    ["Frame dragging","A spinning mass drags spacetime around with it, so the grid near the black hole twists into a whirlpool."],
+    ["Doppler beaming","Gas on the side of the disk moving toward you looks brighter and bluer, and the side moving away looks dimmer and redder. That is why the Event Horizon Telescope images are brighter on one side."],
+    ["Tidal stretching","Gravity pulls much harder on the near side of anything falling in than on its far side, stretching it into a long thin strand. Astronomers call it spaghettification.","Move your cursor or finger near the disk to stretch it."],
+    ["Time dilation","A clock hovering just outside the event horizon, at 1.1 times its radius, ticks at less than a third of the rate of one far away."]],clock:[.3,"Just outside the horizon"]},
   {gr:{y:-.3,size:3.4,a:.8,M:.5,s:.3},theory:[
     ["Dark matter","Stars far from the centre orbit about as fast as stars near it, so the galaxy must hold far more mass than we can see. An invisible halo of dark matter holds it together. Across the universe there is about five times more dark matter than ordinary matter, and nobody yet knows what it is.","Move your cursor or finger over the galaxy to reveal the halo."]]},
-  {gr:{y:-.35,size:3.4,a:.75,M:.5,s:.3},lens:.1,theory:[
-    ["Gravitational lensing","Whole galaxies bend light too. Here the effect is exaggerated so you can see it. Telescopes find real galaxy lenses as arcs and rings, and astronomers use them to weigh the dark matter inside."]]},
+  {gr:{y:-.35,size:3.4,a:.75,M:.5,s:.3,gw:1},lens:.1,theory:[
+    ["Gravitational lensing","Whole galaxies bend light too. Here the effect is exaggerated so you can see it. Telescopes find real galaxy lenses as arcs and rings, and astronomers use them to weigh the dark matter inside."],
+    ["Gravitational waves","When Andromeda and the Milky Way merge, their central black holes will spiral together and shake spacetime, sending ripples across the grid like these. LIGO first detected such waves in 2015, from two black holes 1.3 billion light-years away."]]},
   {gr:{y:-1.35,size:3.6,a:1,M:0,s:.5},theory:[
     ["Dark energy","Space between the filaments keeps stretching, and in 1998 two teams found that the expansion is speeding up. The unknown cause is called dark energy, about 68% of the universe. Scroll on and watch the web, and the grid under it, spread faster and faster."]]},
   {gr:{y:-1.1,size:3.2,a:1.7,M:0,s:.5,weave:1},theory:[
     ["Loop quantum gravity","String theory’s main rival keeps Einstein’s spacetime but says it is not smooth. At the Planck scale it is woven from tiny loops, like cloth seen up close. The grid that followed you through the universe becomes that weave here. Like string theory, it has not been tested."],
-    ["Quantum uncertainty","At this scale everything is quantum. Each point of the shape is a fuzzy cloud of places it might be, until it is measured. It is the same rule that wipes out the stripes in the double-slit experiment.","Move your cursor or finger over the shape to measure it: the clouds snap to points."]]}
+    ["Quantum uncertainty","At this scale everything is quantum. Each point of the shape is a fuzzy cloud of places it might be, until it is measured. It is the same rule that wipes out the stripes in the double-slit experiment.","Move your cursor or finger over the shape to measure it: the clouds snap to points."],
+    ["Quantum entanglement","The pairs of clouds on opposite sides are entangled. Measure one and its partner settles at the same moment, however far apart they are, one amber and one blue. Einstein called it spooky action at a distance; experiments since the 1980s show it is real.","Move your cursor or finger over one cloud of a pair."],
+    ["Vacuum fluctuations","Even empty space is never quite empty. Pairs of particles flicker into existence and vanish again almost at once, the flickers you see here."]]},
+  {gr:{y:-1.3,size:3.4,a:0,M:0,s:.5},theory:[
+    ["Cosmic inflation","In the first tiny fraction of a second, space may have grown by a factor of at least 10²⁶, far faster than light, before settling into the slower expansion we see today."],
+    ["The cosmic microwave background","For 380,000 years the universe was a glowing fog. When it cooled enough, light broke free. That light still fills the sky, discovered in 1965, and its hot and cold spots differ by only about 1 part in 100,000."]]}
 ];
 SCENES.forEach((sc,i)=>Object.assign(sc,PHYS[i]));
-const ROMAN=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+const ROMAN=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII"];
 const FORMS=[];
 const form=i=>FORMS[i]||(FORMS[i]=SCENES[i].make());
 form(0);form(1);
@@ -244,7 +285,8 @@ const stage=opts.stage,cv=opts.canvas,bar=opts.bar,cue=opts.cue;
 const SEG=2.2, LASTI=SCENES.length-1;
 let segPx=1,P=0,Pt=0,pair=[-1,-1],shown=-1,time=0,last=performance.now(),mouseOn=0;
 const ptr={mx:0,my:0,tx:0,ty:0,inside:false};
-let shiftV=0;
+let shiftV=0,beta=0,bang=0,lastP=0;
+addEventListener("universe:bang",()=>{bang=0;kick();});
 function setUI(i,beat){opts.onScene&&opts.onScene(i,beat);}
 const nf=(v,d=0)=>v.toLocaleString("en",{maximumFractionDigits:d,minimumFractionDigits:d});
 const SUP="⁰¹²³⁴⁵⁶⁷⁸⁹",sup=e=>String(e).replace("-","⁻").replace(/\d/g,d=>SUP[d]);
@@ -288,14 +330,16 @@ let gl=null;
 try{gl=cv.getContext("webgl",{antialias:false,alpha:false,preserveDrawingBuffer:true,powerPreference:"high-performance"});}catch(_){gl=null;}
 const VS=`precision highp float;
 attribute vec4 aPA,aCA,aPB,aCB,aR;
-uniform float uMix,uTime,uHoldA,uSpinA,uModeA,uModeB,uDist,uAspect,uPx,uMouseOn,uMotion,uShift,uLensA,uLensB,uReveal;
+uniform float uMix,uTime,uHoldA,uSpinA,uModeA,uModeB,uDist,uAspect,uPx,uMouseOn,uMotion,uShift,uLensA,uLensB,uReveal,uBeta,uBang;
 uniform vec2 uMouse;
 varying vec3 vC;
 varying float vB;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
 float horizon(float x){return -.95+.12*sin(x*1.7)+.06*sin(x*4.3+1.);}
-vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit){
-  vec3 q=p.xyz;float k=p.w;float vis=1.;sz=1.;lit=1.;
+float ecc(float r){return r<.25?.25:abs(r-.5)<.02?.32:.07;}
+vec2 kep(float a,float e,float M){float E=M;for(int k=0;k<6;k++)E-=(E-e*sin(E)-M)/(1.-e*cos(E));return vec2(a*(cos(E)-e),a*sqrt(1.-e*e)*sin(E));}
+vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit,out float dp){
+  vec3 q=p.xyz;float k=p.w;float vis=1.;sz=1.;lit=1.;dp=0.;
   if(abs(k-1.)<.1)return vec4(q,1.);
   bool orb=k>7.9;float orR=max((k-8.)*10.,.15);
   if(mode<.5){vec2 pole=vec2(-.35,1.5);q.xy=pole+rot(spin)*(q.xy-pole);if(q.y<horizon(q.x)+.012)vis=0.;}
@@ -321,39 +365,55 @@ vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit){
     else if(orb&&q.z<0.&&length(q.xy)<.74)vis=0.;
   }
   else if(mode<6.5){
-    if(orb)q.xz=rot((uTime*.1+spin*3.)*.3/pow(orR,1.5))*q.xz;
+    float om=(uTime*.1+spin*3.)*.3;
+    if(abs(k-13.)<.1){float w=5.5;vec2 P=rot(w)*kep(.5,.32,q.z-w+om/pow(.5,1.5)-q.y*.8)*sqrt(q.x);lit=.4+.9*(1.-q.y);q=vec3(P.x,0.,P.y);}
+    else if(abs(k-15.)<.1){lit=pow(max(0.,sin(uTime*(2.+aR.y*3.)+aR.x*40.)),30.)*6.;sz=1.+lit*.3;}
+    else if(orb){float w=orR*11.;vec2 c0=normalize(q.xz+1e-5)*orR,off=q.xz-c0;q.xz=rot(w)*kep(orR,ecc(orR),atan(c0.y,c0.x)-w+om/pow(orR,1.5))+off;}
     q.yz=rot(mix(.28,1.05,hold))*q.yz;
   }
   else if(mode<7.5){
+    float ph=uTime*9.42;vec3 ax=vec3(sin(.8)*cos(ph),cos(.8),sin(.8)*sin(ph));
+    if(abs(k-14.)<.1){vec3 u1=normalize(cross(ax,vec3(.3,0.,1.))),u2=cross(ax,u1);float s=q.x;
+      q=ax*s*q.y+(u1*cos(q.z)+u2*sin(q.z))*s*.07*aR.y;lit=(1.-s/1.6)*(1.-s/1.6)*1.4;return vec4(q,1.);}
     q.xz=rot(uTime*.03)*q.xz;
-    if(abs(k-9.)<.1)sz=1.+1.6*step(.5,fract(uTime*1.5));
+    if(abs(k-9.)<.1)sz=1.+2.2*pow(abs(sin(ph)),12.);
     else{q*=mix(.05,1.12,hold);float fl=1.-hold;lit=1.+fl*fl*2.2;}
   }
   else if(mode<8.5){
     if(abs(k-11.)<.1){float f=fract(uTime*.06+aR.x*7.),r=aR.y<.35?.37-f*.08:.31+f*1.6;
       q=vec3(cos(q.x)*r*1.05,sin(q.x)*r*.92,.02);lit=aR.y<.35?(1.-f)*.8:1.-f;return vec4(q,1.);}
     if(abs(k-10.)<.1)q.xy=rot(uTime*.04)*q.xy;
-    else{float r=length(q.xz);q.xz=rot((uTime*.5+spin*5.)*.1/pow(max(r,.3),1.5))*q.xz;lit=1.+.7*q.x/max(r,.01);
+    else{float r=length(q.xz);q.xz=rot((uTime*.5+spin*5.)*.1/pow(max(r,.3),1.5))*q.xz;dp=q.x/max(r,.01);lit=pow(1.+.42*dp,3.);
       q.yz=rot(.17)*q.yz;q.xy=rot(-.12)*q.xy;if(q.z<0.&&length(q.xy)<.31)vis=0.;}
   }
   else if(mode<9.5){float r=length(q.xz);q.xz=rot((uTime*.03+spin)*.3/(r+.25))*q.xz;q.yz=rot(.3)*q.yz;q.xy=rot(.6)*q.xy;}
-  else{
+  else if(mode<10.5){
+    if(k>17.9){vec3 h=fract(sin(q*vec3(12.9,78.2,37.7)+q.yzx*5.1)*43758.5);float f=fract(uTime*(.25+h.x*.3)+h.y);
+      q+=normalize(h-.5)*sin(3.14159*f)*.08*(k>18.5?1.:-1.);lit=pow(sin(3.14159*f),2.)*1.8;}
     if(abs(k-12.)<.1){vec2 c=floor(q.xy/.8+.5)*.8;vec2 d=q.xy-c;float r=length(d),th=atan(d.y,d.x),n=2.+floor(aR.x*4.);
       r*=1.+(.2+hold*.15)*sin(n*th+uTime*(1.4+n*.5)+spin*6.);q.xy=c+vec2(cos(th),sin(th))*r;q.z+=.05*sin(n*th-uTime*2.);}
     else{q.xz=rot(uTime*.12+spin*2.)*q.xz;q.yz=rot(.35+sin(uTime*.2)*.15)*q.yz;q*=1.+.035*sin(length(q)*12.-uTime*3.);}
+  }
+  else{
+    /* the Big Bang: one bright point, inflation, then steady expansion; the afterglow appears once light breaks free */
+    float b=uBang,a=b<.1?.003+.62*pow(b/.1,3.):.625+.375*smoothstep(.1,.95,b);
+    if(abs(k-20.)>.1)q+=normalize(aR.yzw-.5+1e-4)*pow(aR.x,.333)*.9*(1.-smoothstep(.35,.9,b));
+    q=q*a;q.xz=rot(uTime*.03)*q.xz;q.yz=rot(.2)*q.yz;
+    if(abs(k-20.)<.1)lit=smoothstep(.3,.5,b)*(q.z>0.?.3:1.);else{float hot=1.-smoothstep(.02,.3,b);lit=1.+2.5*hot;sz=mix(1.,.35,1.-smoothstep(.0,.08,b));}
   }
   return vec4(q,vis);
 }
 void main(){
   float d=aR.x*.45;float t=smoothstep(d,d+.55,uMix);
-  float sA,lA,sB,lB;
-  vec4 A=anim(aPA,uModeA,uHoldA,uSpinA,sA,lA);
-  vec4 B=anim(aPB,uModeB,0.,0.,sB,lB);
+  float sA,lA,sB,lB,dA,dB;
+  vec4 A=anim(aPA,uModeA,uHoldA,uSpinA,sA,lA,dA);
+  vec4 B=anim(aPB,uModeB,0.,0.,sB,lB,dB);
   vec3 p=mix(A.xyz,B.xyz,t);
   float fly=sin(t*3.14159)*uMotion;
   float hn=1.+floor(aR.x*5.);
   vec3 wv=vec3(sin(p.y*3.1+uTime*1.7+hn),sin(p.x*2.3*hn+uTime*2.3),cos(p.x*1.7+p.y*2.+uTime*1.3));
-  p+=wv*fly*.55+(aR.yzw-.5)*fly*.22;
+  vec3 jr=normalize(aR.yzw-.5+1e-4)*pow(aR.x,.333)*.5;
+  p+=wv*fly*.55+jr*fly*.22;
   p.z+=fly*aR.y*1.3;
   p+=(aR.yzw-.5)*.01*sin(uTime*(6.+floor(aR.x*6.)*3.)+aR.y*40.)*uMotion;
   float vz=uDist-p.z;
@@ -361,6 +421,14 @@ void main(){
   vec2 sp=p.xy*1.6/vz;sp.x/=uAspect;sp.x+=uShift;
   float kind=t<.5?aPA.w:aPB.w,glow=1.;
   vec2 dm=(sp-uMouse)*vec2(uAspect,1.);float near=exp(-dot(dm,dm)/.05)*uReveal;
+  vec3 tint=vec3(1.);
+  /* entangled pairs: measuring either cloud settles both, one amber and one blue */
+  bool ent=abs(kind-16.)<.1||abs(kind-17.)<.1;
+  if(ent){vec2 s2=-p.xy*1.6/(uDist+p.z);s2.x/=uAspect;s2.x+=uShift;vec2 d2=(s2-uMouse)*vec2(uAspect,1.);
+    near=max(near,exp(-dot(d2,d2)/.05)*uReveal);float tq=uMotion>.5?floor(uTime*20.):0.;
+    vec3 h=fract(sin(vec3(dot(aR.xy,vec2(12.99,78.23)),dot(aR.zw,vec2(39.35,11.13)),dot(aR.xw,vec2(73.15,52.21)))+tq*vec3(.71,1.13,.37))*43758.55);
+    p+=(aR.yzw-.5)*.05+(h-.5)*.32*(1.-near);vz=uDist-p.z;sp=p.xy*1.6/vz;sp.x/=uAspect;sp.x+=uShift;
+    tint=mix(vec3(1.),abs(kind-16.)<.1?vec3(2.4,1.5,.6):vec3(.7,1.5,2.6),near);}
   /* quantum uncertainty: at the Planck scale each point is a cloud until the cursor measures it */
   float fz=(uModeA>9.5&&abs(aPA.w)<.1?1.-t:0.)+(uModeB>9.5&&abs(aPB.w)<.1?t:0.);
   if(fz>0.){float tq=uMotion>.5?floor(uTime*24.):0.;
@@ -373,17 +441,27 @@ void main(){
   if(lens>0.&&abs(kind-1.)<.1&&p.z<-1.){vec2 c=vec2(uShift,0.),d=(sp-c)*vec2(uAspect,1.);float r=length(d)+1e-5,u=r/lens,s=sqrt(u*u+4.);
     bool sec=aR.w<.35&&u<2.5;float th=sec?(u-s)*.5:(u+s)*.5,mu=(u*u+2.)/(2.*u*s)+(sec?-.5:.5);
     sp=c+d/r*th*lens/vec2(uAspect,1.);glow=clamp(mu,0.,4.);}
-  if(abs(kind-1.)>.1&&abs(kind-5.)>.1&&fz<.5){
+  /* tidal stretching near the black hole: along the line to the hole, squeezed across it */
+  float tide=(uModeA>7.5&&uModeA<8.5&&abs(aPA.w)<.1)?1.-t:0.;
+  if(tide>0.){vec2 c=vec2(uShift,0.),n=normalize((uMouse-c)*vec2(uAspect,1.)+1e-5),d=(sp-uMouse)*vec2(uAspect,1.);
+    float w=exp(-dot(d,d)/.025)*uReveal*tide,al=dot(d,n);vec2 pe=d-n*al;
+    d=n*al*(1.+2.*w)+pe*(1.-.5*w)-n*.03*w;sp=uMouse+d/vec2(uAspect,1.);}
+  if(abs(kind-1.)>.1&&abs(kind-5.)>.1&&fz<.5&&!ent&&tide<.5){
     vec2 dd=(sp-uMouse)*vec2(uAspect,1.);float dl=length(dd);
     sp+=dd/(dl+1e-4)/vec2(uAspect,1.)*.12*exp(-dl*dl/.03)*uMouseOn;
   }
+  /* special relativity: fast scrolling is flying near light speed (aberration plus Doppler shift) */
+  if(abs(uBeta)>.003){vec2 c=vec2(uShift,0.),d=(sp-c)*vec2(uAspect,1.);float r=length(d)+1e-5,ct=cos(atan(r/1.6)),c2=(ct+uBeta)/(1.+uBeta*ct);
+    sp=c+d/r*1.6*tan(min(acos(clamp(c2,-1.,1.)),1.45))/vec2(uAspect,1.);
+    float D=sqrt(1.-uBeta*uBeta)/(1.-uBeta*c2),sh=clamp(log(D)*1.4,-1.,1.);tint*=vec3(1.-.45*sh,1.-.12*abs(sh),1.+.6*sh)*clamp(D,.5,1.6);}
   gl_Position=vec4(sp,0.,1.);
   float tw=1.+.28*sin(uTime*(1.5+aR.z*4.)+aR.x*60.)*uMotion;
   float size=mix(aCA.w*sA,aCB.w*sB,t)*tw*(glow>1.?sqrt(glow):1.);
   vB=smoothstep(2.4,5.2,size)*(1.-fly);
   gl_PointSize=clamp(size*uPx*3./vz*(1.+vB*3.),1.,150.);
   float vis=mix(A.w,B.w,t);
-  vC=mix(aCA.rgb*lA,aCB.rgb*lB,t)*vis*(1.+fly*.3)*glow;
+  vec3 dopA=vec3(1.-.28*dA,1.,1.+.4*dA),dopB=vec3(1.-.28*dB,1.,1.+.4*dB);
+  vC=mix(aCA.rgb*lA*dopA,aCB.rgb*lB*dopB,t)*vis*(1.+fly*.3)*glow*tint;
 }`;
 const FS=`precision mediump float;varying vec3 vC;varying float vB;
 void main(){vec2 q=gl_PointCoord-.5;float r=length(q),s=1.+vB*3.;
@@ -395,15 +473,17 @@ void main(){vec2 q=gl_PointCoord-.5;float r=length(q),s=1.+vB*3.;
    woven into loops at the Planck scale (loop quantum gravity). Two sheets, for the scene we leave and the one we reach. */
 const GVS=`precision highp float;
 attribute vec3 aG;
-uniform vec4 uWA[6],uWB[6],uSA,uSB,uTA,uTB;
-uniform float uMix,uDist,uAspect,uShift,uMouseOn,uLines;
+uniform vec4 uWA[6],uWB[6],uSA,uSB,uTA,uTB,uXA,uXB;
+uniform float uMix,uDist,uAspect,uShift,uMouseOn,uLines,uTime;
 uniform vec2 uMouse;
 varying float vA,vD;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
-vec4 sheet(vec4 S,vec4 T,bool A){
+vec4 sheet(vec4 S,vec4 T,vec4 X,bool A){
   vec2 p=aG.xy*S.y*T.z;float y=S.x,dip=0.;
+  float r2=dot(p,p);if(X.x>0.)p=rot(X.x*(.9/(r2+.12))+uTime*.1*X.x)*p;
   for(int k=0;k<6;k++){vec4 w=A?uWA[k]:uWB[k];vec2 d=p-w.xy*T.z;dip+=w.z*w.w/sqrt(dot(d,d)+w.w*w.w+1e-4);}
   y-=dip;
+  if(X.y>0.){float r=sqrt(r2),ph=atan(p.y,p.x);y+=X.y*.11*sin(7.*r-uTime*2.4+2.*ph)*smoothstep(.15,.6,r)*exp(-r*.25);}
   if(S.w>0.){float c=2.*S.y*T.z/(uLines-1.),fixd=aG.z<.5?aG.y:aG.x,idx=floor((fixd+1.)*(uLines-1.)*.5+.5);
     float sg=mod(idx,2.)*2.-1.;y+=S.w*c*.4*cos(3.14159*(aG.z<.5?p.x:p.y)/c)*sg*(aG.z<.5?1.:-1.);}
   vec3 q=vec3(p.x,y,p.y);q.xz=rot(T.w)*q.xz;q.yz=rot(T.x)*q.yz;q.xy=rot(T.y)*q.xy;
@@ -411,7 +491,7 @@ vec4 sheet(vec4 S,vec4 T,bool A){
 }
 void main(){
   float m=smoothstep(0.,1.,uMix);
-  vec4 A=sheet(uSA,uTA,true),B=sheet(uSB,uTB,false);
+  vec4 A=sheet(uSA,uTA,uXA,true),B=sheet(uSB,uTB,uXB,false);
   vec3 q=mix(A.xyz,B.xyz,m);
   float vz=uDist-q.z;vec2 sp=q.xy*1.6/max(vz,.05);sp.x/=uAspect;sp.x+=uShift;
   vec2 dm=(sp-uMouse)*vec2(uAspect,1.);float pull=exp(-dot(dm,dm)/.03)*uMouseOn;
@@ -435,11 +515,11 @@ function upload(s,i){const F=form(i);gl.bindBuffer(gl.ARRAY_BUFFER,bufP[s]);gl.b
 if(gl){
   try{
     prog=link(VS,FS);qprog=link(QVS,QFS);
-    ["uMix","uTime","uHoldA","uSpinA","uModeA","uModeB","uDist","uAspect","uPx","uMouseOn","uMotion","uMouse","uShift","uLensA","uLensB","uReveal"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+    ["uMix","uTime","uHoldA","uSpinA","uModeA","uModeB","uDist","uAspect","uPx","uMouseOn","uMotion","uMouse","uShift","uLensA","uLensB","uReveal","uBeta","uBang"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
     ["aPA","aCA","aPB","aCB","aR"].forEach(n=>A_LOC[n]=gl.getAttribLocation(prog,n));
     QU.uC=gl.getUniformLocation(qprog,"uC");QU.p=gl.getAttribLocation(qprog,"p");
     gprog=link(GVS,GFS);
-    ["uWA","uWB","uSA","uSB","uTA","uTB","uMix","uDist","uAspect","uShift","uMouseOn","uLines","uMouse","uFade"].forEach(n=>GU[n]=gl.getUniformLocation(gprog,n));
+    ["uWA","uWB","uSA","uSB","uTA","uTB","uXA","uXB","uMix","uDist","uAspect","uShift","uMouseOn","uLines","uMouse","uFade","uTime"].forEach(n=>GU[n]=gl.getUniformLocation(gprog,n));
     GU.aG=gl.getAttribLocation(gprog,"aG");
     { const L=GL_LINES_N,M=96,v=[];
       for(let dir=0;dir<2;dir++)for(let l=0;l<L;l++){const f=-1+2*l/(L-1);
@@ -477,13 +557,17 @@ function sheetParams(i,hold,spin,t,W){
   else if(m===4){scale=.78+.62*hold*hold;yaw=t*.05;yz=.25+Math.sin(t*.1)*.1;orbit=()=>0;}
   else if(m===5){yz=.12;orbit=r=>(t*.12+spin*2.5)/Math.pow(r,1.5);}
   else if(m===6){yz=lerp(.28,1.05,hold);orbit=r=>(t*.1+spin*3)*.3/Math.pow(r,1.5);}
+  else if(m===11)yz=.2;
   else if(m===7)yaw=t*.03;
   else if(m===8){yz=.17;xy=-.12;}
   else if(m===9){yz=.3;xy=.6;}
   else if(m===10)yz=.3;
   W.fill(0);W[2]=g.M;W[3]=g.s;
-  if(orbit){let k=1;for(const [r,a,M,s] of form(i).bodies){if(k>5)break;const th=a+orbit(r);W[k*4]=Math.cos(th)*r;W[k*4+1]=Math.sin(th)*r;W[k*4+2]=M;W[k*4+3]=s;k++;}}
-  return{S:[g.y,g.size,g.a,g.weave||0],T:[yz,xy,scale,yaw]};
+  if(orbit){let k=1;for(const [r,a,M,s] of form(i).bodies){if(k>5)break;let x,z;
+    if(m===6){const w=peri(r);[x,z]=rot2(kep(r,ecc(r),a-w+orbit(r)),w);}else{const th=a+orbit(r);x=Math.cos(th)*r;z=Math.sin(th)*r;}
+    W[k*4]=x;W[k*4+1]=z;W[k*4+2]=M;W[k*4+3]=s;k++;}}
+  if(g.gw)for(const k of[1,2]){const th=t*1.2+(k-1)*Math.PI;W[k*4]=Math.cos(th)*.09;W[k*4+1]=Math.sin(th)*.09;W[k*4+2]=.18;W[k*4+3]=.05;}
+  return{S:[g.y,g.size,g.a,g.weave||0],T:[yz,xy,scale,yaw],X:[g.fd||0,g.gw||0,0,0]};
 }
 function drawGrid(fade,mixV,dist,hold,spin,i,j,t){
   const A=sheetParams(i,ease(hold),spin,t,WA),B=sheetParams(j,0,0,t,WB);
@@ -492,7 +576,7 @@ function drawGrid(fade,mixV,dist,hold,spin,i,j,t){
   for(const l of Object.values(A_LOC))gl.disableVertexAttribArray(l);
   gl.bindBuffer(gl.ARRAY_BUFFER,gridBuf);gl.enableVertexAttribArray(GU.aG);gl.vertexAttribPointer(GU.aG,3,gl.FLOAT,false,0,0);
   gl.uniform4fv(GU.uWA,WA);gl.uniform4fv(GU.uWB,WB);
-  gl.uniform4fv(GU.uSA,A.S);gl.uniform4fv(GU.uSB,B.S);gl.uniform4fv(GU.uTA,A.T);gl.uniform4fv(GU.uTB,B.T);
+  gl.uniform4fv(GU.uSA,A.S);gl.uniform4fv(GU.uSB,B.S);gl.uniform4fv(GU.uTA,A.T);gl.uniform4fv(GU.uTB,B.T);gl.uniform4fv(GU.uXA,A.X);gl.uniform4fv(GU.uXB,B.X);gl.uniform1f(GU.uTime,t);
   gl.uniform1f(GU.uMix,mixV);gl.uniform1f(GU.uDist,dist);gl.uniform1f(GU.uAspect,W/H);gl.uniform1f(GU.uShift,shiftV);
   gl.uniform1f(GU.uMouseOn,reduced?mouseOn*.5:mouseOn);gl.uniform2f(GU.uMouse,ptr.mx,-ptr.my);gl.uniform1f(GU.uLines,GL_LINES_N);gl.uniform1f(GU.uFade,fade);
   gl.drawArrays(gl.LINES,0,gridN);
@@ -515,7 +599,7 @@ function drawGL(fade,mixV,dist,hold,spin,i,j){
   gl.uniform1f(U.uModeA,SCENES[i].mode);gl.uniform1f(U.uModeB,SCENES[j].mode);gl.uniform1f(U.uDist,dist);
   gl.uniform1f(U.uAspect,W/H);gl.uniform1f(U.uShift,shiftV);gl.uniform1f(U.uPx,H/760);gl.uniform1f(U.uMotion,reduced?0:1);
   gl.uniform2f(U.uMouse,ptr.mx,-ptr.my);gl.uniform1f(U.uMouseOn,reduced?0:mouseOn);gl.uniform1f(U.uReveal,mouseOn);
-  gl.uniform1f(U.uLensA,SCENES[i].lens||0);gl.uniform1f(U.uLensB,SCENES[j].lens||0);
+  gl.uniform1f(U.uLensA,SCENES[i].lens||0);gl.uniform1f(U.uLensB,SCENES[j].lens||0);gl.uniform1f(U.uBeta,beta);gl.uniform1f(U.uBang,bang);
   gl.drawArrays(gl.POINTS,0,N);
   if(bctx&&!reduced){bctx.globalCompositeOperation="copy";bctx.drawImage(cv,0,0,bloom.width,bloom.height);}
 }
@@ -533,11 +617,14 @@ function loop(now){
   readScroll();
   P=reduced?Pt:P+(Pt-P)*(1-Math.pow(.0004,dt));
   if(Math.abs(Pt-P)<1e-4)P=Pt;P=clamp(P,0,LASTI);
+  const vP=(P-lastP)/Math.max(dt,1e-3);lastP=P;
+  beta+=((reduced?0:clamp(vP*.3,-.6,.6))-beta)*Math.min(1,dt*5);if(Math.abs(beta)<.002)beta=0;
   const i=Math.min(Math.floor(P),LASTI),u=P-i,end=i>=LASTI;
   const hold=end?0:clamp(u/.68,0,1),mixV=end?0:ease(clamp((u-.68)/.32,0,1)),j=end?i:i+1;
   if(gl&&(pair[0]!==i||pair[1]!==j)){upload(0,i);upload(1,j);pair=[i,j];}
   const show=mixV>.5?j:i,bs=SCENES[show].beats.length,beat=show===i?Math.min(bs-1,Math.floor(hold*bs*.999)):0,key=show*10+beat;
   if(key!==shown){shown=key;setUI(show,beat);}
+  bang=SCENES[show].bang?(reduced?1:Math.min(1,bang+dt/16)):0;
   const km=Math.exp(lerp(Math.log(SCENES[i].km),Math.log(SCENES[j].km),mixV));
   if(Math.abs(km-(loop.km||0))>km*1e-4){loop.km=km;hudD.textContent=fmtDist(km);hudL.textContent=fmtLight(km);}
   const spin=SCENES[i].spin(ease(hold))*(reduced?.3:1);

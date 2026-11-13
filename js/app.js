@@ -2,7 +2,7 @@
 const { useState, useEffect, useRef, useCallback, useMemo } = React;
 const html = htm.bind(React.createElement);
 const { SCENES, ROMAN, reduced } = window.Universe;
-const LASTI = SCENES.length - 1;
+const LASTI = SCENES.length - 1, WEB = SCENES.findIndex(s => s.name === "The cosmic web");
 const smooth = reduced ? "auto" : "smooth";
 const scrollToId = id => document.getElementById(id)?.scrollIntoView({ behavior: smooth });
 
@@ -219,13 +219,14 @@ function Interlude({ i, p }) {
   const sc = SCENES[i];
   return html`<section className="interlude" data-p0=${p[0]} data-p1=${p[1]} data-kind="interlude" aria-labelledby=${"ch" + i}>
     <div className="inner"><div className="il">
-      <span className="label">Chapter ${ROMAN[i]} · ${fmtKm(sc.km)} from Earth</span>
+      <span className="label">Chapter ${ROMAN[i]} · ${sc.bang ? "13.8 billion years ago" : fmtKm(sc.km) + " from Earth"}</span>
       <h2 id=${"ch" + i}>${sc.name}</h2>
       <p className="coordline">${sc.coord}</p>
       <ol>${sc.beats.map((b, k) => html`<li key=${k}>${b}</li>`)}</ol>
       <${SeenBy} sc=${sc}/>
       <${Theory} sc=${sc}/>
-      ${sc.final && html`<${StringLab}/>`}
+      ${sc.lab && html`<${StringLab}/>`}
+      ${sc.bang && html`<button className="link replay" type="button" onClick=${() => window.dispatchEvent(new Event("universe:bang"))}>↻ Replay the Big Bang</button>`}
       ${sc.final ? html`<button className="link back" type="button" onClick=${() => scrollToP(0)}>↑ Travel back to Earth</button>` : html`<span className="hint">Keep scrolling ${sc.b} ↓</span>`}
     </div></div></section>`;
 }
@@ -269,7 +270,7 @@ function Hero({ cueRef }) {
       <h1 id="hero-h">${CONTENT.hero.title}</h1>
       <p>${CONTENT.hero.text}</p>
       <div className="btns"><a className="btn" href="#projects">Explore My Work</a><a className="btn ghost" href="#contact">Get in Touch</a></div>
-      <p className="trip">Scroll to travel from this hillside to the edge of the observable universe, then down to the smallest scale. Twelve stops, from 384,400 km out to a billion light-years and in to 10⁻³⁵ m.</p>
+      <p className="trip">Scroll to travel from this hillside to the edge of the observable universe, then down to the smallest scale. Thirteen stops, from 384,400 km out to a billion light-years, in to 10⁻³⁵ m, and back to the Big Bang.</p>
       <div className="hero-string" data-string="" data-tone="amber" ref=${hs} aria-hidden="true"></div>
       <p className="trip strings-hint">String theory says everything is made of vibrating strings. So is this page: every line is a string you can pluck with your cursor or finger. Behind it all runs Einstein’s spacetime, a grid that bends under every mass you pass.</p>
     </div></div>
@@ -391,8 +392,8 @@ function Contact({ onToast }) {
     <label htmlFor=${"f-" + k}>${label}</label>${input}${errors[k] && html`<span className="err" id=${"e-" + k}>${errors[k]}</span>`}</div>`;
   const a = k => ({ id: "f-" + k, "aria-invalid": errors[k] ? "true" : undefined, "aria-describedby": errors[k] ? "e-" + k : undefined });
   return html`<section className="band" id="contact" aria-labelledby="contact-h" data-p0="9.6" data-p1="10.3" data-kind="content"><div className="inner">
-    <div className="arrive"><span className="label">Chapter ${ROMAN[LASTI - 1]} · ${fmtKm(SCENES[LASTI - 1].km)} from Earth</span>
-      <p>You have reached the cosmic web, where galaxies gather along filaments hundreds of millions of light-years long. Every stop so far can be seen or photographed from Earth. Keep scrolling: the journey turns around and zooms in to the smallest scale.</p><${Theory} sc=${SCENES[LASTI - 1]}/></div>
+    <div className="arrive"><span className="label">Chapter ${ROMAN[WEB]} · ${fmtKm(SCENES[WEB].km)} from Earth</span>
+      <p>You have reached the cosmic web, where galaxies gather along filaments hundreds of millions of light-years long. Every stop so far can be seen or photographed from Earth. Keep scrolling: the journey turns around and zooms in to the smallest scale.</p><${Theory} sc=${SCENES[WEB]}/></div>
     <div className="contact">
     <div>
       <span className="label">Contact</span>
@@ -901,7 +902,15 @@ function LightWave({ wave }) {
 /* the physics each stop shows on top of the particles: general relativity, lensing, dark matter and more */
 function Theory({ sc }) {
   if (!sc.theory) return null;
-  return html`<div className="theory">${sc.theory.map(([t, d, how]) => html`<div key=${t}><span className="label">Physics · ${t}</span><p>${d}</p>${how && html`<p className="how">${how}</p>`}</div>`)}</div>`;
+  return html`<div className="theory">${sc.theory.map(([t, d, how]) => html`<div key=${t}><span className="label">Physics · ${t}</span><p>${d}</p>${how && html`<p className="how">${how}</p>`}
+    ${t === "Time dilation" && sc.clock && html`<${Clocks} f=${sc.clock[0]} where=${sc.clock[1]}/>`}</div>`)}</div>`;
+}
+/* two clocks side by side: one far from the mass, one deep in its gravity, ticking slower */
+function Clocks({ f, where }) {
+  const dial = (rate, label) => html`<figure className="clock"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/>
+    ${[...Array(12)].map((_, k) => html`<line key=${k} x1="20" y1="5" x2="20" y2=${k % 3 ? 7 : 8.5} transform=${`rotate(${k * 30} 20 20)`}/>`)}
+    <line className="hand" x1="20" y1="20" x2="20" y2="7" style=${{ animationDuration: (6 / rate).toFixed(2) + "s" }}/></svg><figcaption>${label}<b>${rate === 1 ? "1 second" : rate.toFixed(2) + " seconds"}</b></figcaption></figure>`;
+  return html`<div className="clocks" role="img" aria-label=${`Time dilation: while a distant clock ticks one second, a clock ${where.toLowerCase()} ticks ${f} seconds.`}>${dial(1, "Far away")}${dial(f, where)}</div>`;
 }
 function SeenBy({ sc }) {
   if (!sc.light) return null;
@@ -1139,7 +1148,8 @@ function App() {
       <${Gallery}/>
       <${SkyNotes}/>
       <${Contact} onToast=${setToast}/>
-      <${Interlude} i=${11} p=${[10.3, 11]}/>
+      <${Interlude} i=${11} p=${[10.3, 11.6]}/>
+      <${Interlude} i=${12} p=${[11.6, 12]}/>
     </main>
     <footer><div className="inner"><span className="foot-mark"><${Logo}/><span>© Bhanu Prakash · Exploring the universe. Making science accessible. Building technology that inspires.</span></span><span>Hyderabad · Draft site: amber dashed tags are placeholders to confirm.</span></div></footer>
     <${HudBar} view=${view} refs=${refs} api=${api}/>

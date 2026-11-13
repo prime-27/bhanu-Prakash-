@@ -548,6 +548,17 @@ footer{border-top:0}
 .seenby .label{margin:0 0 4px}
 .seenby p{margin:0;font-size:14.5px;color:var(--star-2)}
 .lightwave{flex:none;margin-top:4px}
+.clocks{display:flex;flex-wrap:wrap;gap:12px 22px;margin-top:12px}
+.clock{display:flex;align-items:center;gap:10px;margin:0}
+.clock svg{width:40px;height:40px;flex:none}
+.clock circle{fill:none;stroke:var(--line);stroke-width:1.2}
+.clock line{stroke:var(--dim);stroke-width:1.2}
+.clock .hand{stroke:var(--amber);stroke-width:1.6;stroke-linecap:round;transform-origin:20px 20px;animation:tick linear infinite}
+.clock figcaption{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.clock figcaption b{display:block;font-weight:500;color:var(--star-2);letter-spacing:.02em;text-transform:none;font-size:12px}
+@keyframes tick{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.clock .hand{animation:none}}
+.link.replay{display:block;margin:22px 0 10px}
 .theory{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:16px}
 .theory .label{margin:0 0 4px;color:var(--ice)}
 .theory p{margin:0;font-size:14.5px;color:var(--star-2)}

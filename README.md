@@ -8,10 +8,10 @@ Personal portfolio website for Bhanu Prakash. Scrolling the page is one journey:
 | --- | --- |
 | `index.html` | The page: metadata, fonts and script tags |
 | `css/styles.css` | All styles, built on the brand kit's tokens |
-| `js/universe.js` | The WebGL particle universe: twelve formations and the scroll-driven journey |
+| `js/universe.js` | The WebGL particle universe: thirteen formations and the scroll-driven journey |
 | `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery and contact form |
 | `assets/` | Site files, such as the favicon |
-| `brand/` | The brand kit: brand book, the twelve-stop journey, design tokens, logos and patterns |
+| `brand/` | The brand kit: brand book, the thirteen-stop journey, design tokens, logos and patterns |
 
 There is no build step. React 18 and htm load from public CDNs, so the folder can be hosted as it is.
 
@@ -28,6 +28,18 @@ On top of the particles, the universe follows real physics. Each layer is explai
 | Dark energy | The cosmic web | The web and the grid under it expand faster and faster as you scroll |
 | Loop quantum gravity | The smallest scale | The spacetime grid becomes a woven lattice of loops |
 | Quantum uncertainty | The smallest scale | Each point is a fuzzy cloud until the cursor measures it |
+| Special relativity | Everywhere | Scroll fast and stars crowd ahead and turn bluer (aberration and Doppler shift); scroll back and they redden |
+| Kepler's laws | The Solar System | Elliptical orbits (Mercury and Mars stretched), with a wedge behind Mars sweeping equal areas in equal times |
+| Nuclear fusion | The Solar System | Flashes in the Sun's core |
+| Pulsar beams | The Crab Nebula | Two lighthouse beams sweeping round, slowed 20 times, with the pulsar flashing in step |
+| Time dilation | The Crab Nebula, Sagittarius A* | Two ticking clocks in the Physics note: one far away, one deep in the gravity |
+| Frame dragging | Sagittarius A* | The grid twists into a whirlpool around the spinning black hole |
+| Doppler beaming | Sagittarius A* | The side of the disk moving toward you is brighter and bluer |
+| Tidal stretching | Sagittarius A* | The disk stretches toward the hole near the cursor |
+| Gravitational waves | Andromeda | Spiral ripples across the grid from a pair of black holes |
+| Quantum entanglement | The smallest scale | Paired clouds: measure one and both settle, one amber and one blue |
+| Vacuum fluctuations | The smallest scale | Particle pairs flickering in and out of empty space |
+| Cosmic inflation and the CMB | The Big Bang (chapter XIII) | One bright point expands; matter gathers into clusters inside the speckled cosmic microwave background. "Replay the Big Bang" restarts it |
 
 The numbers for each stop (grid depth, lens strength and the notes) are in the `PHYS` list in `js/universe.js`.
 
@@ -60,7 +72,7 @@ The site is a draft. Amber dashed tags on the page mark details still to confirm
 
 ## Editing content
 
-Text for every section lives in the `CONTENT` object near the top of `js/app.js`. The twelve journey stops, with their distances and facts, are the `SCENES` list in `js/universe.js`. Colors, type and spacing follow `brand/tokens.json`. Change a value there and in the `:root` block of `css/styles.css`.
+Text for every section lives in the `CONTENT` object near the top of `js/app.js`. The thirteen journey stops, with their distances and facts, are the `SCENES` list in `js/universe.js`. Colors, type and spacing follow `brand/tokens.json`. Change a value there and in the `:root` block of `css/styles.css`.
 
 ### Adding a public session
 

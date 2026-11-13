@@ -1,6 +1,6 @@
 # Universe journey
 
-The eleven stops of the particle universe, in the order the website travels them. Use the same names, distances and facts wherever the journey appears: talks, posters, slides and social series.
+The thirteen stops of the particle universe, in the order the website travels them. Use the same names, distances and facts wherever the journey appears: talks, posters, slides and social series.
 
 | # | Stop | Distance from Earth | Light-travel time | What the particles do as you scroll |
 | --- | --- | --- | --- | --- |
@@ -15,5 +15,7 @@ The eleven stops of the particle universe, in the order the website travels them
 | IX | The Milky Way | seen from 200,000 light-years | — | The galaxy spins and turns face-on |
 | X | Andromeda (M31) | 2.5 million light-years | 2.5 million years | The disk and its ring come closer |
 | XI | The cosmic web | about 1 billion light-years | about 1 billion years | Galaxy clusters strung along filaments |
+| XII | The smallest scale | 1.6 × 10⁻³⁵ m (Planck length) | — | Vibrating strings, a woven spacetime lattice and fuzzy quantum clouds |
+| XIII | The Big Bang | 13.8 billion years ago | 13.8 billion years | One bright point expands into the universe, inside the cosmic microwave background |
 
 On the website each portfolio section sits at one stop: About at the Moon, Astronomy at Saturn, Development at the Orion Nebula, Projects at Sagittarius A*, Gallery at Andromeda and Contact at the cosmic web.
