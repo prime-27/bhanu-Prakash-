@@ -270,12 +270,59 @@ function Hero({ cueRef }) {
 }
 
 /* ---------- content sections ---------- */
+/* ---------- Particle portrait: the photo rebuilt from stardust ----------
+   Put a photo at assets/portrait.jpg (head and shoulders, plain dark background works best). */
+const PORTRAIT_SRC = "assets/portrait.jpg";
+function startPortrait(canvas, img) {
+  const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, vis = false, t = 0, last = 0, mx = -1e4, my = -1e4, go = false;
+  const GW = 120, GH = 150, off = document.createElement("canvas"); off.width = GW; off.height = GH; const o = off.getContext("2d");
+  if (img) { const sc = Math.max(GW / img.width, GH / img.height), w = img.width * sc, h = img.height * sc; o.drawImage(img, (GW - w) / 2, (GH - h) / 2, w, h); }
+  else { const g = o.createRadialGradient(GW * .4, GH * .28, 3, GW * .5, GH * .5, GH * .75); g.addColorStop(0, "#fff"); g.addColorStop(.55, "#9a9a9a"); g.addColorStop(1, "#262626"); o.fillStyle = g;
+    o.beginPath(); o.ellipse(GW * .5, GH * .34, GW * .16, GH * .155, 0, 0, 6.283); o.fill();
+    o.fillRect(GW * .43, GH * .45, GW * .14, GH * .2);
+    o.beginPath(); o.moveTo(GW * .04, GH); o.quadraticCurveTo(GW * .06, GH * .66, GW * .36, GH * .62); o.lineTo(GW * .64, GH * .62); o.quadraticCurveTo(GW * .94, GH * .66, GW * .96, GH); o.closePath(); o.fill(); }
+  const d = o.getImageData(0, 0, GW, GH).data, P = [];
+  for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) { const i = (y * GW + x) * 4, l = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255 * (d[i + 3] / 255);
+    if (l > .09 && Math.random() < Math.pow(l, 1.25) * .95) P.push({ u: (x + Math.random()) / GW, v: (y + Math.random()) / GH, l, x: Math.random(), y: Math.random(), vx: 0, vy: 0, ph: Math.random() * 6.28 }); }
+  const resize = () => { const dp = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * dp; canvas.height = H * dp; ctx.setTransform(dp, 0, 0, dp, 0, 0); };
+  const move = e => { const r = canvas.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; };
+  const leave = () => { mx = my = -1e4; };
+  function frame(now) {
+    raf = vis ? requestAnimationFrame(frame) : 0; const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt;
+    ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = "lighter";
+    for (const p of P) {
+      const tx = go ? p.u : p.x, ty = go ? p.v : p.y;
+      if (reduced) { p.x = p.u; p.y = p.v; }
+      else { p.vx += (tx - (p.x)) * .05; p.vy += (ty - (p.y)) * .05;
+        const px = p.x * W, py = p.y * H, ex = px - mx, ey = py - my, dd = ex * ex + ey * ey;
+        if (dd < 3600) { const f = (1 - dd / 3600) * .012; p.vx += ex / Math.sqrt(dd + 1) * f; p.vy += ey / Math.sqrt(dd + 1) * f; }
+        p.vx *= .84; p.vy *= .84; p.x += p.vx; p.y += p.vy; }
+      const tw = .75 + .25 * Math.sin(t * 2 + p.ph), a = (.3 + .7 * p.l) * tw, sz = .9 + p.l * 1.5;
+      ctx.fillStyle = `rgba(255,${Math.round(150 + 100 * p.l)},${Math.round(80 + 160 * p.l * p.l)},${a.toFixed(3)})`;
+      ctx.fillRect(p.x * W, p.y * H, sz, sz);
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+  const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis) { setTimeout(() => (go = true), 250); if (!raf) { last = 0; raf = requestAnimationFrame(frame); } } }, { threshold: .25 });
+  io.observe(canvas); resize(); addEventListener("resize", resize); canvas.addEventListener("pointermove", move); canvas.addEventListener("pointerleave", leave);
+  return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+}
+function ParticlePortrait() {
+  const can = useRef(), [photo, setPhoto] = useState(null), [reveal, setReveal] = useState(false);
+  useEffect(() => { let stop = () => {}; const img = new Image(); img.onload = () => { setPhoto(PORTRAIT_SRC); stop = startPortrait(can.current, img); }; img.onerror = () => { stop = startPortrait(can.current, null); }; img.src = PORTRAIT_SRC; return () => stop(); }, []);
+  return html`<div className=${"portrait pp" + (reveal ? " reveal" : "")} onMouseEnter=${() => photo && setReveal(true)} onMouseLeave=${() => setReveal(false)}
+      role="img" aria-label=${photo ? "Portrait of Bhanu Prakash, drawn in particles" : "Placeholder for a portrait of Bhanu Prakash, drawn in particles"}>
+    <span className="bigword" aria-hidden="true">ASTRONOMER</span>
+    ${photo && html`<img src=${photo} alt="" className="pp-photo"/>`}
+    <canvas ref=${can} className="pp-canvas"></canvas>
+    ${photo ? html`<button type="button" className="pp-toggle" onClick=${() => setReveal(v => !v)}>${reveal ? "Show particles" : "Show photo"}</button>` : html`<span className="pp-tag"><${Ph}>Photo to add: assets/portrait.jpg<//></span>`}
+  </div>`;
+}
+
 function About() {
   return html`<section className="band" id="about" aria-labelledby="about-h" data-p0=".6" data-p1="1.3" data-kind="content"><div className="inner">
     <div className="about">
-    <div><div className="portrait" role="img" aria-label="Placeholder for a professional portrait of Bhanu Prakash with a telescope">
-      <svg viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="20" r="9" fill="none" stroke="#9aa1bb"/><path d="M10 50c3-10 10-15 18-15s15 5 18 15" fill="none" stroke="#9aa1bb"/></svg>
-      Professional portrait<br/><${Ph}>Photo to add<//></div></div>
+    <div><${ParticlePortrait}/></div>
     <div className="prose">
       <span className="label">About</span>
       <h2 id="about-h">Astronomy, education, observation and technology</h2>
