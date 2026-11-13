@@ -316,8 +316,10 @@ void main(){
   vec4 B=anim(aPB,uModeB,0.,0.,sB,lB);
   vec3 p=mix(A.xyz,B.xyz,t);
   float fly=sin(t*3.14159)*uMotion;
-  p+=(aR.yzw-.5)*fly*.9;
-  p.z+=fly*aR.y*1.8;
+  float hn=1.+floor(aR.x*5.);
+  vec3 wv=vec3(sin(p.y*3.1+uTime*1.7+hn),sin(p.x*2.3*hn+uTime*2.3),cos(p.x*1.7+p.y*2.+uTime*1.3));
+  p+=wv*fly*.55+(aR.yzw-.5)*fly*.22;
+  p.z+=fly*aR.y*1.3;
   p+=(aR.yzw-.5)*.01*sin(uTime*(6.+floor(aR.x*6.)*3.)+aR.y*40.)*uMotion;
   float vz=uDist-p.z;
   if(vz<.2){gl_Position=vec4(3.,3.,3.,1.);gl_PointSize=0.;vC=vec3(0.);return;}

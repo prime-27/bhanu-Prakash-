@@ -8,7 +8,7 @@ const scrollToId = id => document.getElementById(id)?.scrollIntoView({ behavior:
 
 /* ---------- content (source of truth: website brief) ---------- */
 const CONTENT = {
-  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["development","Development"],["projects","Projects"],["gallery","Gallery"]],
+  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["projects","Projects"],["notes","Notes"]],
   hero: {
     eyebrow: "Astronomy · Education · Technology",
     title: "Exploring the Universe. Building What’s Next.",
@@ -123,6 +123,7 @@ function startStrings(canvas) {
       if ((py - g.y) * (y - g.y) < 0 && x > g.x && x < g.x + g.w) pluck(st(el), (x - g.x) / g.w, clamp((y - py) * .9, -16, 16)); }
     px = x; py = y; kick();
   };
+  const onTap = e => { if (e.pointerType === "mouse") return; for (const el of list()) { const g = geom(el); if (Math.abs(e.clientY - g.y) < 28 && e.clientX > g.x && e.clientX < g.x + g.w) pluck(st(el), (e.clientX - g.x) / g.w, 10); } kick(); };
   const onPluck = e => { const el = e.detail.el; if (el) pluck(st(el), e.detail.at ?? .5, e.detail.amp ?? 8); kick(); };
   const onBurst = e => { if (reduced) return; const { x, y, n = 24, speed = 4 } = e.detail;
     for (let k = 0; k < Math.max(3, n / 6); k++) { const a = rnd() * 6.283, v = speed * (.25 + rnd() * .5); loops.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 5 + rnd() * 9, m: 2 + ((rnd() * 4) | 0), ph: rnd() * 6, life: 1 }); }
@@ -131,6 +132,8 @@ function startStrings(canvas) {
   function kick() { if (!raf) raf = requestAnimationFrame(frame); }
   function frame() {
     raf = 0; ctx.clearRect(0, 0, W, H);
+    const navB = (document.querySelector(".top")?.getBoundingClientRect().bottom) || 0, hudT = (document.querySelector(".hudbar")?.getBoundingClientRect().top) || H;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, navB, W, hudT - navB + 3); ctx.clip();
     const dy = scrollY - lastY; lastY = scrollY; let busy = loops.length + sparks.length > 0;
     for (const el of list()) {
       const g = geom(el); if (g.y < -10 || g.y > H + 10 || g.w < 10) continue; const o = st(el);
@@ -153,11 +156,11 @@ function startStrings(canvas) {
       ctx.lineWidth = 1; ctx.strokeStyle = `rgba(${L.m % 2 ? "255,194,122" : "241,238,230"},${(L.life * .8).toFixed(3)})`; ctx.stroke(); }
     for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.x += p.vx; p.y += p.vy; p.vy += .06; p.vx *= .98; p.life -= .025;
       if (p.life <= 0) { sparks.splice(i, 1); continue; } ctx.fillStyle = `rgba(241,238,230,${p.life.toFixed(3)})`; ctx.fillRect(p.x, p.y, 1.6, 1.6); }
-    ctx.globalCompositeOperation = "source-over";
+    ctx.globalCompositeOperation = "source-over"; ctx.restore();
     if (busy || Math.abs(dy) > 0) kick();
   }
   resize(); addEventListener("resize", () => { resize(); kick(); }); addEventListener("scroll", kick, { passive: true });
-  addEventListener("pointermove", onMove, { passive: true }); addEventListener("particles:burst", onBurst); addEventListener("strings:pluck", onPluck);
+  addEventListener("pointermove", onMove, { passive: true }); addEventListener("pointerdown", onTap, { passive: true }); addEventListener("particles:burst", onBurst); addEventListener("strings:pluck", onPluck);
   setTimeout(kick, 300);
   return () => { cancelAnimationFrame(raf); removeEventListener("pointermove", onMove); removeEventListener("particles:burst", onBurst); removeEventListener("strings:pluck", onPluck); };
 }
@@ -246,6 +249,7 @@ function HudBar({ view, refs, api }) {
   const sc = SCENES[view.i];
   return html`<div className="hudbar" aria-label="Journey position">
     <i className="prog" ref=${refs.bar}></i>
+    <i className="hb-string" data-string="" data-tone="amber" aria-hidden="true"></i>
     <span className="hb-ch">${ROMAN[view.i]} / ${ROMAN[LASTI]}</span>
     <b className="hb-name">${sc.name}</b>
     <ol className="hb-dots">${SCENES.map((s, k) => html`<li key=${k}><button type="button" aria-label=${`Travel to chapter ${k + 1}: ${s.name}`} title=${s.name}
@@ -254,6 +258,8 @@ function HudBar({ view, refs, api }) {
   </div>`;
 }
 function Hero({ cueRef }) {
+  const hs = useRef();
+  useEffect(() => { const t = setTimeout(() => pluckEl(hs.current, .3, 12), 1400); return () => clearTimeout(t); }, []);
   return html`<section className="introhero" id="home" data-p0="0" data-p1=".6" data-kind="hero" aria-labelledby="hero-h">
     <div className="inner"><div className="hero-copy">
       <span className="eyebrow">${CONTENT.hero.eyebrow}</span>
@@ -261,6 +267,8 @@ function Hero({ cueRef }) {
       <p>${CONTENT.hero.text}</p>
       <div className="btns"><a className="btn" href="#projects">Explore My Work</a><a className="btn ghost" href="#contact">Get in Touch</a></div>
       <p className="trip">Scroll to travel from this hillside to the edge of the observable universe, then down to the smallest scale. Twelve stops, from 384,400 km out to a billion light-years and in to 10⁻³⁵ m.</p>
+      <div className="hero-string" data-string="" data-tone="amber" ref=${hs} aria-hidden="true"></div>
+      <p className="trip strings-hint">String theory says everything is made of vibrating strings. So is this page: every line is a string you can pluck with your cursor or finger.</p>
     </div></div>
     <div className="cue" ref=${cueRef} aria-hidden="true">Scroll to leave Earth<i></i></div>
   </section>`;
@@ -283,7 +291,7 @@ function About() {
     </div></section>`;
 }
 function Astronomy() {
-  return html`<${Section} id="astronomy" p=${[2.6, 3.6]} chapter=${3} label="Astronomy & Outreach" title="Helping people experience astronomy firsthand"
+  return html`<${Section} id="astronomy" p=${[2.6, 3.2]} chapter=${3} label="Astronomy & Outreach" title="Helping people experience astronomy firsthand"
     lede="From guided telescope observations to engaging school workshops, every session is planned around the audience, the venue and what the sky offers that night.">
     <${SkillGrid} items=${CONTENT.astroSkills}/>
     <div className="subhead"><h3>Who I work with</h3><span>Audiences</span></div>
@@ -335,7 +343,7 @@ function Gallery() {
     const k = e => { if (idx == null) return; if (e.key === "ArrowRight") dlg.setData((idx + 1) % n); if (e.key === "ArrowLeft") dlg.setData((idx - 1 + n) % n); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [idx]);
-  return html`<${Section} id="gallery" p=${[8.6, 9.6]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
+  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
     <div className="gallery">${CONTENT.gallery.map((c, i) => html`<figure key=${c}>
       <button className="img" type="button" aria-label=${"Open photo: " + c} onClick=${e => { burstAt(e.currentTarget, { n: 30, speed: 4 }); dlg.open(i); }}>Photo to add</button><figcaption>${c}</figcaption></figure>`)}</div>
     <dialog ref=${dlg.ref} className="modal lightbox" aria-label="Photo viewer">
@@ -615,9 +623,204 @@ function Process() {
     </div></section>`;
 }
 
+/* ---------- Sky calculations for Hyderabad, computed in the browser ----------
+   Sun: low-precision solar coordinates. Moon: main periodic terms (about 1° accuracy).
+   Planets: JPL "Approximate Positions of the Planets", Table 1 (valid 1800–2050). */
+const SITE = { lat: 17.385, lon: 78.487, tz: 5.5, name: "Hyderabad" };
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const n360 = x => ((x % 360) + 360) % 360;
+const dayNum = date => date.getTime() / 86400000 + 2440587.5 - 2451545;
+const oblq = d => (23.439 - 4e-7 * d) * D2R;
+function eclToEq(lon, lat, d) {
+  const l = lon * D2R, b = lat * D2R, e = oblq(d);
+  const x = Math.cos(b) * Math.cos(l), y = Math.cos(b) * Math.sin(l) * Math.cos(e) - Math.sin(b) * Math.sin(e), z = Math.cos(b) * Math.sin(l) * Math.sin(e) + Math.sin(b) * Math.cos(e);
+  return { ra: n360(Math.atan2(y, x) * R2D), dec: Math.asin(z) * R2D };
+}
+function sunLon(d) { const L = 280.460 + .9856474 * d, g = (357.528 + .9856003 * d) * D2R; return n360(L + 1.915 * Math.sin(g) + .020 * Math.sin(2 * g)); }
+function moonEcl(d) {
+  const L = 218.316 + 13.176396 * d, M = (134.963 + 13.064993 * d) * D2R, F = (93.272 + 13.229350 * d) * D2R, D = (297.850 + 12.190749 * d) * D2R, Ms = (357.529 + .98560028 * d) * D2R;
+  return { lon: n360(L + 6.289 * Math.sin(M) + 1.274 * Math.sin(2 * D - M) + .658 * Math.sin(2 * D) + .214 * Math.sin(2 * M) - .186 * Math.sin(Ms) - .114 * Math.sin(2 * F)), lat: 5.128 * Math.sin(F) };
+}
+const ELEM = {
+  Mercury: [.38709927, .20563593, 7.00497902, 252.25032350, 77.45779628, 48.33076593, .00000037, .00001906, -.00594749, 149472.67411175, .16047689, -.12534081],
+  Venus: [.72333566, .00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255, .00000390, -.00004107, -.00078890, 58517.81538729, .00268329, -.27769418],
+  Earth: [1.00000261, .01671123, -.00001531, 100.46457166, 102.93768193, 0, .00000562, -.00004392, -.01294668, 35999.37244981, .32327364, 0],
+  Mars: [1.52371034, .09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891, .00001847, .00007882, -.00813131, 19140.30268499, .44441088, -.29257343],
+  Jupiter: [5.20288700, .04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909, -.00011607, -.00013253, -.00183714, 3034.74612775, .21252668, .20469106],
+  Saturn: [9.53667594, .05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448, -.00125060, -.00050991, .00193609, 1222.49362201, -.41897216, -.28867794]
+};
+function helio(p, T) {
+  const a = p[0] + p[6] * T, e = p[1] + p[7] * T, I = (p[2] + p[8] * T) * D2R, L = p[3] + p[9] * T, w = p[4] + p[10] * T, O = p[5] + p[11] * T;
+  let M = n360(L - w); if (M > 180) M -= 360; M *= D2R;
+  let E = M + e * Math.sin(M); for (let k = 0; k < 6; k++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  const xp = a * (Math.cos(E) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(E), om = (w - O) * D2R, Om = O * D2R;
+  const co = Math.cos(om), so = Math.sin(om), cO = Math.cos(Om), sO = Math.sin(Om), cI = Math.cos(I), sI = Math.sin(I);
+  return [(co * cO - so * sO * cI) * xp + (-so * cO - co * sO * cI) * yp, (co * sO + so * cO * cI) * xp + (-so * sO + co * cO * cI) * yp, so * sI * xp + co * sI * yp];
+}
+function radec(name, date) {
+  const d = dayNum(date);
+  if (name === "Sun") return eclToEq(sunLon(d), 0, d);
+  if (name === "Moon") { const m = moonEcl(d); return eclToEq(m.lon, m.lat, d); }
+  const T = d / 36525, P = helio(ELEM[name], T), E = helio(ELEM.Earth, T), g = [P[0] - E[0], P[1] - E[1], P[2] - E[2]];
+  return eclToEq(n360(Math.atan2(g[1], g[0]) * R2D), Math.atan2(g[2], Math.hypot(g[0], g[1])) * R2D, d);
+}
+function altAz(name, date) {
+  const { ra, dec } = radec(name, date), d = dayNum(date), lst = n360(280.46061837 + 360.98564736629 * d + SITE.lon);
+  const H = (lst - ra) * D2R, ph = SITE.lat * D2R, de = dec * D2R;
+  const alt = Math.asin(Math.sin(ph) * Math.sin(de) + Math.cos(ph) * Math.cos(de) * Math.cos(H));
+  const az = Math.atan2(-Math.sin(H) * Math.cos(de), Math.cos(ph) * Math.sin(de) - Math.sin(ph) * Math.cos(de) * Math.cos(H));
+  return { alt: alt * R2D, az: n360(az * R2D) };
+}
+const COMPASS = ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"];
+const dirOf = az => COMPASS[Math.round(az / 45) % 8];
+const istDate = (y, m, dd, h = 0, mi = 0) => new Date(Date.UTC(y, m, dd, h, mi) - SITE.tz * 3600000);
+const istParts = date => { const t = new Date(date.getTime() + SITE.tz * 3600000); return { y: t.getUTCFullYear(), m: t.getUTCMonth(), d: t.getUTCDate(), h: t.getUTCHours(), mi: t.getUTCMinutes(), wd: t.getUTCDay() }; };
+const fmtTime = date => { const p = istParts(date), h12 = ((p.h + 11) % 12) + 1; return `${h12}:${String(p.mi).padStart(2, "0")} ${p.h < 12 ? "AM" : "PM"}`; };
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const fmtDay = date => { const p = istParts(date); return `${DAYS[p.wd]} ${p.d} ${MONTHS[p.m]}`; };
+function moonPhase(date) {
+  const d = dayNum(date), el = n360(moonEcl(d).lon - sunLon(d)), illum = (1 - Math.cos(el * D2R)) / 2;
+  const name = el < 8 || el > 352 ? "New Moon" : el < 82 ? "Waxing crescent" : el < 98 ? "First quarter" : el < 172 ? "Waxing gibbous" : el < 188 ? "Full Moon" : el < 262 ? "Waning gibbous" : el < 278 ? "Last quarter" : "Waning crescent";
+  return { el, illum, name, age: el / 360 * 29.53 };
+}
+const SKY_NOTES = {
+  Moon: "Craters show best along the line between day and night.",
+  Mercury: "Low in twilight and never far from the Sun. Look just after sunset or before sunrise.",
+  Venus: "The brightest planet. It never strays far from the Sun, so look in twilight.",
+  Mars: "A steady orange-red point that does not twinkle like the stars around it.",
+  Jupiter: "Binoculars held steady show up to four of its moons in a line.",
+  Saturn: "A small telescope shows the rings."
+};
+function tonight(y, m, dd) {
+  const start = istDate(y, m, dd, 12), steps = 24 * 12, sun = [];
+  for (let i = 0; i <= steps; i++) { const t = new Date(start.getTime() + i * 300000); sun.push([t, altAz("Sun", t).alt]); }
+  const cross = (lvl, down) => { for (let i = 1; i < sun.length; i++) if (down ? sun[i - 1][1] >= lvl && sun[i][1] < lvl : sun[i - 1][1] < lvl && sun[i][1] >= lvl) return sun[i][0]; return null; };
+  const sunset = cross(-.833, true), sunrise = cross(-.833, false), darkStart = cross(-18, true), darkEnd = cross(-18, false), nightStart = cross(-6, true), nightEnd = cross(-6, false);
+  const objs = ["Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"].map(name => {
+    let best = null, first = null, last = null;
+    if (nightStart && nightEnd) for (let t = nightStart.getTime(); t <= nightEnd.getTime(); t += 600000) {
+      const dt = new Date(t), h = altAz(name, dt);
+      if (h.alt > 10) { if (!first) first = dt; last = dt; if (!best || h.alt > best.alt) best = { ...h, t: dt }; }
+    }
+    return { name, visible: !!best, best, first, last, note: SKY_NOTES[name] };
+  });
+  const phase = moonPhase(istDate(y, m, dd, 21));
+  const moon = objs[0], darkHours = darkStart && darkEnd ? (darkEnd - darkStart) / 3600000 : 0;
+  const moonDark = moon.visible && moon.first && moon.last ? Math.max(0, (Math.min(moon.last, darkEnd) - Math.max(moon.first, darkStart)) / 3600000) : 0;
+  const rating = phase.illum < .3 || moonDark < darkHours * .3 ? "Good night for faint stars and the Milky Way" : phase.illum > .75 ? "Bright Moon: best for the Moon and planets" : "Fair: plan deep-sky viewing around the Moon";
+  return { sunset, sunrise, darkStart, darkEnd, objs, phase, rating };
+}
+function lunarEvents(from, days) {
+  const out = []; let prev = null;
+  for (let h = 0; h <= days * 24; h++) {
+    const t = new Date(from.getTime() + h * 3600000), d = dayNum(t), el = n360(moonEcl(d).lon - sunLon(d));
+    if (prev != null) { if (prev > 300 && el < 60) out.push({ t, kind: "new" }); if (prev < 180 && el >= 180) out.push({ t, kind: "full" }); }
+    prev = el;
+  }
+  return out;
+}
+const SHOWERS = [["Quadrantids", 0, 3], ["Lyrids", 3, 22], ["Eta Aquariids", 4, 5], ["Perseids", 7, 12], ["Orionids", 9, 21], ["Leonids", 10, 17], ["Geminids", 11, 13]];
+function skyCalendar(now) {
+  const p = istParts(now), from = istDate(p.y, p.m, p.d), until = from.getTime() + 120 * 86400000, items = [];
+  lunarEvents(from, 120).forEach(e => items.push(e.kind === "new"
+    ? { t: e.t, title: "New Moon", tag: "Best nights", d: "Darkest skies of the month. The nights around it are the best for faint stars, nebulae and the Milky Way." }
+    : { t: e.t, title: "Full Moon", tag: "Moon night", d: "The Moon is up all night and washes out faint stars. A good night to talk about the Moon itself." }));
+  for (const yr of [p.y, p.y + 1]) SHOWERS.forEach(([n, mo, da]) => { const t = istDate(yr, mo, da, 23); if (t >= from && t.getTime() <= until) items.push({ t, title: `${n} meteor shower peak`, tag: "Meteor shower", d: "Approximate peak night. Watch after midnight from a dark site, away from city lights." }); });
+  return items.sort((a, b) => a.t - b.t).slice(0, 8);
+}
+
+/* ---------- Tonight's Sky + calendar + events section ---------- */
+/* Add Bhanu's own public sessions here. Each one also becomes an Event in Google's structured data.
+   { date: "2026-12-14", time: "19:30", title: "Geminids night", place: "Venue, Hyderabad", desc: "…", link: "https://…" } */
+const EVENTS = [];
+function MoonIcon({ el, size = 64 }) {
+  const f = el / 360, c = 32, r = 28, rx = Math.abs(Math.cos(el * D2R)) * r, waxing = f < .5;
+  const crescent = (el < 90) || (el > 270);
+  const lit = `M${c} ${c - r}A${r} ${r} 0 0 ${waxing ? 1 : 0} ${c} ${c + r}A${rx} ${r} 0 0 ${crescent ? (waxing ? 0 : 1) : (waxing ? 1 : 0)} ${c} ${c - r}Z`;
+  return html`<svg width=${size} height=${size} viewBox="0 0 64 64" className="moonicon" aria-hidden="true"><circle cx="32" cy="32" r="28" className="m-dark"/><path d=${lit} className="m-lit"/></svg>`;
+}
+function useEventSchema(events) {
+  useEffect(() => {
+    if (!events.length) return;
+    const s = document.createElement("script"); s.type = "application/ld+json";
+    s.textContent = JSON.stringify(events.map(e => ({ "@context": "https://schema.org", "@type": "Event", name: e.title, startDate: `${e.date}T${e.time || "19:00"}:00+05:30`,
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", description: e.desc,
+      location: { "@type": "Place", name: e.place, address: { "@type": "PostalAddress", addressLocality: "Hyderabad", addressCountry: "IN" } },
+      organizer: { "@type": "Person", name: "Bhanu Prakash" }, url: e.link || location.href.split("#")[0] })));
+    document.head.appendChild(s); return () => s.remove();
+  }, []);
+}
+function Tonight() {
+  const now = new Date(), p0 = istParts(now);
+  const [off, setOff] = useState(0);
+  const base = istDate(p0.y, p0.m, p0.d + off), p = istParts(base);
+  const sky = useMemo(() => tonight(p.y, p.m, p.d), [off]);
+  const cal = useMemo(() => skyCalendar(now), []);
+  useEventSchema(EVENTS);
+  const strRef = useRef();
+  useEffect(() => { pluckEl(strRef.current, .5, 6); }, [off]);
+  const vis = sky.objs.filter(o => o.visible), hidden = sky.objs.filter(o => !o.visible);
+  const label = off === 0 ? "Tonight" : off === 1 ? "Tomorrow night" : fmtDay(base);
+  return html`<${Section} id="tonight" p=${[3.2, 3.6]} label="Tonight’s Sky" title="What’s up over Hyderabad"
+    lede="Calculated live in your browser for Hyderabad (17.4° N, 78.5° E). Positions are good to about a degree and times to a few minutes.">
+    <div className="sky-controls" role="group" aria-label="Choose a night">
+      ${[0, 1, 2, 3, 4, 5, 6].map(k => html`<button key=${k} type="button" aria-pressed=${off === k} onClick=${() => setOff(k)}>${k === 0 ? "Tonight" : fmtDay(istDate(p0.y, p0.m, p0.d + k))}</button>`)}
+    </div>
+    <div className="sky-grid">
+      <div className="sky-moon">
+        <${MoonIcon} el=${sky.phase.el} size=${96}/>
+        <div><span className="label">${label} · Moon</span><h3>${sky.phase.name}</h3>
+          <p className="coordline">${Math.round(sky.phase.illum * 100)}% lit · ${sky.phase.age.toFixed(1)} days since New Moon</p>
+          <p className="rating">${sky.rating}</p></div>
+      </div>
+      <dl className="sky-times">
+        <div><dt>Sunset</dt><dd>${sky.sunset ? fmtTime(sky.sunset) : "—"}</dd></div>
+        <div><dt>Fully dark</dt><dd>${sky.darkStart ? fmtTime(sky.darkStart) : "—"}</dd></div>
+        <div><dt>Dark until</dt><dd>${sky.darkEnd ? fmtTime(sky.darkEnd) : "—"}</dd></div>
+        <div><dt>Sunrise</dt><dd>${sky.sunrise ? fmtTime(sky.sunrise) : "—"}</dd></div>
+      </dl>
+    </div>
+    <div className="sky-string" data-string="" data-tone="amber" ref=${strRef} aria-hidden="true"></div>
+    <div className="sky-list">
+      ${vis.map(o => html`<article key=${o.name} className="sky-obj">
+        <h3>${o.name}</h3>
+        <p className="when">${o.first.getTime() === o.last.getTime() ? "Around " + fmtTime(o.first) : "Up " + fmtTime(o.first) + " – " + fmtTime(o.last)}</p>
+        <p>Highest at <b>${fmtTime(o.best.t)}</b>, ${Math.round(o.best.alt)}° up in the ${dirOf(o.best.az)}.</p>
+        <p className="note">${o.note}</p></article>`)}
+      ${!vis.length && html`<p>No bright planets are well placed ${label.toLowerCase()}.</p>`}
+    </div>
+    ${hidden.length > 0 && html`<p className="sky-hidden">Not well placed ${label.toLowerCase()}: ${hidden.map(o => o.name).join(", ")}.</p>`}
+
+    <div className="subhead" style=${{ marginTop: "72px" }}><h3>Sky calendar</h3><span>Next 4 months</span></div>
+    <ol className="cal">${cal.map((e, i) => html`<li key=${i}>
+      <time dateTime=${e.t.toISOString()}><b>${istParts(e.t).d}</b><span>${MONTHS[istParts(e.t).m]} ${istParts(e.t).y}</span></time>
+      <div><span className=${"tag" + (e.tag === "Best nights" ? " good" : "")}>${e.tag}</span><h4>${e.title}</h4><p>${e.d}</p></div></li>`)}</ol>
+
+    <div className="subhead" style=${{ marginTop: "72px" }}><h3>Upcoming sessions</h3><span>Public stargazing</span></div>
+    ${EVENTS.length ? html`<ol className="cal">${EVENTS.map((e, i) => html`<li key=${i}><time dateTime=${e.date}><b>${+e.date.slice(8, 10)}</b><span>${MONTHS[+e.date.slice(5, 7) - 1]} ${e.date.slice(0, 4)}</span></time>
+        <div><span className="tag good">${e.time || "Evening"} · ${e.place}</span><h4>${e.title}</h4><p>${e.desc}</p>${e.link && html`<a className="link" href=${e.link}>Details →</a>`}</div></li>`)}</ol>`
+      : html`<div className="no-events"><p>No public sessions are announced right now. New dates are planned around the New Moon nights above.</p>
+        <button className="btn ghost" type="button" onClick=${() => window.dispatchEvent(new CustomEvent("prefill", { detail: "Guided stargazing session" }))}>Request a session</button></div>`}
+  <//>`;
+}
+
+/* ---------- Sky Notes (articles are static pages in /notes for search engines) ---------- */
+const NOTES = [
+  { slug: "best-night-for-stargazing", title: "When is the best night to go stargazing?", tag: "Planning", mins: 4, d: "Why the New Moon week, a dark site and twenty minutes of patience matter more than a big telescope." },
+  { slug: "find-cassiopeia-from-hyderabad", title: "How to find Cassiopeia from Hyderabad", tag: "Constellations", mins: 3, d: "The bright W in the northern sky: when to look, where to face, and the five stars that make it." },
+  { slug: "see-the-orion-nebula", title: "See the Orion Nebula with your own eyes", tag: "Deep sky", mins: 3, d: "A star nursery 1,344 light-years away that you can spot from a dark site, no telescope needed." }
+];
+function SkyNotes() {
+  return html`<${Section} id="notes" p=${[9.2, 9.6]} label="Sky Notes" title="Short guides to the night sky"
+    lede="Practical notes for beginners: what to look for, when, and how, from the sessions I run.">
+    <div className="note-grid">${NOTES.map(n => html`<a key=${n.slug} className="note-card" href=${"notes/" + n.slug + ".html"} onMouseEnter=${e => burst(e.clientX, e.clientY, { n: 10, speed: 2 })}>
+      <span className="tag">${n.tag} · ${n.mins} min read</span><h3>${n.title}</h3><p>${n.d}</p><span className="link">Read the note →</span></a>`)}</div>
+  <//>`;
+}
+
 /* ---------- app ---------- */
 function App() {
-  const active = useActiveSection(["home", "about", "expertise", "astronomy", "development", "process", "projects", "gallery", "contact"]);
+  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "projects", "gallery", "notes", "contact"]);
   const [toast, setToast] = useState("");
   const [view, setView] = useState({ i: 0, beat: 0 });
   const refs = { stage: useRef(), canvas: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
@@ -641,6 +844,7 @@ function App() {
       <${Expertise}/>
       <${Interlude} i=${2} p=${[1.6, 2.6]}/>
       <${Astronomy}/>
+      <${Tonight}/>
       <${Interlude} i=${4} p=${[3.6, 4.6]}/>
       <${Development}/>
       <${Process}/>
@@ -648,6 +852,7 @@ function App() {
       <${Projects}/>
       <${Interlude} i=${8} p=${[7.6, 8.6]}/>
       <${Gallery}/>
+      <${SkyNotes}/>
       <${Contact} onToast=${setToast}/>
       <${Interlude} i=${11} p=${[10.3, 11]}/>
     </main>

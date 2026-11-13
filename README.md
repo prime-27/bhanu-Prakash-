@@ -45,3 +45,12 @@ The site is a draft. Amber dashed tags on the page mark details still to confirm
 ## Editing content
 
 Text for every section lives in the `CONTENT` object near the top of `js/app.js`. The twelve journey stops, with their distances and facts, are the `SCENES` list in `js/universe.js`. Colors, type and spacing follow `brand/tokens.json`. Change a value there and in the `:root` block of `css/styles.css`.
+
+### Adding a public session
+
+Add an entry to the `EVENTS` list in `js/app.js` (there is an example in the comment above it). Each event appears under "Upcoming sessions" and is also published to Google as an Event, so it can show up in event searches.
+
+### Sky Notes
+
+Articles are plain pages in `notes/`. To add one, copy an existing note, change its title, description and text, add it to the `NOTES` list in `js/app.js`, and add its address to `sitemap.xml`. Review the three starter notes before publishing: they are written in your voice.
+
