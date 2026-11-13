@@ -513,7 +513,7 @@ function buildProcessObjects() {
   { const pts = []; for (let i = 0; i < 1300; i++) { const f = i % 5, a = f * 1.26 + G() * .12, r = Math.pow(R(), .7) * 1.7, tw = r * 1.4;
       pts.push([Math.cos(a + tw) * r + G() * .08, G() * .18 * (1 - r / 2), Math.sin(a + tw) * r * .7 + G() * .08, .2 + R() * .5, i % 9 ? 0 : 2]); }
     for (let i = 0; i < 160; i++) pts.push([G() * .12, G() * .1, G() * .12, .7 + R() * .3, 0]);
-    O.push({ segs: [], pts, pitch: .75, spin: .08 }); }
+    O.push({ segs: [], pts, pitch: .75, spin: .08, glow: [{ c: "200,190,235", r: 1.5, a: .14 }, { c: "255,226,190", r: .3, a: .45 }] }); }
   // 1 Plan: a protostar, a hot core fed by a spinning disk, firing jets from its poles
   { const pts = [];
     for (let i = 0; i < 260; i++) pts.push([G() * .09, G() * .09, G() * .09, .7 + R() * .3, 1]);
@@ -521,20 +521,20 @@ function buildProcessObjects() {
     for (let i = 0; i < 520; i++) { const sg = i % 2 ? 1 : -1, h = Math.pow(R(), .8) * 1.7, w = .03 + h * .07; pts.push([G() * w, sg * (.12 + h), G() * w, .3 + (1 - h / 1.8) * .55, 2]); }
     for (let i = 0; i < 420; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.2 + R() * .5; pts.push([sq * Math.cos(a) * r, u * r * .8, sq * Math.sin(a) * r, .08 + R() * .14, 0]); }
     pts.push([0, 0, 0, 3, 1]);
-    O.push({ segs: [], pts, pitch: .3, spin: .3 }); }
+    O.push({ segs: [], pts, pitch: .3, spin: .3, glow: [{ c: "255,205,150", r: .42, a: .75, solid: true }, { c: "168,199,255", r: 1.3, a: .08 }] }); }
   // 2 Prepare: a protoplanetary disk with gaps where planets are clearing their orbits
   { const pts = []; for (let i = 0; i < 1500; i++) { let r; do { r = .25 + Math.pow(R(), .8) * 1.45; } while ((r > .62 && r < .72) || (r > 1.08 && r < 1.16));
       const a = R() * 6.283; pts.push([Math.cos(a) * r, G() * .015 * (1 + r), Math.sin(a) * r, .25 + R() * .45, r < .5 ? 1 : 0]); }
     for (const [r, a] of [[.67, 1.1], [1.12, 3.9]]) pts.push([Math.cos(a) * r, 0, Math.sin(a) * r, 2.2, 2]);
     pts.push([0, 0, 0, 3, 1]);
-    O.push({ segs: [], pts, pitch: .42, spin: .25 }); }
+    O.push({ segs: [], pts, pitch: .42, spin: .25, glow: [{ c: "255,232,195", r: .34, a: .8, solid: true }, { c: "255,194,122", r: 1.5, a: .1 }] }); }
   // 3 Deliver: a star ignites, with flaring loops and a corona
   { const S = [], pts = []; for (let i = 0; i < 900; i++) { const u = R() * 2 - 1, a = R() * 6.283, s = Math.sqrt(1 - u * u), r = .62; pts.push([s * Math.cos(a) * r, u * r, s * Math.sin(a) * r, .45 + R() * .5, 1]); }
     for (let i = 0; i < 420; i++) { const u = R() * 2 - 1, a = R() * 6.283, s = Math.sqrt(1 - u * u), r = .66 + Math.pow(R(), 2.5) * .9; pts.push([s * Math.cos(a) * r, u * r, s * Math.sin(a) * r, .2 + R() * .3, 0]); }
     for (let k = 0; k < 22; k++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), d = [sq * Math.cos(a), u, sq * Math.sin(a)], L = .64 + .15 + R() * .55;
       S.push([d[0] * .64, d[1] * .64, d[2] * .64, d[0] * L, d[1] * L, d[2] * L, .25 + R() * .35]); }
     pts.push([0, 0, 0, 4, 1]);
-    O.push({ segs: S, pts, pitch: .2, spin: .1 }); }
+    O.push({ segs: S, pts, pitch: .2, spin: .1, glow: [{ c: "255,226,170", r: .68, a: .95, solid: true }, { c: "255,200,120", r: 1.6, a: .22 }] }); }
   // 4 Reflect: a red giant, swollen and mottled by giant convection cells
   { const pts = [], cells = [...Array(9)].map(() => { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u); return [sq * Math.cos(a), u, sq * Math.sin(a)]; });
     for (let i = 0; i < 1500; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), n = [sq * Math.cos(a), u, sq * Math.sin(a)];
@@ -542,7 +542,7 @@ function buildProcessObjects() {
       const r = 1.15 + G() * .02; pts.push([n[0] * r, n[1] * r, n[2] * r, Math.min(.95, b), 4]); }
     for (let i = 0; i < 380; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.25 + Math.pow(R(), 2) * .6; pts.push([sq * Math.cos(a) * r, u * r, sq * Math.sin(a) * r, .08 + R() * .12, 4]); }
     pts.push([0, 0, 0, 2.2, 1]);
-    O.push({ segs: [], pts, pitch: .15, spin: .05, shell: 1.15 }); }
+    O.push({ segs: [], pts, pitch: .15, spin: .05, glow: [{ c: "255,104,58", r: 1.17, a: .85, solid: true, limb: true }, { c: "255,120,72", r: 1.9, a: .14 }] }); }
   // 5 Grow: a planetary nebula, a glowing shell of shed gas around a white dwarf
   { const pts = [];
     for (let i = 0; i < 2400; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1 + G() * .07, rim = Math.abs(u) < .55;
@@ -550,7 +550,7 @@ function buildProcessObjects() {
     for (let i = 0; i < 520; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = Math.pow(R(), .5) * .78; pts.push([sq * Math.cos(a) * r, u * r * .9, sq * Math.sin(a) * r, .2 + R() * .3, 2]); }
     for (let i = 0; i < 300; i++) { const u = R() * 2 - 1, a = R() * 6.283, sq = Math.sqrt(1 - u * u), r = 1.4 + R() * .45; pts.push([sq * Math.cos(a) * r, u * r, sq * Math.sin(a) * r, .06 + R() * .08, 3]); }
     pts.push([0, 0, 0, 2.6, 0]);
-    O.push({ segs: [], pts, pitch: .25, spin: .07 }); }
+    O.push({ segs: [], pts, pitch: .25, spin: .07, glow: [{ c: "242,71,127", r: 1.2, a: .45, ring: true }, { c: "168,199,255", r: .8, a: .16 }, { c: "255,255,255", r: .14, a: 1, solid: true }] }); }
   return O;
 }
 const PCOL = ["241,238,230", "255,194,122", "168,199,255", "242,71,127", "255,120,72"];
@@ -612,6 +612,12 @@ function startProcess(canvas, section, onStage, ctl = { mode: "formed", paused: 
       const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), spp = Math.sin(pitch);
       const tf = (x0, y0, z0) => { const h = Math.sin(x0 * 12.9898 + y0 * 78.233 + z0 * 37.719) * 43758.5453, jr = h - Math.floor(h), ee = 1 + ex * (.9 + jr * 1.4) * (i === st ? 1 : .25);
         const x = x0 * ee + ex * (jr - .5) * .6, y = y0 * ee + ex * Math.sin(t * .8 + jr * 6.28) * .12, z = z0 * ee; const X = x * cyw + z * syw, Z = -x * syw + z * cyw; const Y2 = y * cp - Z * spp, Z2 = y * spp + Z * cp; return proj(cx + X * sc, Y2 * sc, Z2 * sc, camX); };
+      if (o.glow) { const C = tf(0, 0, 0); if (C) for (const gl of o.glow) {
+        const rad = gl.r * sc * C[2] * (1 + ex * .6), a = gl.a * br * (1 - ex * .5), g = ctx.createRadialGradient(C[0], C[1], 0, C[0], C[1], rad), col = gl.c;
+        if (gl.ring) { g.addColorStop(0, `rgba(${col},0)`); g.addColorStop(.62, `rgba(${col},${(a * .25).toFixed(3)})`); g.addColorStop(.86, `rgba(${col},${a.toFixed(3)})`); g.addColorStop(1, `rgba(${col},0)`); }
+        else if (gl.solid) { g.addColorStop(0, `rgba(${col},${a.toFixed(3)})`); g.addColorStop(gl.limb ? .78 : .55, `rgba(${col},${(a * (gl.limb ? .72 : .6)).toFixed(3)})`); g.addColorStop(gl.limb ? .97 : 1, `rgba(${col},${(gl.limb ? a * .3 : 0).toFixed(3)})`); g.addColorStop(1, `rgba(${col},0)`); }
+        else { g.addColorStop(0, `rgba(${col},${a.toFixed(3)})`); g.addColorStop(1, `rgba(${col},0)`); }
+        ctx.fillStyle = g; ctx.fillRect(C[0] - rad, C[1] - rad, rad * 2, rad * 2); } }
       for (const s of o.segs) { const A = tf(s[0], s[1], s[2]), B = tf(s[3], s[4], s[5]); if (!A || !B) continue;
         ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]);
         ctx.strokeStyle = `rgba(241,238,230,${(s[6] * br * .08).toFixed(3)})`; ctx.lineWidth = 4; ctx.stroke();
