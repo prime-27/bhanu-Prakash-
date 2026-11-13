@@ -278,88 +278,15 @@ function Hero({ cueRef }) {
 }
 
 /* ---------- content sections ---------- */
-/* ---------- Particle portrait: Bhanu rebuilt from stardust ----------
-   assets/portraits/pNN.png are aligned sources (R = brightness, G = depth from a 3D face mesh, A = person mask);
-   pNN.jpg are the matching photos for the reveal. The same particles morph from one photo to the next. */
-const PORTRAITS = ["13", "21", "18", "19", "22", "20"];
-function samplePortrait(img, N) {
-  const GW = img.width, GH = img.height, c = document.createElement("canvas"); c.width = GW; c.height = GH;
-  const o = c.getContext("2d"); o.drawImage(img, 0, 0); const d = o.getImageData(0, 0, GW, GH).data;
-  const T = new Float32Array(N * 3), L = new Float32Array(N); let n = 0, guard = 0;
-  while (n < N && guard++ < N * 60) {
-    const x = Math.random() * GW, y = Math.random() * GH, i = ((y | 0) * GW + (x | 0)) * 4, a = d[i + 3] / 255, l = d[i] / 255;
-    if (a < .35 || l < .05 || Math.random() > (.3 + .7 * l) * a) continue;
-    T[n * 3] = (x / GW - .5) * 2; T[n * 3 + 1] = (.5 - y / GH) * 2 * GH / GW; T[n * 3 + 2] = d[i + 1] / 255 * .32 + (l - .5) * .02; L[n] = l; n++;
-  }
-  return { T, L, aspect: GH / GW };
-}
-function startPortrait(canvas, imgs, onIndex) {
-  const N = innerWidth < 700 ? 16000 : 30000, S = imgs.map(im => samplePortrait(im, N)), asp = S[0].aspect;
-  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
-  if (!gl) return { stop() {}, show() {} };
-  const vs = `attribute vec3 aT,aT2,aS;attribute float aL,aL2,aR;uniform float uP,uM,uT,uRx,uRy,uAsp,uSize,uScale;uniform vec2 uMs;varying vec3 vC;varying float vA;
-  void main(){float d=(aT.y/uScale*.5+.5)*.55+aR*.25;float k=smoothstep(d,d+.35,uP);
-    float dm=aR*.45;float m=smoothstep(dm,dm+.55,uM);float fly=sin(m*3.14159);
-    vec3 tg=mix(aT,aT2,m);tg+=vec3(sin(aR*91.+uT),cos(aR*57.+uT*.8),sin(aR*33.))*fly*.28;float l=mix(aL,aL2,m);
-    vec3 p=mix(aS,tg,k);float sw=(1.-k)*2.;p.x+=sin(uT*.7+aR*20.)*.03*sw;p.y+=cos(uT*.6+aR*17.)*.03*sw;
-    p.xy+=vec2(sin(uT*.9+aR*40.),cos(uT*.8+aR*31.))*.003*k;
-    float cy=cos(uRy),sy=sin(uRy),cx=cos(uRx),sx=sin(uRx);vec3 q=vec3(p.x*cy+p.z*sy,p.y,-p.x*sy+p.z*cy);q=vec3(q.x,q.y*cx-q.z*sx,q.y*sx+q.z*cx);
-    float z=3.2-q.z;vec2 s=q.xy*2.9/z;s.x/=uAsp;s/=uScale;vec2 dd=(s-uMs)*vec2(uAsp,1.);float dl=length(dd);s+=dd/(dl+1e-4)*.09*exp(-dl*dl/.012)/vec2(uAsp,1.);
-    gl_Position=vec4(s,0.,1.);gl_PointSize=uSize*(.55+l*.9)*(1.+sw*.4+fly*.6);
-    vec3 warm=vec3(1.,.48,.2),hot=vec3(1.,.82,.58),white=vec3(1.,.97,.92);vC=mix(mix(warm,hot,smoothstep(.15,.55,l)),white,smoothstep(.6,.95,l));vA=(.28+.85*l)*mix(.45,1.,k)*(1.-fly*.35);}`;
-  const fs = `precision mediump float;varying vec3 vC;varying float vA;void main(){vec2 q=gl_PointCoord-.5;float r=length(q);float a=smoothstep(.5,.15,r)*vA;gl_FragColor=vec4(vC*a,a);}`;
-  const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); return s; };
-  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return { stop() {}, show() {} };
-  gl.useProgram(pr);
-  const st = new Float32Array(N * 3), rr = new Float32Array(N);
-  for (let i = 0; i < N; i++) { const a = Math.random() * 6.283, r = .4 + Math.random() * 1.6; st[i * 3] = Math.cos(a) * r; st[i * 3 + 1] = -1.6 - Math.random() * 1.2; st[i * 3 + 2] = Math.sin(a) * r * .6; rr[i] = Math.random(); }
-  const mk = (data, name, n) => { const b = gl.createBuffer(), l = gl.getAttribLocation(pr, name); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, n, gl.FLOAT, false, 0, 0); return b; };
-  const bT = mk(S[0].T, "aT", 3), bL = mk(S[0].L, "aL", 1), bT2 = mk(S[0].T, "aT2", 3), bL2 = mk(S[0].L, "aL2", 1); mk(st, "aS", 3); mk(rr, "aR", 1);
-  const put = (b, data) => { gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferSubData(gl.ARRAY_BUFFER, 0, data); };
-  const U = n => gl.getUniformLocation(pr, n), uP = U("uP"), uM = U("uM"), uT = U("uT"), uRx = U("uRx"), uRy = U("uRy"), uAsp = U("uAsp"), uSize = U("uSize"), uMs = U("uMs"), uScale = U("uScale");
-  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
-  let W = 1, H = 1, dpr = 1, raf = 0, vis = false, last = 0, t = 0, P = 0, goal = 0, rx = 0, ry = 0, trx = 0, try_ = 0, mx = 9, my = 9, cur = 0, next = -1, M = 0, hold = 0, hovering = false;
-  const resize = () => { dpr = Math.min(devicePixelRatio || 1, 2); const r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; gl.viewport(0, 0, canvas.width, canvas.height); };
-  const move = e => { const r = canvas.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width * 2 - 1, ny = (e.clientY - r.top) / r.height * 2 - 1; try_ = nx * .45; trx = ny * .2; mx = nx; my = -ny; hovering = true; };
-  const leave = () => { trx = try_ = 0; mx = my = 9; hovering = false; };
-  const show = k => { if (next >= 0 || k === cur || !S[k]) return; next = k; M = 0; put(bT2, S[k].T); put(bL2, S[k].L); onIndex && onIndex(k); };
-  function frame(now) {
-    raf = vis ? requestAnimationFrame(frame) : 0; const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt;
-    P += (goal - P) * Math.min(1, dt * (reduced ? 60 : .9)); rx += (trx - rx) * Math.min(1, dt * 3); ry += ((try_ + Math.sin(t * .35) * .06) - ry) * Math.min(1, dt * 3);
-    if (next >= 0) { M = Math.min(1, M + dt / (reduced ? .01 : 2.4)); if (M >= 1) { put(bT, S[next].T); put(bL, S[next].L); cur = next; next = -1; M = 0; hold = 0; } }
-    else if (P > .95 && !hovering && S.length > 1) { hold += dt; if (hold > 6.5) show((cur + 1) % S.length); }
-    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uP, P * 1.25); gl.uniform1f(uM, M * 1.2); gl.uniform1f(uT, t); gl.uniform1f(uRx, rx); gl.uniform1f(uRy, ry); gl.uniform1f(uAsp, W / H);
-    gl.uniform1f(uScale, asp * 1.16); gl.uniform1f(uSize, Math.max(1.4, W / 300 * 1.05) * dpr); gl.uniform2f(uMs, mx, my);
-    gl.drawArrays(gl.POINTS, 0, N);
-  }
-  const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis) { goal = 1; if (!raf) { last = 0; raf = requestAnimationFrame(frame); } } }, { threshold: .2 });
-  io.observe(canvas); resize(); addEventListener("resize", resize); canvas.addEventListener("pointermove", move); canvas.addEventListener("pointerleave", leave);
-  return { show, stop() { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); } };
-}
-function ParticlePortrait() {
-  const can = useRef(), api = useRef(null), [idx, setIdx] = useState(0), [reveal, setReveal] = useState(false), [ready, setReady] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    Promise.all(PORTRAITS.map(n => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = `assets/portraits/p${n}.png`; })))
-      .then(list => { const ok = list.filter(Boolean); if (!alive || !ok.length) return; api.current = startPortrait(can.current, ok, k => setIdx(k)); setReady(true); });
-    return () => { alive = false; api.current && api.current.stop(); };
-  }, []);
-  return html`<div className=${"portrait pp" + (reveal ? " reveal" : "")}
-      role="img" aria-label="Portrait of Bhanu Prakash, drawn in particles that move between six photos">
-    <span className="bigword" aria-hidden="true">ASTRONOMER</span>
-    ${PORTRAITS.map((n, k) => html`<img key=${n} src=${`assets/portraits/p${n}.jpg`} alt="" className=${"pp-photo" + (k === idx ? " on" : "")} loading="lazy"/>`)}
-    <canvas ref=${can} className="pp-canvas"></canvas>
-    ${ready && html`<div className="pp-dots" role="group" aria-label="Choose a photo">${PORTRAITS.map((n, k) => html`<button key=${n} type="button" aria-pressed=${k === idx} aria-label=${"Photo " + (k + 1)} onClick=${e => { e.stopPropagation(); api.current && api.current.show(k); }}></button>`)}</div>`}
-    <button type="button" className="pp-toggle" onClick=${() => setReveal(v => !v)}>${reveal ? "Show particles" : "Show photo"}</button>
-  </div>`;
+/* ---------- About mark: the word ASTRONOMER in the panel beside the bio ---------- */
+function AstronomerMark() {
+  return html`<div className="portrait pp" aria-hidden="true"><span className="bigword">ASTRONOMER</span></div>`;
 }
 
 function About() {
   return html`<section className="band" id="about" aria-labelledby="about-h" data-p0=".6" data-p1="1.3" data-kind="content"><div className="inner">
     <div className="about">
-    <div><${ParticlePortrait}/></div>
+    <div><${AstronomerMark}/></div>
     <div className="prose">
       <span className="label">About</span>
       <h2 id="about-h">Astronomy, education, observation and technology</h2>

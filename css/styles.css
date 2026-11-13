@@ -638,31 +638,14 @@ footer{border-top:0}
 .proc-nav .proc-steps button:hover .stage-icon{opacity:1}
 @media (max-width:760px){.proc-nav > div.proc-steps{display:flex}.proc-nav .proc-steps button{padding:4px}}
 
-/* ---------- particle portrait ---------- */
-.portrait.pp{position:relative;display:block;padding:0;overflow:hidden;container-type:inline-size;background:radial-gradient(ellipse at 50% 40%,rgba(255,170,110,.07),transparent 65%),rgba(5,7,15,.6)}
-.pp .bigword{position:absolute;left:50%;top:9%;transform:translateX(-50%);font-family:var(--display);font-weight:600;font-size:15cqw;letter-spacing:-.04em;line-height:1;white-space:nowrap;
-  background:linear-gradient(180deg,rgba(241,238,230,.55),rgba(241,238,230,.04) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;pointer-events:none;transition:background .6s}
-.pp.reveal .bigword{background:linear-gradient(180deg,#ffc27a,rgba(255,120,72,.15) 90%);-webkit-background-clip:text;background-clip:text}
-.pp-canvas,.pp-photo{position:absolute;inset:0;width:100%;height:100%;display:block}
-.pp-photo{object-fit:cover;opacity:0;transition:opacity .6s}
-.pp-canvas{transition:opacity .6s}
-.pp.reveal .pp-photo{opacity:1}
-.pp.reveal .pp-canvas{opacity:.15}
-.pp-toggle{all:unset;cursor:pointer;position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--star);background:rgba(5,7,15,.7);border:1px solid var(--line);border-radius:var(--radius-pill);padding:7px 14px}
-.pp-toggle:focus-visible{outline:1.5px solid var(--amber)}
-.pp-tag{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);white-space:nowrap}
+/* ---------- About mark ---------- */
+.portrait.pp{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:auto;padding:56px 0;overflow:hidden;container-type:inline-size;background:radial-gradient(ellipse at 50% 50%,rgba(255,170,110,.07),transparent 65%),rgba(5,7,15,.6)}
+.pp .bigword{font-family:var(--display);font-weight:600;font-size:15cqw;letter-spacing:-.04em;line-height:1;white-space:nowrap;
+  background:linear-gradient(180deg,rgba(241,238,230,.55),rgba(241,238,230,.04) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;pointer-events:none}
 
 /* real photos */
 .gallery button.img.has-photo{padding:0;overflow:hidden;border-style:solid;background:var(--panel)}
 .gallery button.img.has-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease,filter .5s}
 .gallery button.img.has-photo:hover img{transform:scale(1.04)}
 .lb-photo{width:100%;max-height:70vh;object-fit:contain;border-radius:var(--radius-md);background:var(--void)}
-.pp-photo{object-position:50% 30%}
 
-.pp-photo{opacity:0}
-.pp.reveal .pp-photo{opacity:0}
-.pp.reveal .pp-photo.on{opacity:1}
-.pp-dots{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);display:flex;gap:8px;z-index:2}
-.pp-dots button{all:unset;cursor:pointer;width:8px;height:8px;border-radius:50%;border:1px solid rgba(241,238,230,.6)}
-.pp-dots button[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);box-shadow:var(--glow-amber)}
-.pp-dots button:focus-visible{outline:1.5px solid var(--amber);outline-offset:3px}

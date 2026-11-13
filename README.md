@@ -52,7 +52,7 @@ Then open http://localhost:8000.
 The site is a draft. Amber dashed tags on the page mark details still to confirm:
 
 - University, graduation year and the start year of outreach work
-- Portrait and event photographs, with permission
+- Event photographs, with permission
 - Real projects, with links and your role in each
 - Programming languages and tools
 - Contact email, social links and service area
