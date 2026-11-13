@@ -14,7 +14,7 @@ const starCol=b=>{const t=R();const c=t<.22?[.66,.78,1]:t<.62?[1,1,1]:t<.86?[1,.
 const mk=()=>({p:new Float32Array(N*4),c:new Float32Array(N*4)});
 function set(f,i,x,y,z,k,r,g,b,s){const o=i*4;f.p[o]=x;f.p[o+1]=y;f.p[o+2]=z;f.p[o+3]=k;f.c[o]=r;f.c[o+1]=g;f.c[o+2]=b;f.c[o+3]=s;}
 const horizon=x=>-.95+.12*Math.sin(x*1.7)+.06*Math.sin(x*4.3+1);
-function bgStars(f,i,n){for(let j=0;j<n;j++){const m=Math.pow(R(),3);set(f,i++,(R()*2-1)*4.2,(R()*2-1)*2.6,-1.2-R()*2.5,1,...starCol(.18+m*.7),1+m*2.2);}return i;}
+function bgStars(f,i,n){for(let j=0;j<n;j++){const m=Math.pow(R(),3),z=-1.2-R()*2.5,half=(4+(-z))/1.6;set(f,i++,(R()*2-1)*half*2,(R()*2-1)*half*1.15,z,1,...starCol(.18+m*.7),1+m*2.2);}return i;}
 
 /* ---------- formations ----------
    kind: 0 animated · 1 static · 2 lit sphere · 3 rings · 4 young stars · 9 pulsar · 10 lensed light
@@ -34,9 +34,9 @@ function fSky(){
     else if(t<.88){const s=R()<.5?-1:1;if(R()<.5){x=dx+s*.16;y=dy+R()*.15;}else{x=dx+(R()*2-1)*.16;y=dy+.15;}}
     else{set(f,i++,dx+.03+gauss()*.01,dy+.18+R()*.1,0,1,1,.62,.28,2.2);continue;}
     set(f,i++,x,y,0,1,.4,.45,.6,1.4);}
-  for(let j=0,n=N*.32|0;j<n;j++){const t=-3.6+R()*7.2,off=gauss()*.2*(1+.5*Math.sin(t*2.1));const b=.15+R()*.3;
+  for(let j=0,n=N*.3|0;j<n;j++){const t=-7+R()*14,off=gauss()*.2*(1+.5*Math.sin(t*2.1));const b=.15+R()*.3;
     const c=R()<.55?[.72,.8,1]:[1,.86,.72];set(f,i++,t-off*.35,.2+t*.36+off,0,0,c[0]*b,c[1]*b,c[2]*b,1+R()*1.4);}
-  while(i<N){const m=Math.pow(R(),4);set(f,i++,-3.6+R()*7.2,-1+R()*3.2,0,0,...starCol(.12+m*1.05),.9+m*4.2);}
+  while(i<N){const m=Math.pow(R(),4),a=R()*TAU,r=5.4*Math.sqrt(R());set(f,i++,-.35+Math.cos(a)*r,1.5+Math.sin(a)*r,0,0,...starCol(.16+m*1.05),1+m*4.2);}
   return f;
 }
 const onSphere=()=>{const u=R()*2-1,a=R()*TAU,s=Math.sqrt(1-u*u);return[s*Math.cos(a),u,s*Math.sin(a),a];};
