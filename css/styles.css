@@ -590,3 +590,5 @@ footer{border-top:0}
 
 .cas .wb{fill:none;stroke:rgba(241,238,230,.22);stroke-width:.8;transition:stroke .3s}
 .cas .wb.hot{stroke:rgba(255,194,122,.55)}
+
+.filters button{background:rgba(10,14,29,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}

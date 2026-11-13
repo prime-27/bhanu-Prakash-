@@ -55,22 +55,12 @@ const CONTENT = {
     ["Interactive educational tools","Science-oriented digital experiences and simulations."],
     ["Interface design","Usability and content structured for clear digital experiences."],
     ["Problem solving","Prototyping, testing and iterative development."],
-    ["Astronomy simulations","Including the Beyond the Sky Virtual AstroLab, in development."]
+    ["Astronomy simulations","47 live sky tools, simulators and physics labs, listed under Projects."]
   ],
   devServices: [
     ["Website Development","Design and development of websites with attention to clarity, responsiveness and usability."],
     ["Software & Application Projects","Development of, or collaboration on, applications and interactive tools, subject to project scope."]
   ],
-  projects: [
-    { t:"School astronomy outreach", c:["astronomy","education"], d:"Audience, topic, demonstrations and learning outcomes for a school program." },
-    { t:"Public stargazing events", c:["astronomy"], d:"Venue type, the telescope experience and the objects observed on the night." },
-    { t:"Astronomy workshops", c:["education","astronomy"], d:"Hands-on activities and the educational design behind them." },
-    { t:"Beyond the Sky", c:["astronomy","education"], d:"Your personal role and contributions, kept distinct from the organization itself.", note:"Role to confirm" },
-    { t:"Beyond the Sky Virtual AstroLab", c:["software","education","dev"], d:"Interactive astronomy simulations for learning. Currently in development." },
-    { t:"Websites built", c:["web"], d:"Live links, screenshots, technologies and your exact contribution to each site." },
-    { t:"Software & applications", c:["software"], d:"Features, screenshots, demos, repositories and current status for each project." }
-  ],
-  caseFields: ["Category","Role","Client or organization","Date","Location","Objective","Audience","Responsibilities","Tools, equipment or technology","Process","Outcomes","Live link","Permissions & credits"],
   gallery: ["Telescope session with a public group","School astronomy workshop","The Moon through the telescope","Setting up and aligning the telescope","Public astronomy evening","Hands-on workshop activity"],
   inquiry: ["Guided stargazing session","School astronomy program","Astronomy workshop","Astronomy event or outreach","Website development","Software or application project","Something else"]
 };
@@ -314,33 +304,28 @@ function Development() {
     <div className="dev"><${SkillGrid} items=${CONTENT.devSkills}/></div>
     <${Services} items=${CONTENT.devServices} start=${5} track="Development"/><//>`;
 }
+const TOOLS = [{"t": "Star Map", "d": "The whole sky with names and stories in Telugu and English.", "c": "sky", "u": "https://beyondthesky.in/star-map"}, {"t": "Constellations & Zodiac", "d": "The 88 constellations, the Sun’s path and star lore from many cultures.", "c": "sky", "u": "https://beyondthesky.in/constellations"}, {"t": "Constellations in 3D", "d": "Fly through real stars and watch Orion fall apart.", "c": "sky", "u": "https://beyondthesky.in/constellations-3d"}, {"t": "Nakshatras", "d": "The 27 nakshatras: Telugu stories, real stars, your birth star.", "c": "sky", "u": "https://beyondthesky.in/nakshatras"}, {"t": "Sky Calendar", "d": "Eclipses, meteor showers and planet events, month by month.", "c": "sky", "u": "https://beyondthesky.in/calendar"}, {"t": "Events", "d": "Every eclipse, meteor shower and planet event of the year.", "c": "sky", "u": "https://beyondthesky.in/almanac"}, {"t": "This Week", "d": "The Moon, NASA picture of the day and next launches, live.", "c": "sky", "u": "https://beyondthesky.in/this-week"}, {"t": "Eclipse Simulator", "d": "Watch any eclipse from 2020 to 2040 as it looks from your city.", "c": "sky", "u": "https://beyondthesky.in/eclipse-simulator"}, {"t": "Deep Sky Guide", "d": "The best galaxies, nebulae and star clusters to find from Hyderabad.", "c": "sky", "u": "https://beyondthesky.in/deep-sky"}, {"t": "Planet Finder", "d": "Point your phone at the sky to find the Moon and planets.", "c": "sky", "u": "https://beyondthesky.in/planet-finder"}, {"t": "Star Party Planner", "d": "Plan an observing night hour by hour, and print it.", "c": "sky", "u": "https://beyondthesky.in/star-party-planner"}, {"t": "Light Map", "d": "Find the darkest skies near you.", "c": "sky", "u": "https://beyondthesky.in/light-pollution"}, {"t": "Choose a Telescope", "d": "Six questions to find your first telescope.", "c": "sky", "u": "https://beyondthesky.in/choose-a-telescope"}, {"t": "Space Weather", "d": "Flare classes, solar storms, the aurora and what they do to satellites and grids.", "c": "sun", "u": "https://beyondthesky.in/space-weather"}, {"t": "Space Weather over India", "d": "The May 2024 superstorm as recorded at Hyderabad and Alibag.", "c": "sun", "u": "https://beyondthesky.in/space-weather-india"}, {"t": "Solar Flare Statistics", "d": "Thirty years of GOES flares by phase of the solar cycle, with a fitted power law.", "c": "sun", "u": "https://beyondthesky.in/flare-statistics"}, {"t": "Sun Time Machine", "d": "The real Sun on any day since 1996, from the surface to the corona.", "c": "sun", "u": "https://beyondthesky.in/sun-time-machine"}, {"t": "Aditya-L1", "d": "India’s first solar observatory, its seven instruments and how to get its data.", "c": "sun", "u": "https://beyondthesky.in/aditya-l1"}, {"t": "Kodaikanal Archive", "d": "A century of solar images from the Kodaikanal Solar Observatory.", "c": "sun", "u": "https://beyondthesky.in/kodaikanal"}, {"t": "Solar Cycle Explorer", "d": "Sunspots since 1749, Cycle 25, the butterfly diagram and data to download.", "c": "sun", "u": "https://beyondthesky.in/solar-cycle"}, {"t": "Special Relativity", "d": "Time dilation, the speed limit and E = mc², with live models.", "c": "physics", "u": "https://beyondthesky.in/special-relativity"}, {"t": "General Relativity", "d": "Curved space, slow time, bent light and waves, with a live model of each.", "c": "physics", "u": "https://beyondthesky.in/relativity"}, {"t": "Black Hole Lab", "d": "Fly around a ray-traced black hole, with lessons and quizzes.", "c": "physics", "u": "https://beyondthesky.in/black-hole"}, {"t": "Gravitational Waves", "d": "Every black hole and neutron star merger heard so far, with the chirps.", "c": "physics", "u": "https://beyondthesky.in/gravitational-waves"}, {"t": "Orbits and Kepler", "d": "Launch your own orbit, weigh the Earth and plan a trip to Mars.", "c": "physics", "u": "https://beyondthesky.in/orbits"}, {"t": "Stellar Life Cycles", "d": "The HR diagram, how stars die and where the elements come from.", "c": "physics", "u": "https://beyondthesky.in/stars"}, {"t": "Redshift and Hubble", "d": "Why distant galaxies look red and how the universe expands.", "c": "physics", "u": "https://beyondthesky.in/redshift"}, {"t": "CMB and Dark Matter", "d": "The oldest light, the sound of the early universe and the unseen mass.", "c": "physics", "u": "https://beyondthesky.in/cmb"}, {"t": "Exoplanets", "d": "Worlds orbiting other stars, from real NASA data.", "c": "physics", "u": "https://beyondthesky.in/exoplanet"}, {"t": "MSc Physics Lab", "d": "Sixteen labs: stars, neutron stars, cosmology, radiation, orbits, black holes, discs, the solar wind, CME forecasts, gravitational waves, radio, exoplanets and more.", "c": "physics", "u": "https://beyondthesky.in/msc?level=msc"}, {"t": "Solar System", "d": "Fly through the planets in 3D.", "c": "scale", "u": "https://beyondthesky.in/solar-system"}, {"t": "Size of the Universe", "d": "Zoom from a person to the edge of everything.", "c": "scale", "u": "https://beyondthesky.in/size-of-the-universe"}, {"t": "Sun to Oort Cloud", "d": "How far the Solar System really goes, out to the Voyagers and beyond.", "c": "scale", "u": "https://beyondthesky.in/sun-to-oort-cloud"}, {"t": "Light Travel Time", "d": "When the light you see tonight left its star or galaxy.", "c": "scale", "u": "https://beyondthesky.in/light-travel-time"}, {"t": "Cosmic Timeline", "d": "13.8 billion years, from the Big Bang to now.", "c": "scale", "u": "https://beyondthesky.in/Cosmictimeline"}, {"t": "Time Systems", "d": "Every clock in the universe, live: sundial, star, atomic and Mars time.", "c": "scale", "u": "https://beyondthesky.in/time-systems"}, {"t": "Vishwa Kalamanam (విశ్వ కాలమానం)", "d": "Indian units of time, from paramanu to the life of Brahma, beside science, in Telugu.", "c": "scale", "u": "https://beyondthesky.in/vishwa-kalamanam"}, {"t": "Telescopes", "d": "Live positions of the world’s major telescopes.", "c": "scale", "u": "https://beyondthesky.in/telescopes"}, {"t": "Sky Postcard", "d": "The real sky on your special day, as a postcard.", "c": "learn", "u": "https://beyondthesky.in/sky-postcard"}, {"t": "Sundial and Shadows", "d": "Where shadows fall today, and a sundial to print.", "c": "learn", "u": "https://beyondthesky.in/sundial"}, {"t": "Your Weight in Space", "d": "Your weight and age on other worlds.", "c": "learn", "u": "https://beyondthesky.in/weight-in-space"}, {"t": "Moon Impact Lab", "d": "Crash an asteroid into the Moon and see the crater.", "c": "learn", "u": "https://beyondthesky.in/moon-impact"}, {"t": "Astronomy Quiz", "d": "Test what you know about the sky and space.", "c": "learn", "u": "https://beyondthesky.in/quiz"}, {"t": "For Teachers", "d": "Printable lesson packs in English and Telugu.", "c": "teach", "u": "https://beyondthesky.in/for-teachers"}, {"t": "Research", "d": "Open data guides, Python notebooks and astronomy opportunities in India.", "c": "teach", "u": "https://beyondthesky.in/research"}, {"t": "Careers", "d": "Internships, jobs, workshops and fellowships in physics and astronomy, with email alerts.", "c": "teach", "u": "https://beyondthesky.in/careers"}, {"t": "Installable Sky App", "d": "The sky tools as an app you can add to your phone’s home screen.", "c": "teach", "u": "https://beyondthesky.in/app"}];
+const TOOL_TAGS = { all: "All", sky: "Sky tools", sun: "The Sun", physics: "Physics labs", scale: "Scale & time", learn: "Learn & play", teach: "Teaching & careers" };
+/* Set to false to hide the links to the live tools. */
+const SHOW_TOOL_LINKS = true;
 function Projects() {
   const [filter, setFilter] = useState("all");
-  const dlg = useDialog();
-  const counts = useMemo(() => Object.fromEntries(Object.keys(TAGS).map(k => [k, k === "all" ? CONTENT.projects.length : CONTENT.projects.filter(p => p.c.includes(k)).length])), []);
-  const shown = CONTENT.projects.filter(p => filter === "all" || p.c.includes(filter));
-  const p = dlg.data;
-  return html`<${Section} id="projects" p=${[7.0, 7.6]} chapter=${7} label="Projects" title="Selected work"
-    lede="Case studies will be added here with role, audience, process, outcomes and photographs. The cards below are templates until each project is confirmed.">
+  const counts = useMemo(() => Object.fromEntries(Object.keys(TOOL_TAGS).map(k => [k, k === "all" ? TOOLS.length : TOOLS.filter(p => p.c === k).length])), []);
+  const shown = TOOLS.filter(p => filter === "all" || p.c === filter);
+  return html`<${Section} id="projects" p=${[7.0, 7.6]} chapter=${7} label="Projects" title=${`${TOOLS.length} astronomy tools I designed and built`}
+    lede="Interactive sky tools, solar data explorers, physics labs and teaching resources, many in both English and Telugu. Each one runs in the browser.">
     <div className="filters" role="group" aria-label="Filter projects">
-      ${Object.entries(TAGS).map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${filter === k} onClick=${e => { setFilter(k); burstAt(e.currentTarget, { n: 16, speed: 3 }); }}>${n} <span className="count">${counts[k]}</span></button>`)}
+      ${Object.entries(TOOL_TAGS).map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${filter === k} onClick=${e => { setFilter(k); burstAt(e.currentTarget, { n: 16, speed: 3 }); }}>${n} <span className="count">${counts[k]}</span></button>`)}
     </div>
     <p className="sr" aria-live="polite">${shown.length} projects shown</p>
     <div className="projects">${shown.map(pr => html`<article className="card" key=${pr.t} onMouseEnter=${e => burst(e.clientX, e.clientY, { n: 12, speed: 2.4 })}>
-      <div className="tags">${pr.c.map(c => html`<span key=${c} className=${c === "dev" ? "dev" : ""}>${c === "dev" ? "In development" : TAGS[c]}</span>`)}</div>
+      <div className="tags"><span className=${pr.c === "physics" || pr.c === "teach" ? "dev" : ""}>${TOOL_TAGS[pr.c]}</span></div>
       <h3>${pr.t}</h3><p>${pr.d}</p>
-      <div className="cardfoot"><${Ph}>${pr.note || "Case study to add"}<//><button className="link" type="button" onClick=${() => dlg.open(pr)}>View case study →</button></div>
+      ${SHOW_TOOL_LINKS && html`<div className="cardfoot"><span></span><a className="link" href=${pr.u} target="_blank" rel="noopener">Open the tool ↗</a></div>`}
     </article>`)}</div>
-    <dialog ref=${dlg.ref} className="modal" aria-labelledby="cs-title">
-      ${p && html`<div className="modal-in">
-        <div className="modal-head"><div><span className="label">Case study template</span><h3 id="cs-title">${p.t}</h3></div>
-          <button className="x" type="button" aria-label="Close" onClick=${dlg.close}>×</button></div>
-        <p>${p.d}</p>
-        <dl className="cs">${CONTENT.caseFields.map(f => html`<div key=${f}><dt>${f}</dt><dd><${Ph}>To add<//></dd></div>`)}</dl>
-        <div className="photos">${[1, 2, 3].map(n => html`<div key=${n} className="img">Photo or screenshot</div>`)}</div>
-      </div>`}
-    </dialog><//>`;
+  <//>`;
 }
+
 function Gallery() {
   const dlg = useDialog();
   const n = CONTENT.gallery.length, idx = dlg.data;
