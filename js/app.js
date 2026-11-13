@@ -62,12 +62,12 @@ const CONTENT = {
     ["Software & Application Projects","Development of, or collaboration on, applications and interactive tools, subject to project scope."]
   ],
   gallery: [
-    { src: "assets/photos/library.jpg", cap: "Among the bound journals of the library", alt: "Bhanu Prakash in a library, in front of shelves of old bound journals" },
-    { src: "assets/photos/library-reading.jpg", cap: "Reading in the library", alt: "Bhanu Prakash reading a large book at a library table" },
-    { src: "assets/photos/standing.jpg", pos: "50% 12%", cap: "On the road", alt: "Bhanu Prakash standing on a tree-lined road, smiling" },
-    { src: "assets/photos/outdoors.jpg", pos: "50% 22%", cap: "Out in the open", alt: "Bhanu Prakash standing in a green field with trees behind him" },
     { src: "", cap: "Telescope session with a public group" },
-    { src: "", cap: "School astronomy workshop" }
+    { src: "", cap: "School astronomy workshop" },
+    { src: "", cap: "The Moon through the telescope" },
+    { src: "", cap: "Setting up and aligning the telescope" },
+    { src: "", cap: "Public astronomy evening" },
+    { src: "", cap: "Hands-on workshop activity" }
   ],
   inquiry: ["Guided stargazing session","School astronomy program","Astronomy workshop","Astronomy event or outreach","Website development","Software or application project","Something else"]
 };
@@ -387,7 +387,7 @@ function Gallery() {
     const k = e => { if (idx == null) return; if (e.key === "ArrowRight") dlg.setData((idx + 1) % n); if (e.key === "ArrowLeft") dlg.setData((idx - 1 + n) % n); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [idx]);
-  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Photographs from the library, the field and the sky. Session and workshop photos are added as they are shared with permission.">
+  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
     <div className="gallery">${CONTENT.gallery.map((g, i) => html`<figure key=${g.cap}>
       <button className=${"img" + (g.src ? " has-photo" : "")} type="button" aria-label=${"Open photo: " + g.cap} onClick=${e => { burstAt(e.currentTarget, { n: 30, speed: 4 }); dlg.open(i); }}>
         ${g.src ? html`<img src=${g.src} alt=${g.alt} loading="lazy" style=${{ objectPosition: g.pos || "50% 50%" }}/>` : "Photo to add"}</button><figcaption>${g.cap}</figcaption></figure>`)}</div>
