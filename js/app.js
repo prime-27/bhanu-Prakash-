@@ -15,13 +15,13 @@ const CONTENT = {
     text: "I’m Bhanu Prakash, an astronomer and stargazing expert with an MSc in Astronomy and three years of experience bringing astronomy to schools, communities, and curious minds. I also design and develop websites, software, and applications."
   },
   bio: [
-    "I am Bhanu Prakash, an astronomer with an MSc in Astronomy and three years of experience conducting stargazing sessions, astronomy outreach programs, and hands-on educational workshops. I work with schools, students, families, and the wider public to make the night sky understandable and exciting.",
+    "I am Bhanu Prakash, an astronomer with an MSc in Astronomy from Osmania University (2025) and three years of experience conducting stargazing sessions, astronomy outreach programs, and hands-on educational workshops. I work with schools, students, families, and the wider public to make the night sky understandable and exciting.",
     "I have been involved in organizing and delivering telescope-based night-sky observations, public stargazing experiences, astronomy awareness programs, school outreach sessions, and interactive workshops. I enjoy translating complex astronomical ideas into engaging experiences for people of different ages and backgrounds.",
     "My astronomy work includes helping participants recognize celestial objects, understand telescopes and observational techniques, explore the Moon and planets, and connect what they see in the sky to the science behind it. I am particularly interested in experiences that move beyond lectures and give participants opportunities to observe, ask questions, and learn by doing.",
     "I also develop websites, software, and applications. This technical side of my work lets me approach problems creatively and build digital tools, including science-oriented and educational experiences. My goal is to use both astronomy and technology to create accessible, meaningful learning opportunities."
   ],
   creds: [
-    ["Education","MSc in Astronomy","University · year"],
+    ["Education","MSc in Astronomy, Osmania University, 2025",null],
     ["Experience","About 3 years in observation, outreach and public engagement","Confirm start year"],
     ["Based in","Hyderabad, India","Confirm service area"],
     ["Works with","Schools, teachers, families, beginners, enthusiasts and public groups",null]
