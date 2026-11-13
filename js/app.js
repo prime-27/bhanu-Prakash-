@@ -654,7 +654,7 @@ function Process() {
             <button type="button" aria-pressed=${paused} onClick=${() => setPaused(v => !v)}>${paused ? "Play" : "Pause"}</button>
           </div>
           <span>Drag to rotate, choose a stage to travel to it</span>
-          <div>${STAGES.map((s, i) => html`<button key=${i} type="button" aria-pressed=${i === stage} onClick=${() => go(i)}>${String(i + 1).padStart(2, "0")}</button>`)}</div></div>
+          <div className="proc-steps">${STAGES.map((s, i) => html`<button key=${i} type="button" aria-pressed=${i === stage} aria-label=${`Stage ${i + 1}: ${s.n}, ${s.s}`} title=${s.s} onClick=${() => go(i)}><${Spark} k=${i} size=${30}/><span>${String(i + 1).padStart(2, "0")}</span></button>`)}</div></div>
       </div>
     </div></section>`;
 }
