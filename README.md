@@ -54,3 +54,7 @@ Add an entry to the `EVENTS` list in `js/app.js` (there is an example in the com
 
 Articles are plain pages in `notes/`. To add one, copy an existing note, change its title, description and text, add it to the `NOTES` list in `js/app.js`, and add its address to `sitemap.xml`. Review the three starter notes before publishing: they are written in your voice.
 
+
+### After changing CSS or JavaScript
+
+Browsers keep the site's files for about 10 minutes. When you change `css/styles.css`, `js/universe.js` or `js/app.js`, also change the `?v=` number after those file names in `index.html` (any new number works, such as today's date and time). Visitors then get the new files straight away.
