@@ -281,39 +281,60 @@ function Hero({ cueRef }) {
    Put a photo at assets/portrait.jpg (head and shoulders, plain dark background works best). */
 const PORTRAIT_SRC = "assets/portrait.jpg", PORTRAIT_PARTICLES = "assets/portrait-particles.png";
 function startPortrait(canvas, img) {
-  const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, vis = false, t = 0, last = 0, mx = -1e4, my = -1e4, go = false;
-  const GW = 190, GH = 236, off = document.createElement("canvas"); off.width = GW; off.height = GH; const o = off.getContext("2d");
-  if (img) { const sc = Math.max(GW / img.width, GH / img.height), w = img.width * sc, h = img.height * sc; o.drawImage(img, (GW - w) / 2, (GH - h) / 2, w, h); }
-  else { const g = o.createRadialGradient(GW * .4, GH * .28, 3, GW * .5, GH * .5, GH * .75); g.addColorStop(0, "#fff"); g.addColorStop(.55, "#9a9a9a"); g.addColorStop(1, "#262626"); o.fillStyle = g;
-    o.beginPath(); o.ellipse(GW * .5, GH * .34, GW * .16, GH * .155, 0, 0, 6.283); o.fill();
-    o.fillRect(GW * .43, GH * .45, GW * .14, GH * .2);
+  // Sample the cut-out portrait densely: one particle per pixel where there is light, brightness drives size and glow.
+  const GW = img ? Math.min(img.width, 300) : 200, GH = img ? Math.round(GW * img.height / img.width) : 250;
+  const off = document.createElement("canvas"); off.width = GW; off.height = GH; const o = off.getContext("2d");
+  if (img) o.drawImage(img, 0, 0, GW, GH);
+  else { o.fillStyle = "#fff"; o.beginPath(); o.ellipse(GW * .5, GH * .34, GW * .16, GH * .155, 0, 0, 6.283); o.fill(); o.fillRect(GW * .43, GH * .45, GW * .14, GH * .2);
     o.beginPath(); o.moveTo(GW * .04, GH); o.quadraticCurveTo(GW * .06, GH * .66, GW * .36, GH * .62); o.lineTo(GW * .64, GH * .62); o.quadraticCurveTo(GW * .94, GH * .66, GW * .96, GH); o.closePath(); o.fill(); }
-  const d = o.getImageData(0, 0, GW, GH).data, P = [];
-  for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) { const i = (y * GW + x) * 4, l = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255 * (d[i + 3] / 255);
-    if (l > .07 && Math.random() < Math.min(1, Math.pow(l, 1.05) * 1.15)) P.push({ u: (x + Math.random()) / GW, v: (y + Math.random()) / GH, l, x: Math.random(), y: Math.random(), vx: 0, vy: 0, ph: Math.random() * 6.28 }); }
-  const resize = () => { const dp = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * dp; canvas.height = H * dp; ctx.setTransform(dp, 0, 0, dp, 0, 0); };
-  const move = e => { const r = canvas.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; };
-  const leave = () => { mx = my = -1e4; };
+  const px = o.getImageData(0, 0, GW, GH).data, tgt = [], lum = [];
+  for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) {
+    const i = (y * GW + x) * 4, l = (px[i] * .3 + px[i + 1] * .59 + px[i + 2] * .11) / 255;
+    if (l < .06 || Math.random() > .35 + .65 * l) continue;
+    const u = (x + Math.random() * .9) / GW, v = (y + Math.random() * .9) / GH;
+    // a curved head-and-shoulders form so the portrait has real depth when it turns
+    const hx = (u - .5) / .34, hy = (v - .4) / .42, head = Math.max(0, 1 - hx * hx - hy * hy), sx = (u - .5) / .62, wb = Math.min(1, Math.max(0, (v - .45) / .35)), body = Math.max(0, 1 - sx * sx) * .5 * wb * wb * (3 - 2 * wb);
+    tgt.push((u - .5) * 2, (.5 - v) * 2 * GH / GW, Math.max(Math.sqrt(head) * .38, Math.sqrt(body) * .3) + (l - .5) * .04); lum.push(l);
+  }
+  const N = lum.length;
+  const gl = canvas.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: false });
+  if (!gl) return () => {};
+  const vs = `attribute vec3 aT,aS;attribute float aL,aR;uniform float uP,uT,uRx,uRy,uAsp,uSize,uScale;uniform vec2 uM;varying vec3 vC;varying float vA;
+  void main(){float d=(aT.y/uScale*.5+.5)*.55+aR*.25;float k=smoothstep(d,d+.35,uP);
+    vec3 p=mix(aS,aT,k);float sw=(1.-k)*2.;p.x+=sin(uT*.7+aR*20.)*.03*sw;p.y+=cos(uT*.6+aR*17.)*.03*sw;
+    p.xy+=vec2(sin(uT*.9+aR*40.),cos(uT*.8+aR*31.))*.0035*k;
+    float cy=cos(uRy),sy=sin(uRy),cx=cos(uRx),sx=sin(uRx);vec3 q=vec3(p.x*cy+p.z*sy,p.y,-p.x*sy+p.z*cy);q=vec3(q.x,q.y*cx-q.z*sx,q.y*sx+q.z*cx);
+    float z=3.2-q.z;vec2 s=q.xy*2.9/z;s.x/=uAsp;s/=uScale;vec2 dd=(s-uM)*vec2(uAsp,1.);float dl=length(dd);s+=dd/(dl+1e-4)*.09*exp(-dl*dl/.012)/vec2(uAsp,1.);
+    gl_Position=vec4(s,0.,1.);gl_PointSize=uSize*(.55+aL*.9)*(1.+sw*.4);
+    vec3 warm=vec3(1.,.48,.2),hot=vec3(1.,.82,.58),white=vec3(1.,.97,.92);vC=mix(mix(warm,hot,smoothstep(.15,.55,aL)),white,smoothstep(.6,.95,aL));vA=(.28+.85*aL)*mix(.45,1.,k);}`;
+  const fs = `precision mediump float;varying vec3 vC;varying float vA;void main(){vec2 q=gl_PointCoord-.5;float r=length(q);float a=smoothstep(.5,.15,r)*vA;gl_FragColor=vec4(vC*a,a);}`;
+  const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return () => {};
+  gl.useProgram(pr);
+  const st = new Float32Array(N * 3), rr = new Float32Array(N);
+  for (let i = 0; i < N; i++) { const a = Math.random() * 6.283, r = .4 + Math.random() * 1.6; st[i * 3] = Math.cos(a) * r; st[i * 3 + 1] = -1.6 - Math.random() * 1.2; st[i * 3 + 2] = Math.sin(a) * r * .6; rr[i] = Math.random(); }
+  const buf = (data, name, n) => { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); const l = gl.getAttribLocation(pr, name); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, n, gl.FLOAT, false, 0, 0); };
+  buf(new Float32Array(tgt), "aT", 3); buf(st, "aS", 3); buf(new Float32Array(lum), "aL", 1); buf(rr, "aR", 1);
+  const U = n => gl.getUniformLocation(pr, n), uP = U("uP"), uT = U("uT"), uRx = U("uRx"), uRy = U("uRy"), uAsp = U("uAsp"), uSize = U("uSize"), uM = U("uM"), uScale = U("uScale");
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  let W = 1, H = 1, dpr = 1, raf = 0, vis = false, last = 0, t = 0, P = 0, goal = 0, rx = 0, ry = 0, trx = 0, try_ = 0, mx = 9, my = 9;
+  const resize = () => { dpr = Math.min(devicePixelRatio || 1, 2); const r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr; gl.viewport(0, 0, canvas.width, canvas.height); };
+  const move = e => { const r = canvas.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width * 2 - 1, ny = (e.clientY - r.top) / r.height * 2 - 1; try_ = nx * .45; trx = ny * .2; mx = nx; my = -ny; };
+  const leave = () => { trx = try_ = 0; mx = my = 9; };
   function frame(now) {
     raf = vis ? requestAnimationFrame(frame) : 0; const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt;
-    ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = "lighter";
-    for (const p of P) {
-      const tx = go ? p.u : p.x, ty = go ? p.v : p.y;
-      if (reduced) { p.x = p.u; p.y = p.v; }
-      else { p.vx += (tx - (p.x)) * .05; p.vy += (ty - (p.y)) * .05;
-        const px = p.x * W, py = p.y * H, ex = px - mx, ey = py - my, dd = ex * ex + ey * ey;
-        if (dd < 3600) { const f = (1 - dd / 3600) * .012; p.vx += ex / Math.sqrt(dd + 1) * f; p.vy += ey / Math.sqrt(dd + 1) * f; }
-        p.vx *= .84; p.vy *= .84; p.x += p.vx; p.y += p.vy; }
-      const tw = .8 + .2 * Math.sin(t * 2 + p.ph), a = Math.min(1, (.35 + .9 * p.l) * tw), sz = .8 + p.l * 1.3;
-      ctx.fillStyle = `rgba(255,${Math.round(150 + 100 * p.l)},${Math.round(80 + 160 * p.l * p.l)},${a.toFixed(3)})`;
-      ctx.fillRect(p.x * W, p.y * H, sz, sz);
-    }
-    ctx.globalCompositeOperation = "source-over";
+    P += (goal - P) * Math.min(1, dt * (reduced ? 60 : .9)); rx += (trx - rx) * Math.min(1, dt * 3); ry += ((try_ + Math.sin(t * .35) * .06) - ry) * Math.min(1, dt * 3);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uP, P * 1.25); gl.uniform1f(uT, t); gl.uniform1f(uRx, rx); gl.uniform1f(uRy, ry); gl.uniform1f(uAsp, W / H);
+    gl.uniform1f(uScale, GH / GW * 1.02); gl.uniform1f(uSize, Math.max(1.4, W / GW * .95) * dpr); gl.uniform2f(uM, mx, my);
+    gl.drawArrays(gl.POINTS, 0, N);
   }
-  const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis) { setTimeout(() => (go = true), 250); if (!raf) { last = 0; raf = requestAnimationFrame(frame); } } }, { threshold: .25 });
+  const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis) { goal = 1; if (!raf) { last = 0; raf = requestAnimationFrame(frame); } } }, { threshold: .2 });
   io.observe(canvas); resize(); addEventListener("resize", resize); canvas.addEventListener("pointermove", move); canvas.addEventListener("pointerleave", leave);
   return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); };
 }
+
 function ParticlePortrait() {
   const can = useRef(), [photo, setPhoto] = useState(null), [reveal, setReveal] = useState(false);
   useEffect(() => { let stop = () => {}; const img = new Image(); img.onload = () => { setPhoto(PORTRAIT_SRC); stop = startPortrait(can.current, img); }; img.onerror = () => { stop = startPortrait(can.current, null); }; img.src = PORTRAIT_PARTICLES; return () => stop(); }, []);
