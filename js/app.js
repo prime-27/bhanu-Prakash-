@@ -542,7 +542,8 @@ function buildProcessObjects() {
   return O;
 }
 const PCOL = ["241,238,230", "255,194,122", "168,199,255", "242,71,127"];
-function startProcess(canvas, section, onStage) {
+function startProcess(canvas, section, onStage, ctl = { mode: "formed", paused: false }) {
+  let ex = 0;
   const ctx = canvas.getContext("2d"), objs = buildProcessObjects(), SP = 7, N = STAGES.length;
   let W = 1, H = 1, raf = 0, t = 0, f = 0, ft = 0, last = performance.now(), shown = -1, visible = false;
   const drag = { on: false, x: 0, y: 0, yaw: 0, pitch: 0, vy: 0, vp: 0 };
@@ -562,7 +563,8 @@ function startProcess(canvas, section, onStage) {
   function proj(x, y, z, camX) { const zc = 9 - z; if (zc < .3) return null; const k = F() / zc; return [W / 2 + (x - camX) * k, H * .56 - y * k, k]; }
   function frame(now) {
     raf = visible ? requestAnimationFrame(frame) : 0;
-    const dt = clamp((now - last) / 1000, 0, .05); last = now; if (!reduced) t += dt;
+    const dt = clamp((now - last) / 1000, 0, .05); last = now; if (!reduced && !ctl.paused) t += dt;
+    ex += ((ctl.mode === "scattered" ? 1 : 0) - ex) * Math.min(1, dt * 2.5);
     read(); f += (ft - f) * (reduced ? 1 : 1 - Math.pow(.002, dt));
     const st = Math.round(f); if (st !== shown) { shown = st; drag.yaw = 0; drag.pitch = 0; onStage(st); }
     if (!drag.on) { drag.yaw += drag.vy; drag.vy *= .94; drag.pitch += drag.vp; drag.vp *= .9; drag.pitch *= .98; }
@@ -584,7 +586,8 @@ function startProcess(canvas, section, onStage) {
       if (Math.abs(cx - camX) > 17) return;
       const yaw = t * (o.spin || .15) + (i === st ? drag.yaw : 0), pitch = (o.pitch || 0) + (i === st ? drag.pitch : 0);
       const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), spp = Math.sin(pitch);
-      const tf = (x, y, z) => { const X = x * cyw + z * syw, Z = -x * syw + z * cyw; const Y2 = y * cp - Z * spp, Z2 = y * spp + Z * cp; return proj(cx + X * sc, Y2 * sc, Z2 * sc, camX); };
+      const tf = (x0, y0, z0) => { const h = Math.sin(x0 * 12.9898 + y0 * 78.233 + z0 * 37.719) * 43758.5453, jr = h - Math.floor(h), ee = 1 + ex * (.9 + jr * 1.4) * (i === st ? 1 : .25);
+        const x = x0 * ee + ex * (jr - .5) * .6, y = y0 * ee + ex * Math.sin(t * .8 + jr * 6.28) * .12, z = z0 * ee; const X = x * cyw + z * syw, Z = -x * syw + z * cyw; const Y2 = y * cp - Z * spp, Z2 = y * spp + Z * cp; return proj(cx + X * sc, Y2 * sc, Z2 * sc, camX); };
       for (const s of o.segs) { const A = tf(s[0], s[1], s[2]), B = tf(s[3], s[4], s[5]); if (!A || !B) continue;
         ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]);
         ctx.strokeStyle = `rgba(241,238,230,${(s[6] * br * .08).toFixed(3)})`; ctx.lineWidth = 4; ctx.stroke();
@@ -602,7 +605,9 @@ function Process() {
   const sec = useRef(), can = useRef();
   const [stage, setStage] = useState(0);
   const strRef = useRef();
-  useEffect(() => startProcess(can.current, sec.current, setStage), []);
+  const ctl = useRef({ mode: "formed", paused: false }), [pmode, setPmode] = useState("formed"), [paused, setPaused] = useState(false);
+  useEffect(() => { ctl.current.mode = pmode; ctl.current.paused = paused; }, [pmode, paused]);
+  useEffect(() => startProcess(can.current, sec.current, setStage, ctl.current), []);
   useEffect(() => { pluckEl(strRef.current, (stage + .5) / STAGES.length, 10); }, [stage]);
   const go = i => { const s = sec.current, top = s.getBoundingClientRect().top + scrollY, span = s.offsetHeight - innerHeight; scrollTo({ top: top + span * i / (STAGES.length - 1) + 2, behavior: smooth }); };
   const N = STAGES.length, S = STAGES[stage];
@@ -619,7 +624,12 @@ function Process() {
           <span className="proc-count"><${Spark} k=${stage} size=${16}/> ${String(stage + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")} · ${S.obj}</span>
           <h3>${S.n}</h3><p>${S.d}</p>
         </div>
-        <div className="proc-nav"><span>Drag to rotate, choose a stage to travel to it</span>
+        <div className="proc-nav">
+          <div className="proc-modes" role="group" aria-label="View">
+            ${[["formed", "Formed"], ["scattered", "Scattered"]].map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${pmode === k} onClick=${() => setPmode(k)}>${n}</button>`)}
+            <button type="button" aria-pressed=${paused} onClick=${() => setPaused(v => !v)}>${paused ? "Play" : "Pause"}</button>
+          </div>
+          <span>Drag to rotate, choose a stage to travel to it</span>
           <div>${STAGES.map((s, i) => html`<button key=${i} type="button" aria-pressed=${i === stage} onClick=${() => go(i)}>${String(i + 1).padStart(2, "0")}</button>`)}</div></div>
       </div>
     </div></section>`;
@@ -979,23 +989,69 @@ function StringLab() {
   </div>`;
 }
 
+/* ---------- Starlight ribbons: light from the current object streaming to you.
+   Each strand ripples at that object's wavelength (wave) and carries photons (particles). ---------- */
+function startRibbons(canvas) {
+  const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, t = 0, last = 0, op = 0;
+  const small = innerWidth < 760, NR = small ? 6 : 10, NS = small ? 4 : 6;
+  const RB = [...Array(NR)].map((_, k) => ({ a: -.55 + k / (NR - 1) * 1.1, ph: Math.random() * 6.28, sp: .5 + Math.random() * .6, w: .6 + Math.random() * .8, photons: [...Array(3)].map(() => Math.random()) }));
+  const resize = () => { const d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; canvas.width = W * d; canvas.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+  const colorOf = () => { const sc = SCENES[+document.body.dataset.ch || 0], l = sc && sc.light; const w = l ? l[1] : 550;
+    if (typeof w === "number") return [nmColor(w), w]; if (w === "red") return ["rgb(255,120,90)", 700]; if (w === "radio") return ["rgb(143,211,255)", 1400]; if (w === "broad") return ["rgb(190,200,255)", 380]; return ["rgb(241,238,230)", 0]; };
+  function frame(now) {
+    raf = requestAnimationFrame(frame); const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt;
+    const mode = document.body.dataset.mode, want = mode === "interlude" || mode === "hero" ? 1 : 0; op += (want - op) * Math.min(1, dt * 3);
+    ctx.clearRect(0, 0, W, H); if (op < .01) return;
+    const [c0, nm] = colorOf(), cv = c0.match(/\d+/g).map(Number), mixw = [241, 238, 230], col = `rgb(${cv.map((v, k) => Math.round(v * .45 + mixw[k] * .55)).join(",")})`;
+    const rgba = a => col.replace("rgb", "rgba").replace(")", `,${a.toFixed(3)})`), hero = mode === "hero";
+    const sx = hero ? W * .82 : W > 1020 ? W * .68 : W * .5, sy = hero ? H * .12 : H * .5;
+    ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+    for (const r of RB) {
+      const ex = hero ? W * (.08 + (r.a + .55) * .5) : -W * .15, ey = hero ? H * 1.08 : H * (.5 + r.a * 1.4);
+      const cx = (sx + ex) / 2 + (hero ? -W * .1 : W * .05) * r.w, cy = (sy + ey) / 2 + r.a * H * .25;
+      const L = Math.hypot(ex - sx, ey - sy), lam = nm ? clamp(nm / 550, .5, 2.6) * 70 : 0, amp = nm ? 5 * r.w : 0;
+      for (let j = 0; j < NS; j++) {
+        const off = (j - (NS - 1) / 2);
+        ctx.beginPath();
+        for (let k = 0; k <= 64; k++) { const u = k / 64, iu = 1 - u;
+          let x = iu * iu * sx + 2 * iu * u * cx + u * u * ex, y = iu * iu * sy + 2 * iu * u * cy + u * u * ey;
+          const tx = 2 * iu * (cx - sx) + 2 * u * (ex - cx), ty = 2 * iu * (cy - sy) + 2 * u * (ey - cy), tl = Math.hypot(tx, ty) || 1, nx = -ty / tl, ny = tx / tl;
+          const spread = off * (1.5 + u * 9) * r.w, wv = amp * u * Math.sin(u * L / Math.max(lam, 1) * 6.283 - t * 4 * r.sp + r.ph + j * .6);
+          x += nx * (spread + wv); y += ny * (spread + wv); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        const a = op * (.05 + .05 * Math.cos(off));
+        ctx.strokeStyle = rgba(a * .5); ctx.lineWidth = 4; ctx.stroke();
+        ctx.strokeStyle = rgba(a * 2.2); ctx.lineWidth = .9; ctx.stroke();
+      }
+      r.photons.forEach((p, k) => { const u = (p + t * .12 * r.sp) % 1, iu = 1 - u;
+        const x = iu * iu * sx + 2 * iu * u * cx + u * u * ex, y = iu * iu * sy + 2 * iu * u * cy + u * u * ey, g = ctx.createRadialGradient(x, y, 0, x, y, 10);
+        g.addColorStop(0, `rgba(255,255,255,${(.9 * op * Math.sin(u * Math.PI)).toFixed(3)})`); g.addColorStop(.3, rgba(.35 * op)); g.addColorStop(1, rgba(0)); ctx.fillStyle = g; ctx.fillRect(x - 10, y - 10, 20, 20); });
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+  resize(); addEventListener("resize", resize); raf = requestAnimationFrame(frame);
+  return () => { cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+}
+function Ribbons() { const ref = useRef(); useEffect(() => startRibbons(ref.current), []); return html`<canvas className="ribbons" ref=${ref} aria-hidden="true"></canvas>`; }
+
 /* ---------- app ---------- */
 function App() {
   const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "projects", "gallery", "notes", "contact"]);
   const [toast, setToast] = useState("");
   const [view, setView] = useState({ i: 0, beat: 0 });
-  const refs = { stage: useRef(), canvas: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
+  const refs = { stage: useRef(), canvas: useRef(), bloom: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
   const api = useRef(null);
   useEffect(() => {
     if (api.current) return;
     api.current = window.Universe.init({
       stage: refs.stage.current, canvas: refs.canvas.current, bar: refs.bar.current, cue: refs.cue.current,
       hudD: refs.hudD.current, hudL: refs.hudL.current, getP: readP, scrollToP, shift: shiftFor,
-      onScene: (i, beat) => setView(v => (v.i === i && v.beat === beat ? v : { i, beat }))
+      bloom: refs.bloom.current,
+      onScene: (i, beat) => { document.body.dataset.ch = i; setView(v => (v.i === i && v.beat === beat ? v : { i, beat })); }
     });
   }, []);
   return html`<a className="skip" href="#about">Skip to content</a>
-    <div className="sky" ref=${refs.stage} aria-hidden="true"><canvas ref=${refs.canvas}></canvas></div>
+    <div className="sky" ref=${refs.stage} aria-hidden="true"><canvas ref=${refs.canvas}></canvas><canvas className="bloom" ref=${refs.bloom}></canvas></div>
+    <${Ribbons}/>
     <div className="scrim" aria-hidden="true"></div>
     <${Sparks}/>
     <${Nav} active=${active}/>

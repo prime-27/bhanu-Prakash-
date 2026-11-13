@@ -259,6 +259,7 @@ attribute vec4 aPA,aCA,aPB,aCB,aR;
 uniform float uMix,uTime,uHoldA,uSpinA,uModeA,uModeB,uDist,uAspect,uPx,uMouseOn,uMotion,uShift;
 uniform vec2 uMouse;
 varying vec3 vC;
+varying float vB;
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,s,-s,c);}
 float horizon(float x){return -.95+.12*sin(x*1.7)+.06*sin(x*4.3+1.);}
 vec4 anim(vec4 p,float mode,float hold,float spin,out float sz,out float lit){
@@ -332,12 +333,17 @@ void main(){
   gl_Position=vec4(sp,0.,1.);
   float tw=1.+.28*sin(uTime*(1.5+aR.z*4.)+aR.x*60.)*uMotion;
   float size=mix(aCA.w*sA,aCB.w*sB,t)*tw;
-  gl_PointSize=clamp(size*uPx*3./vz,1.,56.);
+  vB=smoothstep(2.4,5.2,size)*(1.-fly);
+  gl_PointSize=clamp(size*uPx*3./vz*(1.+vB*3.),1.,150.);
   float vis=mix(A.w,B.w,t);
   vC=mix(aCA.rgb*lA,aCB.rgb*lB,t)*vis*(1.+fly*.3);
 }`;
-const FS=`precision mediump float;varying vec3 vC;
-void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,0.,d);a*=a;gl_FragColor=vec4(vC*a*1.3,1.);}`;
+const FS=`precision mediump float;varying vec3 vC;varying float vB;
+void main(){vec2 q=gl_PointCoord-.5;float r=length(q),s=1.+vB*3.;
+  float core=smoothstep(.5,0.,r*s);core*=core;
+  float halo=exp(-r*10.)*.45*vB;
+  float spikes=(exp(-abs(q.x)*130.)*exp(-abs(q.y)*6.5)+exp(-abs(q.y)*130.)*exp(-abs(q.x)*6.5))*vB;
+  gl_FragColor=vec4(vC*(core*1.3+halo)+mix(vC,vec3(1.),.5)*spikes*.9,1.);}`;
 const QVS=`attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
 const QFS=`precision mediump float;uniform vec4 uC;void main(){gl_FragColor=uC;}`;
 
@@ -361,9 +367,11 @@ if(gl){
 }
 const c2d=gl?null:cv.getContext("2d");
 
+const bloom=opts.bloom||null,bctx=bloom&&bloom.getContext("2d");
 function resize(){
   const r=stage.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,1.75);
   W=Math.max(1,Math.round(r.width*dpr));H=Math.max(1,Math.round(r.height*dpr));cv.width=W;cv.height=H;
+  if(bloom){bloom.width=Math.max(1,W>>2);bloom.height=Math.max(1,H>>2);}
   readScroll();
   if(gl){gl.viewport(0,0,W,H);gl.clear(gl.COLOR_BUFFER_BIT);}
   kick();
@@ -386,6 +394,7 @@ function drawGL(fade,mixV,dist,hold,spin,i,j){
   gl.uniform1f(U.uAspect,W/H);gl.uniform1f(U.uShift,shiftV);gl.uniform1f(U.uPx,H/760);gl.uniform1f(U.uMotion,reduced?0:1);
   gl.uniform2f(U.uMouse,ptr.mx,-ptr.my);gl.uniform1f(U.uMouseOn,reduced?0:mouseOn);
   gl.drawArrays(gl.POINTS,0,N);
+  if(bctx&&!reduced){bctx.globalCompositeOperation="copy";bctx.drawImage(cv,0,0,bloom.width,bloom.height);}
 }
 function draw2D(k){
   const f=form(k),asp=W/H;c2d.fillStyle="#04050a";c2d.fillRect(0,0,W,H);

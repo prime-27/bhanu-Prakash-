@@ -575,3 +575,15 @@ footer{border-top:0}
 .lab-text{margin:16px 0 10px;color:var(--star);min-height:3em}
 .lab-small{margin:0;font-size:13.5px;color:var(--dim)}
 @media (max-width:900px){.slit-wrap{grid-template-columns:minmax(0,1fr)}.duality{grid-template-columns:minmax(0,1fr)}.slit-ctl{flex-direction:row;flex-wrap:wrap}}
+
+/* ---------- polish: bloom, starlight ribbons, bolder chapters, process modes ---------- */
+.sky .bloom{position:absolute;inset:0;width:100%;height:100%;filter:blur(10px) brightness(1.6);mix-blend-mode:screen;opacity:.85;pointer-events:none}
+.ribbons{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.il h2{font-size:clamp(52px,8.5vw,120px);font-weight:600;letter-spacing:-.045em;line-height:.92;margin-bottom:16px}
+.interlude .label{font-size:12px}
+.proc-modes{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius-pill);padding:3px;margin-bottom:6px}
+.proc-modes button{all:unset;cursor:pointer;font-size:13px;color:var(--star-2);padding:7px 14px;border-radius:var(--radius-pill)}
+.proc-modes button[aria-pressed="true"]{background:var(--star);color:var(--void)}
+.proc-modes button:focus-visible{outline:1.5px solid var(--amber)}
+@media (max-width:760px){.proc-nav{display:flex}.proc-nav > span,.proc-nav > div:last-child{display:none}.proc-foot{flex-direction:column;align-items:flex-start}}
+@media (prefers-reduced-motion:reduce){.sky .bloom{display:none}}
