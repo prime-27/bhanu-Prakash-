@@ -61,7 +61,14 @@ const CONTENT = {
     ["Website Development","Design and development of websites with attention to clarity, responsiveness and usability."],
     ["Software & Application Projects","Development of, or collaboration on, applications and interactive tools, subject to project scope."]
   ],
-  gallery: ["Telescope session with a public group","School astronomy workshop","The Moon through the telescope","Setting up and aligning the telescope","Public astronomy evening","Hands-on workshop activity"],
+  gallery: [
+    { src: "assets/photos/library.jpg", cap: "Among the bound journals of the library", alt: "Bhanu Prakash in a library, in front of shelves of old bound journals" },
+    { src: "assets/photos/library-reading.jpg", cap: "Reading in the library", alt: "Bhanu Prakash reading a large book at a library table" },
+    { src: "assets/photos/standing.jpg", pos: "50% 12%", cap: "On the road", alt: "Bhanu Prakash standing on a tree-lined road, smiling" },
+    { src: "assets/photos/outdoors.jpg", pos: "50% 22%", cap: "Out in the open", alt: "Bhanu Prakash standing in a green field with trees behind him" },
+    { src: "", cap: "Telescope session with a public group" },
+    { src: "", cap: "School astronomy workshop" }
+  ],
   inquiry: ["Guided stargazing session","School astronomy program","Astronomy workshop","Astronomy event or outreach","Website development","Software or application project","Something else"]
 };
 const TAGS = { all:"All", astronomy:"Astronomy", education:"Education", web:"Web", software:"Software", dev:"In Development" };
@@ -272,10 +279,10 @@ function Hero({ cueRef }) {
 /* ---------- content sections ---------- */
 /* ---------- Particle portrait: the photo rebuilt from stardust ----------
    Put a photo at assets/portrait.jpg (head and shoulders, plain dark background works best). */
-const PORTRAIT_SRC = "assets/portrait.jpg";
+const PORTRAIT_SRC = "assets/portrait.jpg", PORTRAIT_PARTICLES = "assets/portrait-particles.png";
 function startPortrait(canvas, img) {
   const ctx = canvas.getContext("2d"); let W = 1, H = 1, raf = 0, vis = false, t = 0, last = 0, mx = -1e4, my = -1e4, go = false;
-  const GW = 120, GH = 150, off = document.createElement("canvas"); off.width = GW; off.height = GH; const o = off.getContext("2d");
+  const GW = 190, GH = 236, off = document.createElement("canvas"); off.width = GW; off.height = GH; const o = off.getContext("2d");
   if (img) { const sc = Math.max(GW / img.width, GH / img.height), w = img.width * sc, h = img.height * sc; o.drawImage(img, (GW - w) / 2, (GH - h) / 2, w, h); }
   else { const g = o.createRadialGradient(GW * .4, GH * .28, 3, GW * .5, GH * .5, GH * .75); g.addColorStop(0, "#fff"); g.addColorStop(.55, "#9a9a9a"); g.addColorStop(1, "#262626"); o.fillStyle = g;
     o.beginPath(); o.ellipse(GW * .5, GH * .34, GW * .16, GH * .155, 0, 0, 6.283); o.fill();
@@ -283,7 +290,7 @@ function startPortrait(canvas, img) {
     o.beginPath(); o.moveTo(GW * .04, GH); o.quadraticCurveTo(GW * .06, GH * .66, GW * .36, GH * .62); o.lineTo(GW * .64, GH * .62); o.quadraticCurveTo(GW * .94, GH * .66, GW * .96, GH); o.closePath(); o.fill(); }
   const d = o.getImageData(0, 0, GW, GH).data, P = [];
   for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) { const i = (y * GW + x) * 4, l = (d[i] * .3 + d[i + 1] * .59 + d[i + 2] * .11) / 255 * (d[i + 3] / 255);
-    if (l > .09 && Math.random() < Math.pow(l, 1.25) * .95) P.push({ u: (x + Math.random()) / GW, v: (y + Math.random()) / GH, l, x: Math.random(), y: Math.random(), vx: 0, vy: 0, ph: Math.random() * 6.28 }); }
+    if (l > .07 && Math.random() < Math.min(1, Math.pow(l, 1.05) * 1.15)) P.push({ u: (x + Math.random()) / GW, v: (y + Math.random()) / GH, l, x: Math.random(), y: Math.random(), vx: 0, vy: 0, ph: Math.random() * 6.28 }); }
   const resize = () => { const dp = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * dp; canvas.height = H * dp; ctx.setTransform(dp, 0, 0, dp, 0, 0); };
   const move = e => { const r = canvas.getBoundingClientRect(); mx = e.clientX - r.left; my = e.clientY - r.top; };
   const leave = () => { mx = my = -1e4; };
@@ -297,7 +304,7 @@ function startPortrait(canvas, img) {
         const px = p.x * W, py = p.y * H, ex = px - mx, ey = py - my, dd = ex * ex + ey * ey;
         if (dd < 3600) { const f = (1 - dd / 3600) * .012; p.vx += ex / Math.sqrt(dd + 1) * f; p.vy += ey / Math.sqrt(dd + 1) * f; }
         p.vx *= .84; p.vy *= .84; p.x += p.vx; p.y += p.vy; }
-      const tw = .75 + .25 * Math.sin(t * 2 + p.ph), a = (.3 + .7 * p.l) * tw, sz = .9 + p.l * 1.5;
+      const tw = .8 + .2 * Math.sin(t * 2 + p.ph), a = Math.min(1, (.35 + .9 * p.l) * tw), sz = .8 + p.l * 1.3;
       ctx.fillStyle = `rgba(255,${Math.round(150 + 100 * p.l)},${Math.round(80 + 160 * p.l * p.l)},${a.toFixed(3)})`;
       ctx.fillRect(p.x * W, p.y * H, sz, sz);
     }
@@ -309,7 +316,7 @@ function startPortrait(canvas, img) {
 }
 function ParticlePortrait() {
   const can = useRef(), [photo, setPhoto] = useState(null), [reveal, setReveal] = useState(false);
-  useEffect(() => { let stop = () => {}; const img = new Image(); img.onload = () => { setPhoto(PORTRAIT_SRC); stop = startPortrait(can.current, img); }; img.onerror = () => { stop = startPortrait(can.current, null); }; img.src = PORTRAIT_SRC; return () => stop(); }, []);
+  useEffect(() => { let stop = () => {}; const img = new Image(); img.onload = () => { setPhoto(PORTRAIT_SRC); stop = startPortrait(can.current, img); }; img.onerror = () => { stop = startPortrait(can.current, null); }; img.src = PORTRAIT_PARTICLES; return () => stop(); }, []);
   return html`<div className=${"portrait pp" + (reveal ? " reveal" : "")} onMouseEnter=${() => photo && setReveal(true)} onMouseLeave=${() => setReveal(false)}
       role="img" aria-label=${photo ? "Portrait of Bhanu Prakash, drawn in particles" : "Placeholder for a portrait of Bhanu Prakash, drawn in particles"}>
     <span className="bigword" aria-hidden="true">ASTRONOMER</span>
@@ -380,15 +387,16 @@ function Gallery() {
     const k = e => { if (idx == null) return; if (e.key === "ArrowRight") dlg.setData((idx + 1) % n); if (e.key === "ArrowLeft") dlg.setData((idx - 1 + n) % n); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [idx]);
-  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
-    <div className="gallery">${CONTENT.gallery.map((c, i) => html`<figure key=${c}>
-      <button className="img" type="button" aria-label=${"Open photo: " + c} onClick=${e => { burstAt(e.currentTarget, { n: 30, speed: 4 }); dlg.open(i); }}>Photo to add</button><figcaption>${c}</figcaption></figure>`)}</div>
+  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Photographs from the library, the field and the sky. Session and workshop photos are added as they are shared with permission.">
+    <div className="gallery">${CONTENT.gallery.map((g, i) => html`<figure key=${g.cap}>
+      <button className=${"img" + (g.src ? " has-photo" : "")} type="button" aria-label=${"Open photo: " + g.cap} onClick=${e => { burstAt(e.currentTarget, { n: 30, speed: 4 }); dlg.open(i); }}>
+        ${g.src ? html`<img src=${g.src} alt=${g.alt} loading="lazy" style=${{ objectPosition: g.pos || "50% 50%" }}/>` : "Photo to add"}</button><figcaption>${g.cap}</figcaption></figure>`)}</div>
     <dialog ref=${dlg.ref} className="modal lightbox" aria-label="Photo viewer">
       ${idx != null && html`<div className="modal-in">
         <div className="modal-head"><span className="label">${idx + 1} / ${n}</span><button className="x" type="button" aria-label="Close" onClick=${dlg.close}>×</button></div>
-        <div className="img big">Photo to add</div>
+        ${CONTENT.gallery[idx].src ? html`<img className="lb-photo" src=${CONTENT.gallery[idx].src} alt=${CONTENT.gallery[idx].alt}/>` : html`<div className="img big">Photo to add</div>`}
         <div className="lb-foot"><button className="link" type="button" onClick=${() => dlg.setData((idx - 1 + n) % n)}>← Previous</button>
-          <span>${CONTENT.gallery[idx]}</span><button className="link" type="button" onClick=${() => dlg.setData((idx + 1) % n)}>Next →</button></div>
+          <span>${CONTENT.gallery[idx].cap}</span><button className="link" type="button" onClick=${() => dlg.setData((idx + 1) % n)}>Next →</button></div>
       </div>`}
     </dialog><//>`;
 }
