@@ -1298,7 +1298,7 @@ function Labs() {
     w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(G.name)} · Practical astronomy activities</title>
       <style>body{font:15px/1.5 system-ui,sans-serif;color:#000;max-width:720px;margin:28px auto;padding:0 20px}h1{font-size:22px;margin:0 0 4px}.by{color:#555;margin:0 0 24px}
       section{border-top:1px solid #999;padding:14px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 4px}.t{color:#555;font-size:13px;margin:0 0 8px}.s{font-weight:600}ol{padding-left:22px}</style></head><body>
-      <h1>${e(G.name)}: practical astronomy activities</h1><p class="by">Bhanu Prakash, astronomer · Hyderabad · prime-27.github.io/bhanu-Prakash-</p>
+      <h1>${e(G.name)}: practical astronomy activities</h1><p class="by">Bhanu Prakash, astronomer · Hyderabad · stargazinghyderabad.com</p>
       ${G.acts.map((a, i) => `<section><h2>${i + 1}. ${e(a.t)}</h2><p class="t">${e(a.time)}</p><p><b>You need:</b> ${e(a.need)}</p>${a.safety ? `<p class="s">${e(a.safety)}</p>` : ""}
         <ol>${a.steps.map(x => `<li>${e(x)}</li>`).join("")}</ol><p><b>What you’ll see:</b> ${e(a.see)}</p><p><b>Why:</b> ${e(a.why)}</p></section>`).join("")}
       <script>window.onload=()=>window.print()<\/script></body></html>`);
