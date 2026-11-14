@@ -670,3 +670,21 @@ footer{border-top:0}
 .slit.stack{cursor:default;background:#000}
 .astro-sub{margin-top:56px}
 .gallery div.img{display:flex;align-items:center;justify-content:center}
+
+/* practical labs */
+.lab-intro{color:var(--star-2);max-width:70ch;margin:0 0 18px}
+.slit.gradelab{cursor:default}
+.lab-note{margin:0;font-size:13.5px;color:var(--dim);line-height:1.5}
+.eyepieces{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.eyepieces button{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:var(--radius-pill);padding:6px 10px;color:var(--dim)}
+.eyepieces button[aria-pressed="true"]{background:var(--star);color:var(--void);border-color:var(--star)}
+.eyepieces button:focus-visible{outline:1.5px solid var(--amber)}
+.lab-acts{margin-top:0}
+.lab-acts p{font-size:14.5px;color:var(--star-2);margin:0 0 10px}
+.lab-acts p b{color:var(--star);font-weight:500}
+.lab-acts .safety{color:var(--amber);font-size:13.5px}
+.lab-acts details{margin:0 0 12px}
+.lab-acts summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.lab-acts details ol{margin:0;padding-left:20px;color:var(--star-2);font-size:14.5px}
+.lab-acts details li{margin-bottom:6px}
+.lab-acts details li{background:none;border:0;border-radius:0;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none}
