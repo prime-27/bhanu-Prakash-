@@ -55,9 +55,19 @@ Then open http://localhost:8000.
 
 ## Publish it
 
-- **GitHub Pages:** in the repository's Settings → Pages, choose "Deploy from a branch", pick `main` and the root folder.
+- **GitHub Pages:** the live site is published from the `website` branch (Settings → Pages → "Deploy from a branch", root folder). Push changes to `website` to publish them; keep `main` matching it.
 - **Netlify or Vercel:** import the repository with no build command and the root folder as the output.
-- **Custom domain:** point the domain at whichever host you pick, following that host's domain instructions.
+- **Custom domain:** the site lives at https://stargazinghyderabad.com (registered at Hostinger). The `CNAME` file tells GitHub Pages the address. The DNS records at Hostinger are:
+
+  | Type | Name | Points to |
+  | --- | --- | --- |
+  | A | @ | 185.199.108.153 |
+  | A | @ | 185.199.109.153 |
+  | A | @ | 185.199.110.153 |
+  | A | @ | 185.199.111.153 |
+  | CNAME | www | prime-27.github.io |
+
+  If the domain ever changes, update `CNAME` and every `https://stargazinghyderabad.com` address (in `index.html`, `sitemap.xml`, `robots.txt`, the notes and `js/app.js`).
 
 ## Before launch
 
