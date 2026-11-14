@@ -31,7 +31,7 @@ const CONTENT = {
   ],
   research: [
     ["MSc thesis · 2025","Period variation and spectroscopic studies of Algol-type eclipsing binaries, Osmania University."],
-    ["In preparation","“Photometric and Spectroscopic Analysis of Algol-type Eclipsing Binaries”, for the Journal of Astrophysics and Astronomy: light-curve modelling with PHOEBE and period changes from O–C diagrams."],
+    ["Completed project","“Photometric and Spectroscopic Analysis of Algol-type Eclipsing Binaries”: light-curve modelling with PHOEBE and period changes from O–C diagrams."],
     ["Winter School on Solar Physics · March 2025","Kodaikanal Solar Observatory, Indian Institute of Astrophysics: hands-on work with historical and modern solar telescopes and spectroheliographs."],
     ["ILMT workshop","Aryabhatta Research Institute of Observational Sciences (ARIES), Devasthal: the International Liquid Mirror Telescope and time-domain astronomy."]
   ],
