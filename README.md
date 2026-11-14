@@ -9,7 +9,7 @@ Personal portfolio website for Bhanu Prakash. Scrolling the page is one journey:
 | `index.html` | The page: metadata, fonts and script tags |
 | `css/styles.css` | All styles, built on the brand kit's tokens |
 | `js/universe.js` | The WebGL particle universe: thirteen formations and the scroll-driven journey |
-| `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery, astrophotography stacking demo and contact form |
+| `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery, astrophotography stacking demo, practical labs for schools and contact form |
 | `assets/` | Site files, such as the favicon |
 | `brand/` | The brand kit: brand book, the thirteen-stop journey, design tokens, logos and patterns |
 
@@ -88,6 +88,10 @@ Text for every section lives in the `CONTENT` object near the top of `js/app.js`
 ### Adding a public session
 
 Add an entry to the `EVENTS` list in `js/app.js` (there is an example in the comment above it). Each event appears under "Upcoming sessions" and is also published to Google as an Event, so it can show up in event searches.
+
+### Practical labs
+
+The labs for each class group are the `GRADES` list in `js/app.js`. Each group has one interactive lab (`MoonLab`, `ShadowLab`, `ScopeLab`, `JupiterLab`) and three hands-on activities: title, time, what you need, an optional safety line, steps, what you'll see and why. "Print these activities" prints only the activity cards of the chosen group.
 
 ### Sky Notes
 

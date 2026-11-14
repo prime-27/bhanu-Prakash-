@@ -8,7 +8,7 @@ const scrollToId = id => document.getElementById(id)?.scrollIntoView({ behavior:
 
 /* ---------- content (source of truth: website brief) ---------- */
 const CONTENT = {
-  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["light","Light"],["projects","Projects"],["astrophotography","Astrophotos"],["notes","Notes"]],
+  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["light","Light"],["labs","Labs"],["projects","Projects"],["astrophotography","Astrophotos"],["notes","Notes"]],
   hero: {
     eyebrow: "Astronomy · Education · Technology",
     title: "Exploring the Universe. Building What’s Next.",
@@ -344,7 +344,7 @@ function Projects() {
   const [filter, setFilter] = useState("all");
   const counts = useMemo(() => Object.fromEntries(Object.keys(TOOL_TAGS).map(k => [k, k === "all" ? TOOLS.length : TOOLS.filter(p => p.c === k).length])), []);
   const shown = TOOLS.filter(p => filter === "all" || p.c === filter);
-  return html`<${Section} id="projects" p=${[7.0, 7.6]} chapter=${7} label="Projects" title=${`${TOOLS.length} astronomy tools I designed and built`}
+  return html`<${Section} id="projects" p=${[7.2, 7.6]} chapter=${7} label="Projects" title=${`${TOOLS.length} astronomy tools I designed and built`}
     lede="Interactive sky tools, solar data explorers, physics labs and teaching resources, many in both English and Telugu. Each one runs in the browser.">
     <div className="filters" role="group" aria-label="Filter projects">
       ${Object.entries(TOOL_TAGS).map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${filter === k} onClick=${e => { setFilter(k); burstAt(e.currentTarget, { n: 16, speed: 3 }); }}>${n} <span className="count">${counts[k]}</span></button>`)}
@@ -995,7 +995,7 @@ function LightSection() {
   useEffect(() => { st.current.onCount = c => { if (c % 25 === 0 || c < 25) setCount(c); }; return startDoubleSlit(can.current, st.current); }, []);
   useEffect(() => { Object.assign(st.current, { on, detect, nm }); }, [on, detect, nm]);
   const reset = () => { st.current.clear?.(); setCount(0); };
-  return html`<${Section} id="light" p=${[6.6, 7.0]} label="Light · wave or particle?" title="Everything on this journey reaches us as light"
+  return html`<${Section} id="light" p=${[6.6, 6.9]} label="Light · wave or particle?" title="Everything on this journey reaches us as light"
     lede="Every stop on this site is known to us only through the light it sends. And light behaves in two ways at once: it spreads and interferes like a wave, yet it always arrives as single particles called photons.">
     <div className="slit-wrap">
       <canvas ref=${can} className="slit" role="img" aria-label=${`Double-slit experiment: ${count} photons detected. ${detect ? "Which-slit detectors on: two plain bands." : "No detectors: interference stripes."}`}></canvas>
@@ -1094,6 +1094,229 @@ function Astrophotography() {
     <div className="subhead astro-sub"><h3>My astrophotos</h3><span>Moon · nebulae · Milky Way</span></div>
     <div className="gallery">${CONTENT.astroPhotos.map(g => html`<figure key=${g.cap}>
       <div className=${"img" + (g.src ? " has-photo" : "")}>${g.src ? html`<img src=${g.src} alt=${g.alt || g.cap} loading="lazy"/>` : html`<${Ph}>Add your astrophoto<//>`}</div><figcaption>${g.cap}</figcaption></figure>`)}</div>
+  <//>`;
+}
+
+/* ---------- Practical labs for schools: one interactive lab and three hands-on activities per grade group ---------- */
+const GRADES = [
+  { id: "g35", name: "Classes 3–5", sim: "moon", simT: "Moon phases", simD: "Slide through a month. The Sun always lights half of the Moon; what changes is how much of that lit half faces us.",
+    acts: [
+      { t: "Moon phases with a ball and a lamp", time: "20 min", need: "A ball (or an orange on a pencil), a lamp without its shade, a dark room",
+        steps: ["Put the lamp on a table at head height and switch off the other lights. The lamp is the Sun, your head is the Earth and the ball is the Moon.", "Hold the ball at arm’s length, a little above your head, and stand facing the lamp. The ball looks dark: that is the New Moon.", "Turn slowly to your left, keeping the ball in front of your face. Watch the lit part grow from a thin crescent to a half, and to a full ball when the lamp is behind you.", "Keep turning and watch it shrink again until you face the lamp."],
+        see: "The ball goes through every phase: crescent, half, gibbous and full, and back again.", why: "Half of the Moon is always lit by the Sun. As the Moon goes round the Earth, once in about 29.5 days, we see more or less of its lit half." },
+      { t: "Planets to scale", time: "40 min", need: "A measuring tape, a large sheet of paper, a pea, a peppercorn, a grapefruit, open ground",
+        steps: ["Draw a circle 1 metre across. This is the Sun.", "On this scale the Earth is 9 mm across, a pea. The Moon is a 2.5 mm peppercorn, 28 cm from the pea. Jupiter is a 10 cm grapefruit.", "Now walk out the distances: the pea Earth goes 107 metres from the paper Sun, about the length of a football field. The grapefruit Jupiter goes 560 metres away."],
+        see: "The planets are tiny, and the spaces between them are enormous.", why: "The Sun is 109 times wider than the Earth, and the Earth is about 107 Sun-widths away from it. The Solar System is mostly empty space." },
+      { t: "Chalk shadows", time: "5 min, three times in one day", need: "Chalk, a sunny patch of ground, a friend",
+        steps: ["At about 9 am, stand on a marked spot and ask your friend to trace your shadow with chalk. Write the time inside it.", "Stand on the same spot at noon and again at 3 pm, and trace your shadow each time.", "Compare the three shadows."],
+        see: "The noon shadow is the shortest, and the morning and afternoon shadows point in opposite directions.", why: "The Sun rises in the east, climbs highest around midday and sets in the west. The higher the Sun, the shorter your shadow." }
+    ] },
+  { id: "g68", name: "Classes 6–8", sim: "shadow", simT: "Shadow stick in Hyderabad", simD: "Choose a date and a time to see where a 1 m stick’s shadow falls in Hyderabad. The dotted curve is the path of the shadow’s tip through the day.",
+    acts: [
+      { t: "Find true north with a stick", time: "1–2 hours around midday", need: "A straight stick about 1 m long, small stones, flat open ground",
+        steps: ["Push the stick upright into flat ground in the sunshine, in the middle of the morning.", "Every 15 minutes, put a stone on the tip of the shadow.", "After noon the shadow grows again. The shortest shadow marks local noon.", "A line from an earlier stone to a later one runs from west to east. A line at right angles to it runs north–south."],
+        see: "The stones curve round the stick, coming closest to it at local noon.", why: "The Sun moves across the sky from east to west, so the shadow’s tip moves from west to east. For most of the year the noon Sun in Hyderabad is to the south, so the noon shadow points north. From early May to early August it is slightly to the north instead, and on two days, in early May and early August, there is no shadow at noon at all." },
+      { t: "See the Sun safely with a pinhole", time: "20 min", need: "Two sheets of stiff white card, aluminium foil, a pin, tape",
+        safety: "Never look at the Sun, either directly or through the pinhole, binoculars or a telescope. It can blind you.",
+        steps: ["Cut a small square hole in the middle of one card, tape foil over it and prick one clean pinhole in the foil.", "Stand with your back to the Sun. Hold the pinhole card up so that sunlight passes through it onto the second card, held below it.", "Move the cards apart until a small bright circle appears on the lower card."],
+        see: "The bright circle is an image of the Sun. During a partial solar eclipse it becomes a crescent.", why: "Light travels in straight lines, so each point of the Sun shines through the pinhole onto one point of the card, making an upside-down image." },
+      { t: "Constellation cup", time: "30 min", need: "Paper cups, a pin and a nail, a pencil, a star chart",
+        steps: ["Choose a constellation such as Orion or the Big Dipper. Draw its stars on the bottom of a cup, mirror-reversed, so it looks right when you look into the cup.", "With an adult’s help, push a hole through each star: a pin for faint stars, a nail for bright ones.", "Look into the cup towards a window or a lamp. Then find the real constellation on the next clear night."],
+        see: "The pattern glows like stars, and the bigger holes look like brighter stars.", why: "Constellations are patterns people have drawn between stars. The stars in one constellation are at very different distances from us; they only look close together from Earth." }
+    ] },
+  { id: "g910", name: "Classes 9–10", sim: "scope", simT: "Build a telescope", simD: "Choose the lenses and look through the eyepiece. Magnification is the objective’s focal length divided by the eyepiece’s. Push it too far and the view only gets bigger and blurrier.",
+    acts: [
+      { t: "Measure the size of the Sun", time: "30 min", need: "A long box or tube (about 1 m), aluminium foil, a pin, white paper, a ruler",
+        safety: "Never look at the Sun, through the pinhole or otherwise.",
+        steps: ["Tape foil over one end of the box and prick a clean pinhole. Tape white paper inside the other end, and cut a small window in the side to see it.", "With your back to the Sun, point the pinhole end at the Sun until a bright circle appears on the paper.", "Measure the circle’s diameter d and the distance L from the pinhole to the paper."],
+        see: "With L = 1 m, the image of the Sun is about 9 mm wide.", why: "Similar triangles: the Sun’s diameter divided by its distance (150 million km) equals d ÷ L. With d = 9.3 mm and L = 1 m, the Sun comes out about 1.4 million km across, 109 times the Earth." },
+      { t: "A two-lens telescope", time: "1 hour", need: "A weak convex lens (a +2 dioptre reading-glasses lens, focal length 50 cm), a magnifying glass (focal length about 5 cm), two cardboard tubes that slide into each other, tape",
+        safety: "Never point it at the Sun.",
+        steps: ["Fix the weak lens in the end of the wider tube. This is the objective.", "Fix the magnifying glass in the end of the narrower tube. This is the eyepiece.", "Slide the tubes until the lenses are about 55 cm apart. Look at a distant tree or building and slide gently until it is sharp. At night, try the Moon."],
+        see: "Distant things look about 10 times closer, and upside down.", why: "The objective forms a small image of the distant object at its focus, and the eyepiece magnifies that image. Magnification = 50 cm ÷ 5 cm = 10." },
+      { t: "A spectroscope from a CD", time: "30 min", need: "An old CD or DVD, a small box, black tape, a craft knife",
+        safety: "Do not point it at the Sun.",
+        steps: ["Cut a thin slit, about 1 mm wide, in one end of the box.", "At the other end, fix the CD inside at about 45° and cut a viewing hole above it, so you can see light from the slit reflected off the CD.", "Point the slit at a tube light, then at a filament bulb or an LED bulb, and compare."],
+        see: "A tube light shows separate bright coloured lines. A filament or LED bulb shows a smooth band of colour.", why: "The CD’s fine tracks split light into its colours. Hot solids glow in all colours, but glowing gases such as the mercury vapour in a tube light give out only certain colours. Astronomers read starlight in the same way to learn what stars are made of." }
+    ] },
+  { id: "g11", name: "Classes 11–12 and college", sim: "jupiter", simT: "Weigh Jupiter from its moons", simD: "Pick a moon and watch it swing from side to side of Jupiter. Its distance a and period T give Jupiter’s mass through Kepler’s third law: M = 4π²a³ ÷ (GT²).",
+    acts: [
+      { t: "Weigh Jupiter with binoculars", time: "10 min a night for 2–3 weeks", need: "Binoculars on a tripod or a small telescope, a notebook",
+        steps: ["Each clear night, sketch Jupiter as a dot with its moons as smaller dots in a line on either side. Note the date and time.", "Estimate each moon’s distance from Jupiter in Jupiter-diameters.", "Plot one moon’s position against time and fit a sine curve. Its peak is the orbit radius a and its repeat time is the period T.", "Convert a to metres (Jupiter is 142,984 km across) and T to seconds, then calculate M = 4π²a³ ÷ (GT²)."],
+        see: "The moons swing back and forth along a line. Callisto takes about 16.7 days, Ganymede about 7.2.", why: "Each moon orbits under Jupiter’s gravity, so its orbit’s size and period fix Jupiter’s mass: about 1.9 × 10²⁷ kg, 318 times the Earth." },
+      { t: "Measure the Earth like Eratosthenes", time: "1 hour on the same day, with a partner school", need: "Identical 1 m sticks, a measuring tape, a partner school several hundred kilometres north or south of you",
+        steps: ["Agree on a date with the partner school. Each school measures the shortest shadow of its upright stick around its own local noon.", "Each school works out the Sun’s angle from overhead: θ = arctan(shadow ÷ stick height).", "Find the north–south distance between the schools on a map. The Earth’s circumference = 360° ÷ (difference in θ) × that distance."],
+        see: "Two schools 500 km apart north–south find angles about 4.5° apart, giving about 40,000 km.", why: "The Sun is so far away that its rays arrive parallel. Any difference in the shadow angle comes from the curve of the Earth." },
+      { t: "Watch Algol dim", time: "A few hours on one evening", need: "Your eyes, a star chart, a list of Algol’s predicted minima (from astronomy apps or websites)",
+        steps: ["Algol (Beta Persei) is well placed in the evening sky from Hyderabad from about October to February. Find it in Perseus, below Cassiopeia.", "On a night with a predicted minimum, compare Algol every 20–30 minutes with nearby stars of known brightness: Almach (magnitude 2.1), Epsilon Persei (2.9) and Delta Persei (3.0).", "Plot your estimates against time."],
+        see: "Over about 10 hours Algol fades from magnitude 2.1 to 3.4, more than three times fainter, and then recovers.", why: "Algol is an eclipsing binary: a fainter star passes in front of the brighter one every 2.87 days. It is the kind of star system my MSc research studied." }
+    ] }
+];
+
+/* a canvas that repaints when its inputs change, and animates while on screen if asked */
+function useLabCanvas(draw, deps, animate) {
+  const ref = useRef(), dref = useRef(draw); dref.current = draw;
+  useEffect(() => {
+    const c = ref.current, ctx = c.getContext("2d"); let W = 1, H = 1, raf = 0, vis = false, t = 0, last = 0;
+    const paint = () => { ctx.clearRect(0, 0, W, H); dref.current(ctx, W, H, t); };
+    const resize = () => { const d = Math.min(devicePixelRatio || 1, 2), r = c.getBoundingClientRect(); W = r.width; H = r.height; c.width = W * d; c.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); paint(); };
+    const frame = now => { raf = 0; if (!vis) return; const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; if (!reduced) t += dt; paint(); raf = requestAnimationFrame(frame); };
+    c._paint = paint;
+    const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; if (vis && animate && !raf) { last = 0; raf = requestAnimationFrame(frame); } });
+    io.observe(c); resize(); addEventListener("resize", resize);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+  }, []);
+  useEffect(() => { ref.current && ref.current._paint && ref.current._paint(); }, deps);
+  return ref;
+}
+const LAB_INK = { star: "#f1eee6", dim: "#9aa1bb", line: "rgba(190,200,235,.25)", amber: "#ffc27a", ice: "#8fd3ff" };
+
+/* Classes 3–5: Moon phases. Top view on the left, the Moon as seen from Earth on the right. */
+const PHASES = [[1, "New Moon"], [6.4, "Waxing crescent"], [8.4, "First quarter"], [13.8, "Waxing gibbous"], [15.8, "Full Moon"], [21.1, "Waning gibbous"], [23.1, "Last quarter"], [28.5, "Waning crescent"], [30, "New Moon"]];
+function MoonLab() {
+  const [day, setDay] = useState(4);
+  const th = day / 29.53 * 2 * Math.PI, lit = Math.round((1 - Math.cos(th)) / 2 * 100), name = PHASES.find(([d]) => day < d)[1];
+  const ref = useLabCanvas((ctx, W, H) => {
+    const cx = W * .3, cy = H * .5, R = Math.min(W * .2, H * .36);
+    ctx.strokeStyle = "rgba(255,194,122,.35)"; ctx.lineWidth = 1;
+    for (let k = -3; k <= 3; k++) { const y = cy + k * R * .3; ctx.beginPath(); ctx.moveTo(8, y); ctx.lineTo(cx - R - 22, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - R - 28, y - 4); ctx.lineTo(cx - R - 22, y); ctx.lineTo(cx - R - 28, y + 4); ctx.stroke(); }
+    ctx.fillStyle = LAB_INK.amber; ctx.font = "11px 'IBM Plex Mono', monospace"; ctx.fillText("SUNLIGHT", 8, cy - R * 1.05);
+    ctx.setLineDash([3, 5]); ctx.strokeStyle = LAB_INK.line; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#3d7bd9"; ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 6.283); ctx.fill(); ctx.fillStyle = LAB_INK.dim; ctx.fillText("EARTH", cx - 18, cy + 28);
+    const mx = cx - R * Math.cos(th), my = cy + R * Math.sin(th);
+    ctx.fillStyle = "#2a2e3d"; ctx.beginPath(); ctx.arc(mx, my, 8, 0, 6.283); ctx.fill();
+    ctx.fillStyle = "#e9e4d6"; ctx.beginPath(); ctx.arc(mx, my, 8, Math.PI / 2, Math.PI * 1.5); ctx.fill();
+    const vx = W * .76, vy = H * .5, r = Math.min(W * .17, H * .34), s = th < Math.PI ? 1 : -1;
+    ctx.fillStyle = "#1c2030"; ctx.beginPath(); ctx.arc(vx, vy, r, 0, 6.283); ctx.fill();
+    ctx.fillStyle = "#e9e4d6"; ctx.beginPath();
+    for (let k = 0; k <= 60; k++) { const y = -r + 2 * r * k / 60, x = s * Math.sqrt(Math.max(0, r * r - y * y)); k ? ctx.lineTo(vx + x, vy + y) : ctx.moveTo(vx + x, vy + y); }
+    for (let k = 60; k >= 0; k--) { const y = -r + 2 * r * k / 60, x = s * Math.cos(th) * Math.sqrt(Math.max(0, r * r - y * y)); ctx.lineTo(vx + x, vy + y); }
+    ctx.fill(); ctx.fillStyle = LAB_INK.dim; ctx.fillText("SEEN FROM EARTH", vx - 54, vy + r + 24);
+  }, [day]);
+  return html`<div className="slit-wrap">
+    <canvas ref=${ref} className="slit gradelab" role="img" aria-label=${`Moon phase on day ${day}: ${name}, ${lit}% lit.`}></canvas>
+    <div className="slit-ui"><div className="slit-stats"><b>${name}</b><span>Day ${day} of 29.5 · ${lit}% of the face lit</span></div>
+      <label className="slit-nm" htmlFor="moonday">Days since New Moon <b>${day}</b><input id="moonday" type="range" min="0" max="29.5" step=".5" value=${day} onInput=${e => setDay(+e.target.value)}/></label></div></div>`;
+}
+
+/* Classes 6–8: a 1 m stick in Hyderabad (17.4° N). Sun position from the date and local solar time. */
+const HYD = 17.385 * Math.PI / 180, MONTHS3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function sunENU(doy, hr) {
+  const d = 23.44 * Math.PI / 180 * Math.sin(2 * Math.PI * (284 + doy) / 365), H = (hr - 12) * 15 * Math.PI / 180;
+  return [-Math.cos(d) * Math.sin(H), Math.cos(HYD) * Math.sin(d) - Math.sin(HYD) * Math.cos(d) * Math.cos(H), Math.sin(HYD) * Math.sin(d) + Math.cos(HYD) * Math.cos(d) * Math.cos(H)];
+}
+const doyLabel = n => { const dt = new Date(2026, 0, n); return dt.getDate() + " " + MONTHS3[dt.getMonth()]; };
+function ShadowLab() {
+  const [doy, setDoy] = useState(80), [hr, setHr] = useState(10);
+  const [e, n, u] = sunENU(doy, hr), alt = Math.asin(u) * 180 / Math.PI, len = u > 0 ? Math.hypot(e, n) / u : 0;
+  const dir = u <= 0 ? "" : len < .02 ? "almost none" : ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"][Math.round(((Math.atan2(-e, -n) * 180 / Math.PI + 360) % 360) / 45) % 8];
+  const ref = useLabCanvas((ctx, W, H) => {
+    const cx = W * .5, cy = H * .52, G = Math.min(W, H) * .42, h = G * .32;
+    ctx.fillStyle = "rgba(143,211,255,.05)"; ctx.beginPath(); ctx.arc(cx, cy, G, 0, 6.283); ctx.fill(); ctx.strokeStyle = LAB_INK.line; ctx.stroke();
+    ctx.font = "11px 'IBM Plex Mono', monospace"; ctx.fillStyle = LAB_INK.dim;
+    [["N", 0, -1], ["E", 1, 0], ["S", 0, 1], ["W", -1, 0]].forEach(([l, x, y]) => ctx.fillText(l, cx + x * (G + 12) - 4, cy + y * (G + 12) + 4));
+    ctx.setLineDash([2, 5]); ctx.strokeStyle = "rgba(255,194,122,.5)"; ctx.beginPath(); let on = false;
+    for (let t = 5; t <= 19; t += .05) { const [a, b, c] = sunENU(doy, t); if (c < .08) { on = false; continue; } const x = cx - a / c * h, y = cy + b / c * h; if (Math.hypot(x - cx, y - cy) > G) { on = false; continue; } on ? ctx.lineTo(x, y) : ctx.moveTo(x, y); on = true; }
+    ctx.stroke(); ctx.setLineDash([]);
+    if (u > 0) { const sx = cx - e / u * h, sy = cy + n / u * h, k = Math.min(1, G / Math.max(1, Math.hypot(sx - cx, sy - cy)));
+      ctx.strokeStyle = "rgba(10,12,20,.9)"; ctx.lineWidth = 7; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + (sx - cx) * k, cy + (sy - cy) * k); ctx.stroke();
+      ctx.strokeStyle = LAB_INK.dim; ctx.lineWidth = 1.5; ctx.stroke(); ctx.lineWidth = 1;
+      const az = Math.atan2(e, n); ctx.fillStyle = LAB_INK.amber; ctx.beginPath(); ctx.arc(cx + Math.sin(az) * G * Math.cos(Math.asin(u)), cy - Math.cos(az) * G * Math.cos(Math.asin(u)), 9, 0, 6.283); ctx.fill(); }
+    ctx.fillStyle = LAB_INK.star; ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 6.283); ctx.fill();
+  }, [doy, hr]);
+  const hh = Math.floor(hr), mm = Math.round((hr - hh) * 60);
+  return html`<div className="slit-wrap">
+    <canvas ref=${ref} className="slit gradelab" role="img" aria-label=${u > 0 ? `On ${doyLabel(doy)} at ${hh}:${String(mm).padStart(2, "0")} solar time the Sun is ${alt.toFixed(0)} degrees high and the shadow is ${len.toFixed(2)} metres long, pointing ${dir}.` : "The Sun is below the horizon."}></canvas>
+    <div className="slit-ui"><div className="slit-stats"><b>${u > 0 ? len.toFixed(2) + " m" : "Night"}</b><span>${u > 0 ? `shadow of a 1 m stick · Sun ${alt.toFixed(0)}° high · points ${dir}` : "the Sun has set"}</span></div>
+      <label className="slit-nm" htmlFor="sdoy">Date <b>${doyLabel(doy)}</b><input id="sdoy" type="range" min="1" max="365" value=${doy} onInput=${e => setDoy(+e.target.value)}/></label>
+      <label className="slit-nm" htmlFor="shr">Local solar time <b>${hh}:${String(mm).padStart(2, "0")}</b><input id="shr" type="range" min="6" max="18" step=".25" value=${hr} onInput=${e => setHr(+e.target.value)}/></label>
+      <p className="lab-note">Solar noon in Hyderabad falls between about 12:00 and 12:30 IST, depending on the date. Try 9 May at noon.</p></div></div>`;
+}
+
+/* Classes 9–10: a telescope from an objective and an eyepiece. Apparent field of view 50°. */
+const EYEPIECES = [25, 20, 15, 10, 6, 4];
+function ScopeLab() {
+  const [F, setF] = useState(700), [f, setFe] = useState(20), [D, setD] = useState(70), [tg, setTg] = useState("moon");
+  const M = F / f, fov = 50 / M, maxM = 2 * D, blur = Math.max(0, M / maxM - 1);
+  const ref = useLabCanvas((ctx, W, H) => {
+    const cx = W * .5, cy = H * .5, r = Math.min(W, H) * .44, s = r / (fov / 2);
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.fillStyle = "#03040a"; ctx.fill(); ctx.clip();
+    if (blur > 0) ctx.filter = `blur(${Math.min(8, blur * 5).toFixed(1)}px)`;
+    if (tg === "moon") { const R = .26 * s, g = ctx.createRadialGradient(cx - R * .3, cy - R * .3, R * .1, cx, cy, R);
+      g.addColorStop(0, "#e8e4da"); g.addColorStop(1, "#9c988f"); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.283); ctx.fill();
+      ctx.fillStyle = "rgba(70,72,80,.45)"; [[-.3, -.35, .28], [.15, -.2, .22], [.3, .15, .2], [-.1, .2, .16], [-.45, .1, .12]].forEach(([x, y, k]) => { ctx.beginPath(); ctx.arc(cx + x * R, cy + y * R, k * R, 0, 6.283); ctx.fill(); });
+      ctx.strokeStyle = "rgba(60,60,66,.5)"; [[.1, .55, .07], [-.5, -.5, .05], [.55, -.45, .06], [.62, .4, .04], [-.25, .62, .05]].forEach(([x, y, k]) => { ctx.beginPath(); ctx.arc(cx + x * R, cy + y * R, k * R, 0, 6.283); ctx.stroke(); });
+    } else { const R = Math.max(1.5, 45 / 3600 / 2 * s);
+      ctx.fillStyle = "#e9d8b8"; ctx.beginPath(); ctx.ellipse(cx, cy, R, R * .94, 0, 0, 6.283); ctx.fill();
+      if (R > 6) { ctx.fillStyle = "rgba(150,100,70,.6)"; [-.35, .3].forEach(y => ctx.fillRect(cx - R, cy + y * R - R * .08, 2 * R, R * .16)); }
+      ctx.fillStyle = "#fff"; [2.3, -3.7, 5.9, -10.3].forEach(am => { ctx.beginPath(); ctx.arc(cx + am / 60 * s, cy + am * .02 * R, Math.max(1.1, R * .06), 0, 6.283); ctx.fill(); }); }
+    ctx.restore(); ctx.strokeStyle = LAB_INK.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.283); ctx.stroke(); ctx.lineWidth = 1;
+  }, [F, f, D, tg]);
+  return html`<div className="slit-wrap">
+    <canvas ref=${ref} className="slit gradelab" role="img" aria-label=${`Eyepiece view of ${tg === "moon" ? "the Moon" : "Jupiter"} at ${Math.round(M)} times magnification${blur > 0 ? ", blurred because the magnification is too high for the aperture" : ""}.`}></canvas>
+    <div className="slit-ui"><div className="slit-stats"><b>${Math.round(M)}×</b><span>${F} mm ÷ ${f} mm · field ${fov >= 1 ? fov.toFixed(1) + "°" : Math.round(fov * 60) + "′"} · f/${(F / D).toFixed(1)}</span></div>
+      <div className="slit-ctl" role="group" aria-label="Target">${[["moon", "The Moon"], ["jupiter", "Jupiter"]].map(([k, l]) => html`<button key=${k} type="button" aria-pressed=${tg === k} onClick=${() => setTg(k)}>${l}</button>`)}</div>
+      <label className="slit-nm" htmlFor="scF">Objective focal length <b>${F} mm</b><input id="scF" type="range" min="300" max="1200" step="50" value=${F} onInput=${e => setF(+e.target.value)}/></label>
+      <label className="slit-nm" htmlFor="scD">Aperture (lens width) <b>${D} mm</b><input id="scD" type="range" min="50" max="200" step="10" value=${D} onInput=${e => setD(+e.target.value)}/></label>
+      <div className="slit-nm">Eyepiece<div className="eyepieces" role="group" aria-label="Eyepiece focal length">${EYEPIECES.map(k => html`<button key=${k} type="button" aria-pressed=${f === k} onClick=${() => setFe(k)}>${k} mm</button>`)}</div></div>
+      <p className="lab-note">${blur > 0 ? `Too much: a ${D} mm lens shows detail up to about ${maxM}×. Beyond that the view only gets blurrier.` : `Highest useful magnification for ${D} mm: about ${maxM}× (twice the aperture in millimetres).`}</p></div></div>`;
+}
+
+/* College: weigh Jupiter from a moon's swing (a, T) using Kepler's third law */
+const JMOONS = [["Io", 421700, 1.769], ["Europa", 671034, 3.551], ["Ganymede", 1070412, 7.155], ["Callisto", 1882709, 16.689]], RJ = 71492;
+function JupiterLab() {
+  const [k, setK] = useState(2), [, a, T] = JMOONS[k], Mj = 4 * Math.PI ** 2 * Math.pow(a * 1e3, 3) / (6.674e-11 * Math.pow(T * 86400, 2));
+  const ref = useLabCanvas((ctx, W, H, t) => {
+    const ph = [.3, 2.1, 4.2, 1.2], days = t * T / 6, s = (W * .44) / 27.5, cx = W * .5, ty = H * .2;
+    ctx.fillStyle = "#e9d8b8"; ctx.beginPath(); ctx.arc(cx, ty, s, 0, 6.283); ctx.fill();
+    ctx.font = "11px 'IBM Plex Mono', monospace";
+    JMOONS.forEach(([nm, am, Tm], i) => { const x = cx + am / RJ * s * Math.sin(2 * Math.PI * days / Tm + ph[i]); ctx.fillStyle = i === k ? LAB_INK.amber : LAB_INK.star; ctx.beginPath(); ctx.arc(x, ty, i === k ? 3.5 : 2.2, 0, 6.283); ctx.fill(); if (i === k) ctx.fillText(nm, x - 14, ty - 12); });
+    const x0 = W * .08, x1 = W * .95, y0 = H * .62, A = H * .26, span = 2.2 * T, amp = a / RJ, X = d => x0 + (x1 - x0) * d / span, Y = v => y0 - v / amp * A;
+    ctx.strokeStyle = LAB_INK.line; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y0); ctx.moveTo(x0, y0 - A - 8); ctx.lineTo(x0, y0 + A + 8); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,194,122,.6)"; ctx.beginPath(); for (let i = 0; i <= 200; i++) { const d = span * i / 200, v = amp * Math.sin(2 * Math.PI * d / T + ph[k]); i ? ctx.lineTo(X(d), Y(v)) : ctx.moveTo(X(d), Y(v)); } ctx.stroke();
+    const stepD = Math.min(1, T / 10); ctx.fillStyle = LAB_INK.star;
+    for (let d = 0; d <= span; d += stepD) { const v = amp * Math.sin(2 * Math.PI * d / T + ph[k]); ctx.beginPath(); ctx.arc(X(d), Y(v), 2.2, 0, 6.283); ctx.fill(); }
+    const now = days % span; ctx.strokeStyle = "rgba(143,211,255,.5)"; ctx.beginPath(); ctx.moveTo(X(now), y0 - A - 8); ctx.lineTo(X(now), y0 + A + 8); ctx.stroke();
+    ctx.fillStyle = LAB_INK.dim; ctx.fillText(`+${amp.toFixed(1)} Jupiter radii`, x0 + 6, y0 - A - 12); ctx.fillText(`${span.toFixed(1)} days →`, x1 - 90, y0 + A + 22);
+    const d1 = ((Math.PI / 2 - ph[k]) / (2 * Math.PI) % 1 + 1) % 1 * T; ctx.strokeStyle = LAB_INK.ice; ctx.beginPath(); ctx.moveTo(X(d1), y0 - A - 2); ctx.lineTo(X(d1 + T), y0 - A - 2); ctx.stroke();
+    ctx.fillStyle = LAB_INK.ice; ctx.fillText(`T = ${T} days`, X(d1) + 6, y0 - A - 6 + 0);
+  }, [k], true);
+  return html`<div className="slit-wrap">
+    <canvas ref=${ref} className="slit gradelab" role="img" aria-label=${`${JMOONS[k][0]} swinging around Jupiter: orbit radius ${a.toLocaleString("en")} km, period ${T} days, giving Jupiter a mass of ${(Mj / 1e27).toFixed(2)} times 10 to the 27 kilograms.`}></canvas>
+    <div className="slit-ui"><div className="slit-stats"><b>${(Mj / 1e27).toFixed(2)} × 10²⁷ kg</b><span>Jupiter’s mass from ${JMOONS[k][0]} · 318 Earths</span></div>
+      <div className="slit-ctl" role="group" aria-label="Moon">${JMOONS.map(([nm], i) => html`<button key=${nm} type="button" aria-pressed=${k === i} onClick=${() => setK(i)}>${nm}</button>`)}</div>
+      <p className="lab-note">a = ${a.toLocaleString("en")} km (${(a / RJ).toFixed(1)} Jupiter radii) · T = ${T} days<br/>M = 4π² × (${(a * 1e3).toExponential(3).replace("e+", " × 10^")} m)³ ÷ (G × (${Math.round(T * 86400).toLocaleString("en")} s)²)</p></div></div>`;
+}
+
+function Labs() {
+  const [g, setG] = useState(0), G = GRADES[g], acts = useRef();
+  const Sim = { moon: MoonLab, shadow: ShadowLab, scope: ScopeLab, jupiter: JupiterLab }[G.sim];
+  /* print in a clean page of its own: just this group's activity cards, black on white */
+  const print = () => {
+    const e = x => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"), w = window.open("", "_blank");
+    if (!w) return;
+    w.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${e(G.name)} · Practical astronomy activities</title>
+      <style>body{font:15px/1.5 system-ui,sans-serif;color:#000;max-width:720px;margin:28px auto;padding:0 20px}h1{font-size:22px;margin:0 0 4px}.by{color:#555;margin:0 0 24px}
+      section{border-top:1px solid #999;padding:14px 0;break-inside:avoid}h2{font-size:18px;margin:0 0 4px}.t{color:#555;font-size:13px;margin:0 0 8px}.s{font-weight:600}ol{padding-left:22px}</style></head><body>
+      <h1>${e(G.name)}: practical astronomy activities</h1><p class="by">Bhanu Prakash, astronomer · Hyderabad · prime-27.github.io/bhanu-Prakash-</p>
+      ${G.acts.map((a, i) => `<section><h2>${i + 1}. ${e(a.t)}</h2><p class="t">${e(a.time)}</p><p><b>You need:</b> ${e(a.need)}</p>${a.safety ? `<p class="s">${e(a.safety)}</p>` : ""}
+        <ol>${a.steps.map(x => `<li>${e(x)}</li>`).join("")}</ol><p><b>What you’ll see:</b> ${e(a.see)}</p><p><b>Why:</b> ${e(a.why)}</p></section>`).join("")}
+      <script>window.onload=()=>window.print()<\/script></body></html>`);
+    w.document.close();
+  };
+  return html`<${Section} id="labs" p=${[6.9, 7.2]} label="Practical labs" title="Hands-on astronomy for every class"
+    lede="Experiments I use in school sessions, sorted by class. Each group has one lab to try here and three activities with everyday materials, ready to print for a class.">
+    <div className="filters" role="group" aria-label="Choose a class group">${GRADES.map((x, i) => html`<button key=${x.id} type="button" aria-pressed=${g === i} onClick=${() => setG(i)}>${x.name}</button>`)}</div>
+    <div className="subhead"><h3>Try it here · ${G.simT}</h3><span>${G.name}</span></div>
+    <p className="lab-intro">${G.simD}</p>
+    <${Sim} key=${G.id}/>
+    <div className="subhead astro-sub"><h3>Hands-on activities</h3><button className="link" type="button" onClick=${print}>Print these activities</button></div>
+    <div className="acts" ref=${acts}>
+      <ol className="duality lab-acts">${G.acts.map((a, i) => html`<li key=${a.t}>
+        <span className="label">${String(i + 1).padStart(2, "0")} · ${a.time}</span><h3>${a.t}</h3>
+        <p><b>You need:</b> ${a.need}</p>${a.safety && html`<p className="safety">${a.safety}</p>`}
+        <details><summary>Steps</summary><ol>${a.steps.map(s => html`<li key=${s}>${s}</li>`)}</ol></details>
+        <p><b>What you’ll see:</b> ${a.see}</p><p><b>Why:</b> ${a.why}</p></li>`)}</ol></div>
   <//>`;
 }
 
@@ -1209,7 +1432,7 @@ function Ribbons() { const ref = useRef(); useEffect(() => startRibbons(ref.curr
 
 /* ---------- app ---------- */
 function App() {
-  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "projects", "gallery", "astrophotography", "notes", "contact"]);
+  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "labs", "projects", "gallery", "astrophotography", "notes", "contact"]);
   const [toast, setToast] = useState("");
   const [view, setView] = useState({ i: 0, beat: 0 });
   const refs = { stage: useRef(), canvas: useRef(), bloom: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
@@ -1241,6 +1464,7 @@ function App() {
       <${Process}/>
       <${Interlude} i=${6} p=${[5.6, 6.6]}/>
       <${LightSection}/>
+      <${Labs}/>
       <${Projects}/>
       <${Interlude} i=${8} p=${[7.6, 8.6]}/>
       <${Gallery}/>
