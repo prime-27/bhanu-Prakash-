@@ -8,7 +8,7 @@ const scrollToId = id => document.getElementById(id)?.scrollIntoView({ behavior:
 
 /* ---------- content (source of truth: website brief) ---------- */
 const CONTENT = {
-  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["light","Light"],["projects","Projects"],["notes","Notes"]],
+  nav: [["home","Home"],["about","About"],["astronomy","Astronomy"],["tonight","Tonight"],["development","Development"],["light","Light"],["projects","Projects"],["astrophotography","Astrophotos"],["notes","Notes"]],
   hero: {
     eyebrow: "Astronomy · Education · Technology",
     title: "Exploring the Universe. Building What’s Next.",
@@ -16,15 +16,24 @@ const CONTENT = {
   },
   bio: [
     "I am Bhanu Prakash, an astronomer with an MSc in Astronomy from Osmania University (2025) and three years of experience conducting stargazing sessions, astronomy outreach programs, and hands-on educational workshops. I work with schools, students, families, and the wider public to make the night sky understandable and exciting.",
+    "My MSc research focused on Algol-type eclipsing binaries, pairs of stars that pass in front of each other. Using ground-based photometric and spectroscopic data, I measured how their orbital periods change and studied their spectra to understand their orbits and how they evolve.",
     "I have been involved in organizing and delivering telescope-based night-sky observations, public stargazing experiences, astronomy awareness programs, school outreach sessions, and interactive workshops. I enjoy translating complex astronomical ideas into engaging experiences for people of different ages and backgrounds.",
     "My astronomy work includes helping participants recognize celestial objects, understand telescopes and observational techniques, explore the Moon and planets, and connect what they see in the sky to the science behind it. I am particularly interested in experiences that move beyond lectures and give participants opportunities to observe, ask questions, and learn by doing.",
     "I also develop websites, software, and applications. This technical side of my work lets me approach problems creatively and build digital tools, including science-oriented and educational experiences. My goal is to use both astronomy and technology to create accessible, meaningful learning opportunities."
   ],
   creds: [
     ["Education","MSc in Astronomy, Osmania University, 2025",null],
+    ["Undergraduate","BSc in Mathematics, Physics and Computer Science, Osmania University, 2023",null],
     ["Experience","About 3 years in observation, outreach and public engagement","Confirm start year"],
     ["Based in","Hyderabad, India","Confirm service area"],
-    ["Works with","Schools, teachers, families, beginners, enthusiasts and public groups",null]
+    ["Works with","Schools, teachers, families, beginners, enthusiasts and public groups",null],
+    ["Languages","English, Telugu and Hindi",null]
+  ],
+  research: [
+    ["MSc thesis · 2025","Period variation and spectroscopic studies of Algol-type eclipsing binaries, Osmania University."],
+    ["In preparation","“Photometric and Spectroscopic Analysis of Algol-type Eclipsing Binaries”, for the Journal of Astrophysics and Astronomy: light-curve modelling with PHOEBE and period changes from O–C diagrams."],
+    ["Winter School on Solar Physics · March 2025","Kodaikanal Solar Observatory, Indian Institute of Astrophysics: hands-on work with historical and modern solar telescopes and spectroheliographs."],
+    ["ILMT workshop","Aryabhatta Research Institute of Observational Sciences (ARIES), Devasthal: the International Liquid Mirror Telescope and time-domain astronomy."]
   ],
   astroSkills: [
     ["Night-sky stargazing","Planning and facilitating guided observations for individuals and groups."],
@@ -34,7 +43,16 @@ const CONTENT = {
     ["Workshops","Telescope basics, lunar craters, eclipses, solar-system concepts and more."],
     ["Science communication","Explaining astronomy clearly to beginners and answering their questions."],
     ["Event facilitation","Public astronomy evenings, group programs and astronomy-themed experiences."],
-    ["Observation planning","Choosing targets and adapting to weather, sky conditions, audience and venue."]
+    ["Observation planning","Choosing targets and adapting to weather, sky conditions, audience and venue."],
+    ["Astrophotography","Photographing the Moon, planets and deep sky, and processing the images."],
+    ["CCD photometry","Telescope and CCD operation, and photometric data reduction with IRAF."],
+    ["Spectroscopy","Analysing the profiles of spectral lines to study stars."],
+    ["Light-curve modelling","Modelling eclipsing binaries with PHOEBE, with plots in Gnuplot."]
+  ],
+  astroPhotos: [
+    { src: "", cap: "The Moon" },
+    { src: "", cap: "Orion Nebula (M42)" },
+    { src: "", cap: "The Milky Way" }
   ],
   astroServices: [
     ["Guided Stargazing Sessions","Telescope-based sky experiences for public groups, families, private gatherings and communities."],
@@ -293,6 +311,8 @@ function About() {
       <h2 id="about-h">Astronomy, education, observation and technology</h2>
       ${CONTENT.bio.map((p, i) => html`<p key=${i}>${p}</p>`)}
       <dl className="creds">${CONTENT.creds.map(([t, d, ph]) => html`<div key=${t}><dt>${t}</dt><dd>${d} ${ph && html`<${Ph}>${ph}<//>`}</dd></div>`)}</dl>
+      <div className="research"><span className="label">Research & training</span>
+        <ul>${CONTENT.research.map(([t, d]) => html`<li key=${t}><b>${t}</b><span>${d}</span></li>`)}</ul></div>
     </div></div>
     <${FieldNotes} i=${1}/>
     </div></section>`;
@@ -345,7 +365,7 @@ function Gallery() {
     const k = e => { if (idx == null) return; if (e.key === "ArrowRight") dlg.setData((idx + 1) % n); if (e.key === "ArrowLeft") dlg.setData((idx - 1 + n) % n); };
     addEventListener("keydown", k); return () => removeEventListener("keydown", k);
   }, [idx]);
-  return html`<${Section} id="gallery" p=${[8.6, 9.2]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
+  return html`<${Section} id="gallery" p=${[8.6, 9.0]} chapter=${9} label="Gallery" title="From the field" lede="Real photographs of telescope sessions, workshops and events go here, shared with permission and captioned.">
     <div className="gallery">${CONTENT.gallery.map((g, i) => html`<figure key=${g.cap}>
       <button className=${"img" + (g.src ? " has-photo" : "")} type="button" aria-label=${"Open photo: " + g.cap} onClick=${e => { burstAt(e.currentTarget, { n: 30, speed: 4 }); dlg.open(i); }}>
         ${g.src ? html`<img src=${g.src} alt=${g.alt} loading="lazy" style=${{ objectPosition: g.pos || "50% 50%" }}/>` : "Photo to add"}</button><figcaption>${g.cap}</figcaption></figure>`)}</div>
@@ -869,7 +889,7 @@ const NOTES = [
   { slug: "see-the-orion-nebula", title: "See the Orion Nebula with your own eyes", tag: "Deep sky", mins: 3, d: "A star nursery 1,344 light-years away that you can spot from a dark site, no telescope needed." }
 ];
 function SkyNotes() {
-  return html`<${Section} id="notes" p=${[9.2, 9.6]} label="Sky Notes" title="Short guides to the night sky"
+  return html`<${Section} id="notes" p=${[9.3, 9.6]} label="Sky Notes" title="Short guides to the night sky"
     lede="Practical notes for beginners: what to look for, when, and how, from the sessions I run.">
     <div className="note-grid">${NOTES.map(n => html`<a key=${n.slug} className="note-card" href=${"notes/" + n.slug + ".html"} onMouseEnter=${e => burst(e.clientX, e.clientY, { n: 10, speed: 2 })}>
       <span className="tag">${n.tag} · ${n.mins} min read</span><h3>${n.title}</h3><p>${n.d}</p><span className="link">Read the note →</span></a>`)}</div>
@@ -999,6 +1019,84 @@ function LightSection() {
   <//>`;
 }
 
+/* ---------- Astrophotography: why astrophotos are stacked from many frames ----------
+   A simulated Orion Nebula through a camera: every frame is noisy, and noise falls as 1/√N when N frames are averaged.
+   Darks remove hot pixels and amplifier glow; flats remove vignetting and dust shadows. */
+function startStacking(canvas, st) {
+  const GW = 300, GH = 190, P = GW * GH, ctx = canvas.getContext("2d"), off = document.createElement("canvas"); off.width = GW; off.height = GH;
+  const octx = off.getContext("2d"), img = octx.createImageData(GW, GH);
+  let seed = 7; const R = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const gauss = () => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.2832 * R()); };
+  const S = new Float32Array(P * 3), G = new Float32Array(P * 3), DARK = new Float32Array(P * 3), FLAT = new Float32Array(P);
+  const stars = [...Array(140)].map(() => [R() * GW, R() * GH, Math.pow(R(), 6) * 2.5 + .05, R()]);
+  const dust = [[.24, .3, 15], [.72, .66, 20], [.56, .2, 12]];
+  for (let y = 0; y < GH; y++) for (let x = 0; x < GW; x++) {
+    const i = y * GW + x, u = (x - GW * .52) / GH, v = (y - GH * .5) / GH, w = u + .08 * Math.sin(v * 9), z = v + .06 * Math.sin(u * 7);
+    const core = Math.exp(-(w * w + z * z) / .006), wing = Math.exp(-(w * w * .9 + (z + .05) * (z + .05) * 1.6) / .05) * (.6 + .4 * Math.sin(w * 14 + z * 9)),
+      lane = 1 - .75 * Math.exp(-Math.pow(w + .12 - z * .6, 2) / .002) * (z < .05 ? 1 : 0), neb = (wing * .55 + core) * lane;
+    S[i * 3] = neb * .9; S[i * 3 + 1] = neb * .35 + core * .5; S[i * 3 + 2] = neb * .4 + core * .6;
+    for (let c = 0; c < 3; c++) G[i * 3 + c] = gauss();
+    const amp = .5 * Math.exp(-(Math.hypot(x - GW, y - GH)) / 55), hot = R() < .004 ? .6 + R() : 0;
+    DARK[i * 3] = amp * 1.1 + hot; DARK[i * 3 + 1] = amp * .5 + hot; DARK[i * 3 + 2] = amp * .7 + hot;
+    let f = 1 - .5 * (u * u + v * v) * 3.2;
+    for (const [dx, dy, r] of dust) { const d = Math.hypot(x - dx * GW, y - dy * GH); if (d < r) f *= d > r * .55 ? .55 : .8; }
+    FLAT[i] = Math.max(.2, f);
+  }
+  for (const [sx, sy, b, t] of stars) for (let y = Math.max(0, sy - 5 | 0); y < Math.min(GH, sy + 6); y++) for (let x = Math.max(0, sx - 5 | 0); x < Math.min(GW, sx + 6); x++) {
+    const k = b * Math.exp(-((x - sx) ** 2 + (y - sy) ** 2) / 1.6), i = y * GW + x; S[i * 3] += k * (t < .3 ? .8 : 1); S[i * 3 + 1] += k; S[i * 3 + 2] += k * (t > .7 ? .75 : 1);
+  }
+  let shown = st.n, raf = 0, W = 1, H = 1;
+  const resize = () => { const d = Math.min(devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect(); W = r.width; H = r.height; canvas.width = W * d; canvas.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); draw(); };
+  function draw() {
+    const sig = .32 / Math.sqrt(shown), k = 9, ak = Math.asinh(k), D = img.data;
+    for (let i = 0; i < P; i++) {
+      const fl = FLAT[i];
+      for (let c = 0; c < 3; c++) {
+        let x = (S[i * 3 + c] + .04) * fl + DARK[i * 3 + c] + G[i * 3 + c] * sig;
+        if (st.dark) x -= DARK[i * 3 + c]; if (st.flat) x /= fl;
+        D[i * 4 + c] = 255 * Math.min(1, Math.max(0, Math.asinh(k * Math.max(0, x - .03)) / ak));
+      }
+      D[i * 4 + 3] = 255;
+    }
+    octx.putImageData(img, 0, 0);
+    ctx.clearRect(0, 0, W, H); ctx.imageSmoothingEnabled = true;
+    const sc = Math.max(W / GW, H / GH); ctx.drawImage(off, (W - GW * sc) / 2, (H - GH * sc) / 2, GW * sc, GH * sc);
+  }
+  const step = () => { raf = 0; const t = st.n; if (Math.abs(Math.log(shown / t)) < .02 || reduced) shown = t; else shown *= Math.pow(t / shown, .18); draw(); if (shown !== t) raf = requestAnimationFrame(step); };
+  st.update = () => { if (!raf) raf = requestAnimationFrame(step); };
+  resize(); addEventListener("resize", resize);
+  return () => { cancelAnimationFrame(raf); removeEventListener("resize", resize); };
+}
+function Astrophotography() {
+  const can = useRef(), st = useRef({ n: 1, dark: true, flat: true }), [k, setK] = useState(0), [dark, setDark] = useState(true), [flat, setFlat] = useState(true);
+  useEffect(() => startStacking(can.current, st.current), []);
+  useEffect(() => { Object.assign(st.current, { n: Math.pow(2, k), dark, flat }); st.current.update && st.current.update(); }, [k, dark, flat]);
+  const n = Math.pow(2, k);
+  return html`<${Section} id="astrophotography" p=${[9.0, 9.3]} label="Astrophotography" title="Photographing the night sky"
+    lede="Astrophotography is one of my favourite parts of astronomy, and the same image-processing skills run through my research. A single photo of a faint nebula is mostly noise: the picture only appears when many frames are added together.">
+    <div className="slit-wrap">
+      <canvas ref=${can} className="slit stack" role="img" aria-label=${`Simulated photo of the Orion Nebula from ${n} stacked frame${n > 1 ? "s" : ""}, ${dark ? "with" : "without"} dark frames and ${flat ? "with" : "without"} flat frames.`}></canvas>
+      <div className="slit-ui">
+        <div className="slit-stats"><b>${n.toLocaleString("en")}</b><span>${n === 1 ? "frame" : "frames stacked"} · noise ÷ ${Math.sqrt(n).toFixed(n < 4 ? 1 : 0)}</span></div>
+        <label className="slit-nm" htmlFor="stackn">Frames to stack <b>${n}</b>
+          <input id="stackn" type="range" min="0" max="8" step="1" value=${k} onInput=${e => setK(+e.target.value)}/></label>
+        <div className="slit-ctl" role="group" aria-label="Calibration frames">
+          <button type="button" aria-pressed=${dark} onClick=${() => setDark(v => !v)}>${dark ? "Darks subtracted" : "Subtract dark frames"}</button>
+          <button type="button" aria-pressed=${flat} onClick=${() => setFlat(v => !v)}>${flat ? "Flats applied" : "Apply flat frames"}</button>
+        </div>
+      </div>
+    </div>
+    <ol className="duality">
+      <li><span className="label">01 · Capture</span><h3>Many short exposures</h3><p>The Earth turns, so the camera rides on a mount that tracks the sky. Instead of one long photo, I take dozens or hundreds of shorter frames. A plane, a satellite or a gust of wind then spoils only one of them.</p></li>
+      <li><span className="label">02 · Calibrate</span><h3>Darks and flats</h3><p>Dark frames, taken with the lens covered, record the camera’s own glow and hot pixels so they can be subtracted. Flat frames of an evenly lit field record dark corners and dust shadows so they can be divided out. Turn them off to see what they fix.</p></li>
+      <li><span className="label">03 · Stack and stretch</span><h3>Noise falls as √N</h3><p>Averaging frames keeps the nebula, which is the same in every frame, while the random noise cancels out: 100 frames cut it 10 times. Finally the faint glow is “stretched” to bring it up without burning out the stars.</p></li>
+    </ol>
+    <div className="subhead astro-sub"><h3>My astrophotos</h3><span>Moon · nebulae · Milky Way</span></div>
+    <div className="gallery">${CONTENT.astroPhotos.map(g => html`<figure key=${g.cap}>
+      <div className=${"img" + (g.src ? " has-photo" : "")}>${g.src ? html`<img src=${g.src} alt=${g.alt || g.cap} loading="lazy"/>` : html`<${Ph}>Add your astrophoto<//>`}</div><figcaption>${g.cap}</figcaption></figure>`)}</div>
+  <//>`;
+}
+
 /* ---------- String lab: one string, many notes ---------- */
 const MODES = [
   { n: 1, open: "The lowest vibration of an open string is massless. In many string models, a state like this behaves as the photon, the particle of light.", closed: "One of the closed string’s lowest vibrations is massless and behaves like the graviton, the particle string theory proposes for gravity." },
@@ -1111,7 +1209,7 @@ function Ribbons() { const ref = useRef(); useEffect(() => startRibbons(ref.curr
 
 /* ---------- app ---------- */
 function App() {
-  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "projects", "gallery", "notes", "contact"]);
+  const active = useActiveSection(["home", "about", "expertise", "astronomy", "tonight", "development", "process", "light", "projects", "gallery", "astrophotography", "notes", "contact"]);
   const [toast, setToast] = useState("");
   const [view, setView] = useState({ i: 0, beat: 0 });
   const refs = { stage: useRef(), canvas: useRef(), bloom: useRef(), bar: useRef(), hudD: useRef(), hudL: useRef(), cue: useRef() };
@@ -1146,6 +1244,7 @@ function App() {
       <${Projects}/>
       <${Interlude} i=${8} p=${[7.6, 8.6]}/>
       <${Gallery}/>
+      <${Astrophotography}/>
       <${SkyNotes}/>
       <${Contact} onToast=${setToast}/>
       <${Interlude} i=${11} p=${[10.3, 11.6]}/>

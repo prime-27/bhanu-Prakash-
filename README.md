@@ -9,7 +9,7 @@ Personal portfolio website for Bhanu Prakash. Scrolling the page is one journey:
 | `index.html` | The page: metadata, fonts and script tags |
 | `css/styles.css` | All styles, built on the brand kit's tokens |
 | `js/universe.js` | The WebGL particle universe: thirteen formations and the scroll-driven journey |
-| `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery and contact form |
+| `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery, astrophotography stacking demo and contact form |
 | `assets/` | Site files, such as the favicon |
 | `brand/` | The brand kit: brand book, the thirteen-stop journey, design tokens, logos and patterns |
 
@@ -65,6 +65,7 @@ The site is a draft. Amber dashed tags on the page mark details still to confirm
 
 - University, graduation year and the start year of outreach work
 - Event photographs, with permission
+- Your own astrophotos for the Astrophotography section: put the image files in `assets/astro/` and set each `src` in the `astroPhotos` list in `js/app.js` (for example `"assets/astro/moon.jpg"`)
 - Real projects, with links and your role in each
 - Programming languages and tools
 - Contact email, social links and service area
