@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Journey Through the Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap">
+<style>
+/* A fixed particle universe behind a tall scroll track: one track section per stop, each with a sticky caption. Single dark look on purpose. */
+:root{--void:#04050a;--glass:rgba(6,9,20,.62);--line:rgba(190,200,235,.16);--star:#f1eee6;--star2:#c9c9d6;--dim:#9aa1bb;--amber:#ffc27a;--ice:#8fd3ff;
+  --display:"Space Grotesk",system-ui,sans-serif;--body:"Instrument Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:dark}
+body{margin:0;background:var(--void);color:var(--star);font:15px/1.55 var(--body)}
+.sky{position:fixed;inset:0;z-index:0}
+.sky canvas{width:100%;height:100%;display:block}
+.track{position:relative;z-index:1}
+.stop{position:relative;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.cap{position:sticky;top:calc(14vh + env(safe-area-inset-top,0px));width:min(380px,100%);margin-left:clamp(0px,5vw,72px);box-sizing:border-box;
+  background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:grid;gap:10px}
+.ch{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:500 10.5px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.cap h2{font:600 clamp(26px,3.4vw,36px)/1.02 var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.coord{font:400 11px/1.4 var(--mono);color:var(--dim);margin:0}
+.cap ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cap li{color:var(--star2);font-size:14.5px;padding-left:22px;position:relative;transition:color .3s}
+.cap li::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:50%;border:1px solid var(--dim)}
+.cap li.on{color:var(--star)}
+.cap li.on::before{background:var(--amber);border-color:var(--amber)}
+.phys{display:flex;flex-wrap:wrap;gap:6px}
+.phys span{font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ice);border:1px solid rgba(143,211,255,.3);border-radius:999px;padding:5px 8px}
+.hint{font:500 10.5px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0}
+.cap button{all:unset;cursor:pointer;justify-self:start;font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:9px 13px;color:var(--star)}
+.cap button:hover{border-color:var(--amber);color:var(--amber)}
+.cap button:focus-visible,.dots button:focus-visible{outline:1.5px solid var(--amber);outline-offset:2px}
+.intro .cap{top:calc(18vh + env(safe-area-inset-top,0px))}
+.intro h1{font:600 clamp(32px,5vw,54px)/1 var(--display);letter-spacing:-.03em;margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--star2)}
+.cue{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2;font:500 10.5px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);transition:opacity .5s;pointer-events:none}
+.hud{position:fixed;left:0;right:0;bottom:0;z-index:3;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(rgba(4,5,10,0),rgba(4,5,10,.85) 45%)}
+.hud .prog{position:absolute;left:0;right:0;top:0;height:2px;background:var(--line)}
+.hud .prog i{display:block;height:100%;background:var(--amber);transform-origin:left;transform:scaleX(0)}
+.hud .name{display:flex;gap:10px;align-items:baseline;min-width:0}
+.hud .name em{font:500 11px/1 var(--mono);font-style:normal;letter-spacing:.12em;color:var(--amber);white-space:nowrap}
+.hud .name b{font:500 15px/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;justify-content:center;gap:9px;list-style:none;margin:0;padding:0}
+.dots button{all:unset;cursor:pointer;display:block;width:9px;height:9px;border-radius:50%;border:1px solid var(--dim)}
+.dots button[aria-current]{background:var(--amber);border-color:var(--amber)}
+.dist{text-align:right;display:grid}
+.dist b{font:500 15px/1.2 var(--display);font-variant-numeric:tabular-nums}
+.dist em{font:400 10.5px/1.3 var(--mono);font-style:normal;color:var(--amber)}
+@media (max-width:760px){
+  .cap{margin-left:0;top:auto;bottom:calc(84px + env(safe-area-inset-bottom,0px));position:sticky;width:100%;padding:14px 16px;gap:8px}
+  .stop{display:flex;flex-direction:column;justify-content:flex-end}
+  .cap li{font-size:13.5px}
+  .dots{display:none}
+  .hud{grid-template-columns:minmax(0,1fr) auto}
+  .intro .cap ol{display:none}
+}
+@media (prefers-reduced-motion:reduce){.cap li{transition:none}}
+</style>
+</head>
+<body>
+<div class="sky" id="stage" aria-hidden="true"><canvas id="cv"></canvas></div>
+<main class="track" id="track"></main>
+<div class="cue" id="cue">Scroll to leave Earth ↓</div>
+<nav class="hud" aria-label="Journey position">
+  <div class="prog"><i id="bar"></i></div>
+  <div class="name"><em id="hch">I / XIII</em><b id="hname">Look up</b></div>
+  <ol class="dots" id="dots"></ol>
+  <div class="dist"><b id="hudD"></b><em id="hudL"></em></div>
+</nav>
+
+<script src="../../js/universe.js"></script>
+<script>
+(function () {
+  const U = window.Universe, SC = U.SCENES, LAST = SC.length - 1, track = document.getElementById("track"), $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  /* one tall section per stop; the last one is a single screen so the journey ends on it */
+  const secH = () => innerHeight * 1.6;
+  track.innerHTML = SC.map((s, i) => `<section class="stop${i === 0 ? " intro" : ""}" id="stop${i}" aria-labelledby="h${i}">
+    <div class="cap">
+      ${i === 0 ? `<span class="ch"><span>stargazinghyderabad.com</span><span>13 stops</span></span><h1 id="h${i}">Journey through the universe</h1>
+        <p>Scroll from a hillside under the night sky, out past the Moon, planets, nebulae and galaxies to the cosmic web, down to the smallest scale, and back to the Big Bang.</p>` :
+        `<span class="ch"><span>Stop ${U.ROMAN[i]}</span><span>${esc(s.coord.split(" · ")[0])}</span></span><h2 id="h${i}">${esc(s.name)}</h2>`}
+      ${i === 0 ? "" : `<p class="coord">${esc(s.coord)}</p>`}
+      <ol>${s.beats.map((b, k) => `<li data-k="${k}">${esc(b)}</li>`).join("")}</ol>
+      ${s.theory ? `<div class="phys" aria-label="Physics shown here">${s.theory.map(t => `<span>${esc(t[0])}</span>`).join("")}</div>` : ""}
+      ${s.bang ? `<button type="button" id="replay">Replay the Big Bang</button><button type="button" id="back">Back to Earth ↑</button>` : `<p class="hint">Keep scrolling ${esc(s.b)} ↓</p>`}
+    </div></section>`).join("");
+  const size = () => SC.forEach((_, i) => { $("stop" + i).style.height = (i === LAST ? innerHeight : secH()) + "px"; });
+  size(); addEventListener("resize", size);
+  $("dots").innerHTML = SC.map((s, i) => `<li><button type="button" aria-label="Go to stop ${i + 1}: ${esc(s.name)}" title="${esc(s.name)}" data-i="${i}"></button></li>`).join("");
+  const getP = () => Math.max(0, Math.min(LAST, scrollY / secH()));
+  const scrollToP = i => scrollTo({ top: i * secH() + 2, behavior: U.reduced ? "auto" : "smooth" });
+  $("dots").addEventListener("click", e => { const b = e.target.closest("button"); if (b) scrollToP(+b.dataset.i); });
+  $("replay").addEventListener("click", () => dispatchEvent(new Event("universe:bang")));
+  $("back").addEventListener("click", () => scrollTo({ top: 0, behavior: U.reduced ? "auto" : "smooth" }));
+  let cur = -1;
+  U.init({
+    stage: $("stage"), canvas: $("cv"), bar: $("bar"), cue: $("cue"), hudD: $("hudD"), hudL: $("hudL"),
+    getP, scrollToP, shift: () => (innerWidth > 1020 ? .36 : 0),
+    onScene(i, beat) {
+      if (i !== cur) { cur = i; $("hch").textContent = U.ROMAN[i] + " / " + U.ROMAN[LAST]; $("hname").textContent = SC[i].name;
+        document.querySelectorAll("#dots button").forEach((b, k) => k === i ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current")); }
+      document.querySelectorAll("#stop" + i + " li").forEach(li => li.classList.toggle("on", +li.dataset.k === beat));
+    }
+  });
+})();
+</script>
+</body>
+</html>
