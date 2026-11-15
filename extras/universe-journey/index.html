@@ -58,6 +58,9 @@ body{margin:0;background:var(--void);color:var(--star);font:15px/1.55 var(--body
   .intro .cap ol{display:none}
 }
 @media (prefers-reduced-motion:reduce){.cap li{transition:none}}
+/* visuals only: no caption cards or information bar */
+.cap,.hud{display:none!important}
+.cue{bottom:calc(28px + env(safe-area-inset-bottom,0px))}
 </style>
 </head>
 <body>
