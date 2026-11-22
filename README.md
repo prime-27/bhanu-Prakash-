@@ -10,7 +10,8 @@ Personal portfolio website for Bhanu Prakash. Scrolling the page is one journey:
 | `css/styles.css` | All styles, built on the brand kit's tokens |
 | `js/universe.js` | The WebGL particle universe: thirteen formations and the scroll-driven journey |
 | `js/app.js` | The React interface: navigation, sections, Cassiopeia expertise map, star-life process, vibrating strings, projects, gallery, astrophotography stacking demo and contact form |
-| `astrarium/` | The Astrarium page: what the universe sandbox is, screenshots, a click-to-start live preview, and the PDF documentation. The app itself is hosted from the Universe-sandbox repository; its address is in the page's links |
+| `astrarium/` | The Astrarium page: what the universe sandbox is, screenshots, a click-to-start live preview, and the PDF documentation |
+| `astrarium/app/` | The Astrarium app itself, at stargazinghyderabad.com/astrarium/app/: a copy of the built app (`npm run build` → `dist/`) from the Universe-sandbox repository. To update it, build there and replace this folder's contents with `dist/` |
 | `assets/` | Site files, such as the favicon |
 | `brand/` | The brand kit: brand book, the thirteen-stop journey, design tokens, logos and patterns |
 
