@@ -1,0 +1,96 @@
+/* Astrarium page: the site's night palette and type (see css/styles.css and brand/tokens.json). */
+:root{
+  --void:#05070f;--night:#0a0e1d;--panel:#0f1427;--line:rgba(190,200,235,.16);
+  --star:#f1eee6;--star-2:#c9c9d6;--dim:#9aa1bb;--amber:#ffc27a;--ice:#8fd3ff;--nebula:#e0508a;
+  --display:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --gut:max(16px,env(safe-area-inset-left,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--star-2);font:17px/1.65 var(--body)}
+a{color:var(--amber)}
+img{max-width:100%;display:block}
+:focus-visible{outline:1.5px solid var(--amber);outline-offset:3px}
+
+.bar{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px var(--gut);border-bottom:1px solid var(--line);font-size:15px;background:rgba(5,7,15,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bar a{text-decoration:none;color:var(--star)}
+.bar .home{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:500;min-width:0}
+.bar .home span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .go{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--void);background:var(--amber);border-radius:999px;padding:8px 14px;white-space:nowrap}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 var(--gut)}
+section{padding:72px 0;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.eyebrow{font:500 11.5px/1.4 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin:0 0 14px}
+h1{font:500 clamp(48px,9vw,104px)/1 var(--display);letter-spacing:-.04em;color:var(--star);margin:0 0 18px}
+h2{font:500 clamp(28px,4vw,42px)/1.08 var(--display);letter-spacing:-.02em;color:var(--star);margin:0 0 14px;text-wrap:balance}
+h3{font:500 20px/1.25 var(--display);color:var(--star);margin:0 0 6px}
+p{margin:0 0 14px}
+.lede{font-size:clamp(18px,2vw,21px);line-height:1.55;color:#d8d7e2;max-width:40ch;margin-bottom:26px}
+.sub{max-width:62ch;color:var(--star-2)}
+strong{color:var(--star);font-weight:600}
+
+/* Hero */
+.hero{position:relative;padding:0;border:0;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:url(img/hero.jpg) center/cover;opacity:.55}
+.hero .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,7,15,.96) 0%,rgba(5,7,15,.7) 45%,rgba(5,7,15,.25) 100%),linear-gradient(0deg,var(--void) 0%,transparent 35%)}
+.hero .wrap{position:relative;padding-top:clamp(72px,12vh,140px);padding-bottom:clamp(64px,10vh,120px)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:13px 20px;border-radius:999px;border:1px solid var(--star);background:var(--star);color:var(--void);display:inline-block;cursor:pointer}
+.btn.amber{background:var(--amber);border-color:var(--amber)}
+.btn.ghost{background:rgba(5,7,15,.5);color:var(--star);border-color:var(--line)}
+.btn:hover{background:var(--amber);border-color:var(--amber);color:var(--void)}
+.note{font:12px/1.5 var(--mono);color:var(--dim);margin-top:16px}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:44px;max-width:860px}
+.stat{border:1px solid var(--line);border-radius:6px;padding:14px 16px;background:rgba(15,20,39,.6)}
+.stat b{display:block;font:500 28px/1.1 var(--display);color:var(--star);letter-spacing:-.02em}
+.stat span{font-size:13.5px;color:var(--dim);line-height:1.4;display:block;margin-top:4px}
+
+/* Live preview */
+.preview{position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--night);margin-top:24px}
+.preview img{width:100%;height:100%;object-fit:cover;opacity:.55}
+.preview .start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:16px}
+.preview iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.preview .start p{max-width:44ch;color:var(--star-2);font-size:15px;margin:0}
+
+/* Grids and figures */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+figure{margin:0}
+figure img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:5px;border:1px solid var(--line);background:var(--night)}
+figcaption{font-size:14.5px;line-height:1.5;color:var(--star-2);margin-top:10px}
+figcaption b{color:var(--star);font-family:var(--display);font-weight:500;font-size:17px;display:block;margin-bottom:2px}
+
+.list{columns:2;column-gap:40px;padding-left:20px;margin:20px 0 0}
+.list li{break-inside:avoid;margin-bottom:10px}
+
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
+.card p{font-size:15px;margin:0}
+.card .k{font:500 10.5px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ice);margin-bottom:8px;display:block}
+
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;margin-top:20px}
+.facts div{border-top:1px solid var(--line);padding-top:10px;font-size:15px}
+.facts b{display:block;color:var(--star);font-weight:600}
+
+.cta{margin:0 0 72px;padding:28px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.cta h2{font-size:28px}
+footer{padding:28px var(--gut);border-top:1px solid var(--line);text-align:center;font-size:15px}
+
+@media (max-width:860px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  section{padding:52px 0}
+  .g2,.g3,.cards,.facts{grid-template-columns:1fr}
+  .list{columns:1}
+  .preview{aspect-ratio:3/4}
+  .bar .go{padding:7px 11px;font-size:10.5px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

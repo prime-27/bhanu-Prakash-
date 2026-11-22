@@ -346,6 +346,15 @@ function Projects() {
   const shown = TOOLS.filter(p => filter === "all" || p.c === filter);
   return html`<${Section} id="projects" p=${[7.0, 7.6]} chapter=${7} label="Projects" title=${`${TOOLS.length} astronomy tools I designed and built`}
     lede="Interactive sky tools, solar data explorers, physics labs and teaching resources, many in both English and Telugu. Each one runs in the browser.">
+    <a className="feature" href="astrarium/" onMouseEnter=${e => burst(e.clientX, e.clientY, { n: 16, speed: 2.6 })}>
+      <img src="astrarium/img/universe.jpg" alt="" loading="lazy"/>
+      <div className="feature-text">
+        <span className="tags"><span className="dev">Featured · Universe sandbox</span></span>
+        <h3>Astrarium</h3>
+        <p>A universe sandbox built on real data: fly from the cosmic web to a single planet, visit 28,000 real objects, and experiment with gravity, stars and black holes.</p>
+        <span className="link">See Astrarium →</span>
+      </div>
+    </a>
     <div className="filters" role="group" aria-label="Filter projects">
       ${Object.entries(TOOL_TAGS).map(([k, n]) => html`<button key=${k} type="button" aria-pressed=${filter === k} onClick=${e => { setFilter(k); burstAt(e.currentTarget, { n: 16, speed: 3 }); }}>${n} <span className="count">${counts[k]}</span></button>`)}
     </div>
