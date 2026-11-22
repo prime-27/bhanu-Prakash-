@@ -264,6 +264,7 @@ function Nav({ active }) {
     <button className="menu" type="button" aria-expanded=${open} aria-controls="siteNav" onClick=${() => setOpen(o => !o)}>${open ? "Close" : "Menu"}</button>
     <nav className=${"navs" + (open ? " open" : "")} id="siteNav" aria-label="Site" onClick=${e => e.target.closest("a") && setOpen(false)}>
       ${CONTENT.nav.map(([id, name]) => html`<a key=${id} href=${"#" + id} aria-current=${active === id ? "true" : undefined}>${name}</a>`)}
+      <a href="astrarium/" className="astro" title="Astrarium: a universe sandbox built on real data">Astrarium</a>
       <a href="#contact" className="cta">Contact</a>
     </nav></header>`;
 }

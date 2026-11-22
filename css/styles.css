@@ -50,6 +50,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .navs a:hover{color:var(--star)}
 .navs a[aria-current]{color:var(--void);background:var(--star)}
 .navs a.cta{color:var(--on-amber);background:var(--amber);margin-left:6px}
+/* Astrarium: a page of its own, so it reads as a link out of the journey (ice, like the tool tags). */
+.navs a.astro{color:var(--ice)}
+.navs a.astro:hover{color:var(--star)}
 .menu{all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--radius-pill);padding:8px 14px;display:none}
 
 /* ---------- Stage ---------- */
@@ -221,6 +224,14 @@ footer .inner{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap
   .menu{display:inline-block}
   .skills{grid-template-columns:repeat(2,minmax(0,1fr))}
   .projects,.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* The full menu (with Astrarium) needs about 1,130 px beside the name: collapse it below 1,140. */
+@media (max-width:1140px){
+  .navs{display:none;position:absolute;top:var(--navh);right:var(--gut-r);flex-direction:column;background:var(--night);border:1px solid var(--line);border-radius:var(--radius-lg);padding:8px;min-width:200px}
+  .navs.open{display:flex}
+  .navs a{padding:10px 12px}
+  .navs a.cta{margin:6px 0 0}
+  .menu{display:inline-block}
 }
 @media (max-width:760px){
   .about,.contact{grid-template-columns:minmax(0,1fr);gap:36px}
