@@ -73,6 +73,7 @@ figcaption b{color:var(--star);font-family:var(--display);font-weight:500;font-s
 .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
 .card p{font-size:15px;margin:0}
 .cards.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.soon{display:inline-block;font:500 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--amber);border:1px dashed var(--amber);border-radius:999px;padding:4px 12px;margin-bottom:8px}
 .card .k{font:500 10.5px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ice);margin-bottom:8px;display:block}
 
 .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 28px;margin-top:20px}
