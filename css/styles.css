@@ -158,6 +158,17 @@ td:first-child{font-family:var(--display);font-size:19px;color:var(--star);width
 td:first-child small{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:4px}
 td.when{font-family:var(--mono);font-size:13px;color:var(--amber);white-space:nowrap}
 
+/* Featured project (Astrarium), above the tool filters */
+.feature{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;margin:0 0 28px;text-decoration:none;color:var(--star);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden}
+.feature:hover{border-color:var(--amber)}
+.feature img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}
+.feature-text{padding:26px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.feature-text .tags{display:flex}
+.feature-text .tags span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ice);border:1px solid var(--ice);border-radius:var(--radius-sm);padding:2px 6px}
+.feature-text h3{font-family:var(--display);font-weight:500;font-size:clamp(28px,3vw,38px);letter-spacing:-.02em;line-height:1.05;margin:0}
+.feature-text p{margin:0;color:var(--star-2);font-size:15px;line-height:1.55}
+.feature-text .link{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
+@media (max-width:720px){.feature{grid-template-columns:1fr}.feature img{min-height:0;aspect-ratio:16/9}}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 28px}
 .filters button{all:unset;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:var(--radius-pill);padding:8px 14px;color:var(--dim)}
 .filters button:hover{color:var(--star)}
