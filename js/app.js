@@ -352,7 +352,7 @@ function Projects() {
       <div className="feature-text">
         <span className="tags"><span className="dev">Featured · Universe sandbox</span></span>
         <h3>Astrarium</h3>
-        <p>A universe sandbox built on real data: fly from the cosmic web to a single planet, visit 28,000 real objects, and experiment with gravity, stars and black holes.</p>
+        <p>A universe sandbox built on real data: fly from the cosmic web to a single planet, visit 58,000 real objects, and experiment with gravity, stars and black holes.</p>
         <span className="link">See Astrarium →</span>
       </div>
     </a>
